@@ -1,17 +1,17 @@
 package net.nuclearteam.createnuclear.foundation.advancement;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
+
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.advancements.predicates.entity.EntityPredicate;
+import net.minecraft.server.level.ServerPlayer;
 
 public class SimpleCreateNuclearTrigger extends CriterionTriggerBase<SimpleCreateNuclearTrigger.Instance> {
 
@@ -20,7 +20,7 @@ public class SimpleCreateNuclearTrigger extends CriterionTriggerBase<SimpleCreat
     }
 
     public void trigger(ServerPlayer player) {
-        super.trigger(player, null);
+        triggerWith(player, null);
     }
 
     public SimpleCreateNuclearTrigger.Instance instance() {
@@ -28,14 +28,14 @@ public class SimpleCreateNuclearTrigger extends CriterionTriggerBase<SimpleCreat
     }
 
     @Override
-    public Codec<Instance> codec() {
-        return Instance.CODEC;
+    public Codec<SimpleCreateNuclearTrigger.Instance> codec() {
+        return SimpleCreateNuclearTrigger.Instance.CODEC;
     }
 
     public static class Instance extends CriterionTriggerBase.Instance {
-        private static final Codec<Instance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(Instance::player)
-        ).apply(instance, Instance::new));
+        private static final Codec<SimpleCreateNuclearTrigger.Instance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(SimpleCreateNuclearTrigger.Instance::player)
+        ).apply(instance, SimpleCreateNuclearTrigger.Instance::new));
 
         private final Optional<ContextAwarePredicate> player;
 
@@ -58,3 +58,4 @@ public class SimpleCreateNuclearTrigger extends CriterionTriggerBase<SimpleCreat
         }
     }
 }
+

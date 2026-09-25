@@ -1,67 +1,42 @@
 package net.nuclearteam.createnuclear.foundation.advancement;
 
-import com.google.common.collect.Maps;
-import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.PlayerAdvancements;
-import net.minecraft.server.level.ServerPlayer;
 import net.nuclearteam.createnuclear.CreateNuclear;
-
+import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
-import java.util.*;
+
+import java.util.List;
 import java.util.function.Supplier;
 
-public abstract class CriterionTriggerBase<T extends CriterionTriggerBase.Instance> implements CriterionTrigger<T> {
+/**
+ * Upstream copied Create's trigger base, which kept its own
+ * {@code Map<PlayerAdvancements, Set<Listener>>} and implemented {@code addPlayerListener} /
+ * {@code removePlayerListener} by hand. 26.2 moved all of that bookkeeping into
+ * {@code PlayerAdvancements}: {@code CriterionTrigger} is now just a codec, and
+ * {@link SimpleCriterionTrigger#trigger(ServerPlayer, java.util.function.Predicate)} is the whole
+ * firing API. The listener machinery is therefore gone rather than ported -- it would be a second,
+ * unused copy of what vanilla already does.
+ */
+public abstract class CriterionTriggerBase<T extends CriterionTriggerBase.Instance> extends SimpleCriterionTrigger<T> {
+
     private final Identifier id;
-    protected final Map<PlayerAdvancements, Set<Listener<T>>> listeners = Maps.newHashMap();
 
     public CriterionTriggerBase(String id) {
         this.id = CreateNuclear.asResource(id);
-    }
-
-    @Override
-    public void addPlayerListener(PlayerAdvancements playerAdvancements, Listener<T> listener) {
-        Set<Listener<T>> playerListeners = this.listeners.computeIfAbsent(playerAdvancements, k -> new HashSet<>());
-
-        playerListeners.add(listener);
-    }
-
-    @Override
-    public void removePlayerListener(PlayerAdvancements playerAdvancements, Listener<T> listener) {
-        Set<Listener<T>> playerListeners = this.listeners.get(playerAdvancements);
-
-        if (playerListeners != null) {
-            playerListeners.remove(listener);
-            if (playerListeners.isEmpty()) {
-                this.listeners.remove(playerAdvancements);
-            }
-        }
-    }
-
-    @Override
-    public void removePlayerListeners(PlayerAdvancements playerAdvancements) {
-        this.listeners.remove(playerAdvancements);
     }
 
     public Identifier getId() {
         return id;
     }
 
-    protected void trigger(ServerPlayer player, @Nullable List<Supplier<Object>> suppliers) {
-        PlayerAdvancements playerAdvancements = player.getAdvancements();
-        Set<Listener<T>> playerListeners = this.listeners.get(playerAdvancements);
-        if (playerListeners != null) {
-            List<Listener<T>> list = new LinkedList<>();
-
-            for (Listener<T> listener : playerListeners) {
-                if (listener.trigger().test(suppliers)) {
-                    list.add(listener);
-                }
-            }
-
-            list.forEach(listener -> listener.run(playerAdvancements));
-        }
+    /**
+     * Deliberately not called {@code trigger}: vanilla's own
+     * {@code trigger(ServerPlayer, Predicate)} is inherited, and a null second argument would match
+     * both overloads.
+     */
+    protected void triggerWith(ServerPlayer player, @Nullable List<Supplier<Object>> suppliers) {
+        super.trigger(player, instance -> instance.test(suppliers));
     }
 
     public abstract static class Instance implements SimpleCriterionTrigger.SimpleInstance {

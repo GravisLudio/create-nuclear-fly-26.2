@@ -1,38 +1,55 @@
 package net.nuclearteam.createnuclear.content.particles;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.RandomSource;
 
-public class SmallNuclearExplosionParticle extends TextureSheetParticle {
+/**
+ * Smoke and fire puffs of the mushroom cloud.
+ * <p>
+ * Upstream carried Alex's Caves' whole factory set (mine, underzealot, raygun and more); only the
+ * nuke factory was ever registered, so only it is kept. {@code TextureSheetParticle} became
+ * {@link SingleQuadParticle}, which takes its first sprite up front, and the lit particle sheet
+ * is the opaque layer with full brightness from {@link #getLightCoords}.
+ */
+@Environment(EnvType.CLIENT)
+public class SmallNuclearExplosionParticle extends SingleQuadParticle {
 
     private final SpriteSet sprites;
     private boolean hasFadeColor = false;
     private float fadeR;
     private float fadeG;
     private float fadeB;
+
     protected SmallNuclearExplosionParticle(ClientLevel world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, SpriteSet sprites, boolean shortLifespan, int color1) {
-        super(world, x, y, z, xSpeed, ySpeed, zSpeed);
+        super(world, x, y, z, xSpeed, ySpeed, zSpeed, sprites.first());
         this.xd = xSpeed;
         this.yd = ySpeed;
         this.zd = zSpeed;
         this.setSize(0.5F, 0.5F);
-        this.quadSize = (shortLifespan ? 1 : 0.8F) + world.random.nextFloat() * 0.3F;
-        this.lifetime = shortLifespan ? 5 + world.random.nextInt(3) : 15 + world.random.nextInt(10);
+        this.quadSize = (shortLifespan ? 1 : 0.8F) + this.random.nextFloat() * 0.3F;
+        this.lifetime = shortLifespan ? 5 + this.random.nextInt(3) : 15 + this.random.nextInt(10);
         this.friction = 0.96F;
-        float randCol = world.random.nextFloat() * 0.05F;
+        float randCol = this.random.nextFloat() * 0.05F;
         this.sprites = sprites;
-        this.setColor(Math.min(FastColor.ARGB32.red(color1) / 255F + randCol, 1), Math.min(1F, FastColor.ARGB32.green(color1) / 255F + randCol), Math.min(1F, FastColor.ARGB32.blue(color1) / 255F + randCol));
+        this.setColor(Math.min(ARGB.red(color1) / 255F + randCol, 1), Math.min(1F, ARGB.green(color1) / 255F + randCol), Math.min(1F, ARGB.blue(color1) / 255F + randCol));
     }
 
-    public void setFadeColor(int i){
+    public void setFadeColor(int i) {
         hasFadeColor = true;
         this.fadeR = (float) ((i & 16711680) >> 16) / 255.0F;
-        this.fadeG = (float) ((i & '\uff00') >> 8) / 255.0F;
+        this.fadeG = (float) ((i & '＀') >> 8) / 255.0F;
         this.fadeB = (float) ((i & 255) >> 0) / 255.0F;
     }
 
+    @Override
     public void tick() {
         this.xo = this.x;
         this.yo = this.y;
@@ -41,11 +58,11 @@ public class SmallNuclearExplosionParticle extends TextureSheetParticle {
         if (this.age++ >= this.lifetime) {
             this.remove();
         } else {
-            if(hasFadeColor){
+            if (hasFadeColor) {
                 this.rCol += (fadeR - this.rCol) * 0.2F;
                 this.gCol += (fadeG - this.gCol) * 0.2F;
                 this.bCol += (fadeB - this.bCol) * 0.2F;
-            }else{
+            } else {
                 this.rCol = this.rCol * 0.95F;
                 this.gCol = this.gCol * 0.95F;
                 this.bCol = this.bCol * 0.95F;
@@ -58,15 +75,12 @@ public class SmallNuclearExplosionParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_LIT;
+    protected Layer getLayer() {
+        return Layer.OPAQUE;
     }
 
-    public float getQuadSize(float scaleFactor) {
-        return super.getQuadSize(scaleFactor);
-    }
-
-    public int getLightColor(float partialTicks) {
+    @Override
+    protected int getLightCoords(float partialTicks) {
         return 240;
     }
 
@@ -77,203 +91,10 @@ public class SmallNuclearExplosionParticle extends TextureSheetParticle {
             this.spriteSet = spriteSet;
         }
 
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        @Override
+        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, RandomSource random) {
             SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, false, 0XFFB300);
             particle.setSpriteFromAge(spriteSet);
-            return particle;
-        }
-    }
-
-    public static class MineFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public MineFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, true, 0XFFB300);
-            particle.setSpriteFromAge(spriteSet);
-            return particle;
-        }
-    }
-
-    public static class UnderzealotFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public UnderzealotFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, false, 0);
-            particle.setSpriteFromAge(spriteSet);
-            return particle;
-        }
-    }
-
-    public static class RaygunFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public RaygunFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, true, 0XEEEEEE);
-            particle.setSpriteFromAge(spriteSet);
-            particle.lifetime = 5 + worldIn.random.nextInt(3);
-            particle.scale(0.6F + worldIn.random.nextFloat() * 0.3F);
-            particle.setFadeColor(0X40EE40);
-            return particle;
-        }
-    }
-
-    public static class BlueRaygunFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public BlueRaygunFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, true, 0XEEEEEE);
-            particle.setSpriteFromAge(spriteSet);
-            particle.lifetime = 5 + worldIn.random.nextInt(5);
-            particle.scale(0.5F + worldIn.random.nextFloat() * 0.5F);
-            particle.setFadeColor(0X40EEDA);
-            return particle;
-        }
-    }
-
-    public static class TremorzillaFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public TremorzillaFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, true, 0XEEEEEE);
-            particle.setSpriteFromAge(spriteSet);
-            particle.lifetime = 9 + worldIn.random.nextInt(3);
-            particle.scale(1.0F + worldIn.random.nextFloat() * 0.9F);
-            particle.setFadeColor(0X9BFF3D);
-            return particle;
-        }
-    }
-
-    public static class TremorzillaRetroFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public TremorzillaRetroFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, true, 0XEEEEEE);
-            particle.setSpriteFromAge(spriteSet);
-            particle.lifetime = 9 + worldIn.random.nextInt(3);
-            particle.scale(1.0F + worldIn.random.nextFloat() * 0.9F);
-            particle.setFadeColor(0XE06EFF);
-            return particle;
-        }
-    }
-
-
-    public static class TremorzillaTectonicFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public TremorzillaTectonicFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, true, 0XEEEEEE);
-            particle.setSpriteFromAge(spriteSet);
-            particle.lifetime = 9 + worldIn.random.nextInt(3);
-            particle.scale(1.0F + worldIn.random.nextFloat() * 0.9F);
-            particle.setFadeColor(0XFFD631);
-            return particle;
-        }
-    }
-
-    public static class AmberFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public AmberFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, false, 0XFFDA1E);
-            particle.setSpriteFromAge(spriteSet);
-            particle.scale(0.8F);
-            return particle;
-        }
-    }
-
-    public static class TotemFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public TotemFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, true, 0XFF0000);
-            particle.setSpriteFromAge(spriteSet);
-            particle.lifetime = 5 + worldIn.random.nextInt(3);
-            particle.scale(1.2F + worldIn.random.nextFloat() * 0.3F);
-            particle.setFadeColor(0);
-            return particle;
-        }
-    }
-
-    public static class PurpleWitchFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public PurpleWitchFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, true, 0XFF69FF);
-            particle.setSpriteFromAge(spriteSet);
-            particle.scale(0.8F);
-            particle.setFadeColor(0XFFFFFF);
-            return particle;
-        }
-    }
-
-    public static class ConversionCrucibleFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public ConversionCrucibleFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, 0.0D, 0.0D, 0.0D, spriteSet, true, FastColor.ARGB32.color(255, (int)(255F * xSpeed), (int)(255F * ySpeed), (int)(255F * zSpeed)));
-            particle.setSpriteFromAge(spriteSet);
-            particle.scale(0.8F);
-            particle.setFadeColor(0XFFFFFF);
-            return particle;
-        }
-    }
-
-    public static class FrostmintFactory implements ParticleProvider<SimpleParticleType> {
-        private final SpriteSet spriteSet;
-
-        public FrostmintFactory(SpriteSet spriteSet) {
-            this.spriteSet = spriteSet;
-        }
-
-        public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            SmallNuclearExplosionParticle particle = new SmallNuclearExplosionParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, spriteSet, true, 0XFFFFFF);
-            particle.quadSize *= 1.6F;
-            particle.setSpriteFromAge(spriteSet);
-            particle.setFadeColor(0XE5F9FA);
             return particle;
         }
     }

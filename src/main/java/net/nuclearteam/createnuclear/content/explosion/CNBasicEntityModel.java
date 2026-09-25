@@ -2,39 +2,40 @@ package net.nuclearteam.createnuclear.content.explosion;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.function.Function;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.Identifier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.Entity;
 
-public abstract class CNBasicEntityModel<T extends Entity> extends EntityModel<T> {
+/**
+ * Root of the Tabula-style models (from Citadel, via Alex's Caves) the mushroom cloud is drawn with.
+ * <p>
+ * Upstream extended vanilla's {@code EntityModel}, but only ever used it as a vertex emitter:
+ * {@code renderToBuffer} walks its own parts, and nothing handed it to an entity renderer. 26.2's
+ * {@code EntityModel} is built around render states and baked {@code ModelPart}s, which these
+ * parts are not, so the class stands alone and keeps the one method callers use.
+ */
+@Environment(EnvType.CLIENT)
+public abstract class CNBasicEntityModel<T extends Entity> {
     public int textureWidth;
     public int textureHeight;
 
     protected CNBasicEntityModel() {
-        this(RenderType::entityCutoutNoCull);
-    }
-
-    protected CNBasicEntityModel(Function<Identifier, RenderType> p_102613_) {
-        super(p_102613_);
         this.textureWidth = 64;
         this.textureHeight = 32;
     }
 
-    @Override
-    public void renderToBuffer(PoseStack p_103013_, VertexConsumer p_103014_, int p_103015_, int p_103016_, int color) {
-        float p_103017_ = (float) (color >> 16 & 255) / 255.0F;
-        float p_103018_ = (float) (color >> 8 & 255) / 255.0F;
-        float p_103019_ = (float) (color & 255) / 255.0F;
-        float p_103020_ = (float) (color >> 24 & 255) / 255.0F;
-        this.parts().forEach((p_103030_) -> p_103030_.render(p_103013_, p_103014_, p_103015_, p_103016_, p_103017_, p_103018_, p_103019_, p_103020_));
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        float red = (float) (color >> 16 & 255) / 255.0F;
+        float green = (float) (color >> 8 & 255) / 255.0F;
+        float blue = (float) (color & 255) / 255.0F;
+        float alpha = (float) (color >> 24 & 255) / 255.0F;
+        this.parts().forEach(part -> part.render(poseStack, buffer, packedLight, packedOverlay, red, green, blue, alpha));
     }
 
     public abstract Iterable<CNBasicModelPart> parts();
 
-    public abstract void setupAnim(T var1, float var2, float var3, float var4, float var5, float var6);
+    public abstract void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch);
 
-    public void prepareMobModel(T p_102614_, float p_102615_, float p_102616_, float p_102617_) {
+    public void prepareMobModel(T entity, float limbSwing, float limbSwingAmount, float partialTick) {
     }
 }

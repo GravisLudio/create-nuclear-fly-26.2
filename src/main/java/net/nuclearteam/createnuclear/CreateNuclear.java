@@ -17,7 +17,6 @@ import net.nuclearteam.createnuclear.impl.registry.CreateNuclearRegistriesImpl;
 import net.nuclearteam.createnuclear.infrastructure.config.CNConfigs;
 import net.nuclearteam.createnuclear.infrastructure.worldgen.CNBiomeModifiers;
 import net.nuclearteam.createnuclear.infrastructure.worldgen.CNPlacementModifiers;
-import net.nuclearteam.createnuclear.infrastructure.worldgen.biome.surfacerule.BiomeTagRule;
 import org.slf4j.Logger;
 
 /**
@@ -57,7 +56,6 @@ public class CreateNuclear implements ModInitializer {
         CNParticleRegistry.register();
         CNRecipeTypes.register();
         CNPlacementModifiers.register();
-        BiomeTagRule.register();
         CreateNuclearRegistriesImpl.register();
 
         CNDisplaySources.register();

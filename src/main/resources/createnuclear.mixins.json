@@ -13,7 +13,8 @@
     "client.RadiationHeartMixin",
     "client.CameraAccessor",
     "client.GameRendererMixin",
-    "client.CameraMixin"
+    "client.CameraMixin",
+    "client.ParticleEngineMixin"
   ],
   "injectors": {
     "defaultRequire": 1

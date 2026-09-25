@@ -1,57 +1,25 @@
 package net.nuclearteam.createnuclear.content.decoration.palettes;
 
-import net.nuclearteam.createnuclear.foundation.registrate.CNRegistrate;
-import com.tterrag.registrate.util.nullness.NonNullSupplier;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.material.MapColor;
-import net.nuclearteam.createnuclear.CNTags;
-import net.nuclearteam.createnuclear.CreateNuclear;
-import net.nuclearteam.createnuclear.foundation.utility.CreateNuclearLang;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
 
-import static net.nuclearteam.createnuclear.content.decoration.palettes.PaletteBlockPattern.STANDARD_RANGE;
-
-@SuppressWarnings("unused")
+/**
+ * The mod's palette stone types. Upstream generated each variant from a copy of Create's
+ * {@code PaletteBlockPattern} machinery, most of which existed to drive datagen; the blocks are
+ * registered explicitly in {@link CNPaletteBlocks} now, the way Create Fly registers its own
+ * palettes, and this enum only keeps the handle other code reads.
+ */
 public enum CNPaletteStoneTypes {
-    AUTUNITE(STANDARD_RANGE, r -> r.paletteStoneBlock("autunite", () -> Blocks.ANDESITE, true, true)
-            .properties(p ->
-                p.destroyTime(1.25f)
-                .mapColor(MapColor.COLOR_GREEN))
-            .register()),
-    ;
+    AUTUNITE(() -> CNPaletteBlocks.AUTUNITE.get());
 
-    private final Function<CNRegistrate, NonNullSupplier<Block>> factory;
-    private PalettesVariantEntry variant;
+    public final Supplier<Block> baseBlock;
 
-    public NonNullSupplier<Block> baseBlock;
-    public final PaletteBlockPattern[] variantTypes;
-    public TagKey<Item> materialTag;
-
-
-    CNPaletteStoneTypes(PaletteBlockPattern[] variantTypes, Function<CNRegistrate, NonNullSupplier<Block>> factory) {
-        this.factory = factory;
-        this.variantTypes = variantTypes;
+    CNPaletteStoneTypes(Supplier<Block> baseBlock) {
+        this.baseBlock = baseBlock;
     }
 
-    public NonNullSupplier<Block> getBaseBlock() {
+    public Supplier<Block> getBaseBlock() {
         return baseBlock;
-    }
-
-    public PalettesVariantEntry getVariant() {
-        return variant;
-    }
-
-    public static void register(CNRegistrate registrate) {
-        for (CNPaletteStoneTypes paletteStoneTypes : values()) {
-            paletteStoneTypes.baseBlock = paletteStoneTypes.factory.apply(registrate);
-            String id = CreateNuclearLang.asId(paletteStoneTypes.name());
-            paletteStoneTypes.materialTag = CNTags.optionalTag(BuiltInRegistries.ITEM, CreateNuclear.asResource("stone_types/" + id));
-            paletteStoneTypes.variant = new PalettesVariantEntry(id, paletteStoneTypes);
-        }
     }
 }

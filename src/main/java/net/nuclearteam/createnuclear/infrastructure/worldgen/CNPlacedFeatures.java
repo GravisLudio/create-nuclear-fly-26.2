@@ -1,18 +1,11 @@
 package net.nuclearteam.createnuclear.infrastructure.worldgen;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.levelgen.VerticalAnchor;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.*;
 import net.nuclearteam.createnuclear.CreateNuclear;
 
-import java.util.List;
 
-import static net.minecraft.data.worldgen.placement.PlacementUtils.register;
 
 public class CNPlacedFeatures {
     public static final ResourceKey<PlacedFeature>
@@ -25,39 +18,5 @@ public class CNPlacedFeatures {
 
     private static ResourceKey<PlacedFeature> key(String name) {
         return ResourceKey.create(Registries.PLACED_FEATURE, CreateNuclear.asResource(name));
-    }
-
-    public static void bootstrap(BootstrapContext<PlacedFeature> ctx) {
-        HolderGetter<ConfiguredFeature<?, ?>> featureLookup = ctx.lookup(Registries.CONFIGURED_FEATURE);
-        Holder<ConfiguredFeature<?, ?>> uraniumOre = featureLookup.getOrThrow(CNConfiguredFeatures.URANIUM_ORE);
-        Holder<ConfiguredFeature<?, ?>> leadOre = featureLookup.getOrThrow(CNConfiguredFeatures.LEAD_ORE);
-        Holder<ConfiguredFeature<?, ?>> thoriumOre = featureLookup.getOrThrow(CNConfiguredFeatures.THORIUM_ORE);
-        Holder<ConfiguredFeature<?, ?>> nitrateOre = featureLookup.getOrThrow(CNConfiguredFeatures.NITRATE_ORE);
-        Holder<ConfiguredFeature<?, ?>> striatedOresOverworld = featureLookup.getOrThrow(CNConfiguredFeatures.STRIATED_ORES_OVERWORLD);
-
-        register(ctx, URANIUM_ORE, uraniumOre, placementOres(CountPlacement.of(4), -63, 16));
-        register(ctx, LEAD_ORE, leadOre, placementOres(CountPlacement.of(10), -16, 60));
-        register(ctx, THORIUM_ORE, thoriumOre, placementOres(CountPlacement.of(6), -16, 55));
-        register(ctx, NITRATE_ORE, nitrateOre, placementOres(CountPlacement.of(6), -63, 64));
-        register(ctx, STRIATED_ORES_OVERWORLD, striatedOresOverworld, placement(RarityFilter.onAverageOnceEvery(64), -63, 16));
-
-    }
-
-    private static List<PlacementModifier> placementOres(PlacementModifier frequency, int minHeight, int maxHeight) {
-        return List.of(
-                frequency,
-                InSquarePlacement.spread(),
-                HeightRangePlacement.triangle(VerticalAnchor.absolute(minHeight), VerticalAnchor.absolute(maxHeight)),
-                ConfigPlacementFilter.INSTANCE
-        );
-    }
-
-    private static List<PlacementModifier> placement(PlacementModifier frequency, int minHeight, int maxHeight) {
-        return List.of(
-                frequency,
-                InSquarePlacement.spread(),
-                HeightRangePlacement.uniform(VerticalAnchor.absolute(minHeight), VerticalAnchor.absolute(maxHeight)),
-                ConfigPlacementFilter.INSTANCE
-        );
     }
 }

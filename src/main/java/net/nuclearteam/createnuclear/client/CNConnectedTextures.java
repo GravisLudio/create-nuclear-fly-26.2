@@ -6,6 +6,9 @@ import com.zurrtum.create.client.content.decoration.encasing.EncasedCTBehaviour;
 import com.zurrtum.create.client.infrastructure.model.CTModel;
 import net.minecraft.world.level.block.Block;
 import net.nuclearteam.createnuclear.CNBlocks;
+import net.nuclearteam.createnuclear.content.decoration.palettes.CNPaletteBlocks;
+import com.zurrtum.create.client.foundation.block.connected.HorizontalCTBehaviour;
+import com.zurrtum.create.client.foundation.block.connected.RotatedPillarCTBehaviour;
 import com.zurrtum.create.client.foundation.block.connected.CTSpriteShiftEntry;
 
 /**
@@ -26,6 +29,12 @@ public final class CNConnectedTextures {
     public static void register() {
         casing(CNBlocks.REACTOR_CASING.get(), CNSpriteShifts.REACTOR_CASING);
         casing(CNBlocks.REINFORCED_GLASS.get(), CNSpriteShifts.REACTOR_GLASS);
+
+        // Upstream's PaletteBlockPattern.LAYERED and .PILLAR connected textures.
+        AllModels.register(CNPaletteBlocks.LAYERED_AUTUNITE.get(),
+            CTModel.of(new HorizontalCTBehaviour(CNSpriteShifts.AUTUNITE_LAYERED, CNSpriteShifts.AUTUNITE_CAP)));
+        AllModels.register(CNPaletteBlocks.AUTUNITE_PILLAR.get(),
+            CTModel.of(new RotatedPillarCTBehaviour(CNSpriteShifts.AUTUNITE_PILLAR, CNSpriteShifts.AUTUNITE_CAP)));
     }
 
     private static void casing(Block block, CTSpriteShiftEntry shift) {

@@ -2,53 +2,26 @@ package net.nuclearteam.createnuclear.foundation.advancement;
 
 import com.google.common.collect.Sets;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.critereon.*;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.entity.EntityType;
-import net.neoforged.neoforge.common.Tags;
 import net.nuclearteam.createnuclear.*;
 import net.nuclearteam.createnuclear.content.decoration.palettes.CNPaletteStoneTypes;
-import net.nuclearteam.createnuclear.foundation.advancement.CreateNuclearAdvancement.Builder;
 
-
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 import static net.nuclearteam.createnuclear.foundation.advancement.CreateNuclearAdvancement.TaskType.*;
 
-@MethodsReturnNonnullByDefault
 
+/**
+ * Runtime half of upstream's advancement provider. The JSON it generated is committed under
+ * {@code src/generated/resources}; what remains here is what the game needs: the entries, so each
+ * one without an external trigger registers its {@code <id>_builtin} trigger, and
+ * {@code awardTo}/{@code isAlreadyAwardedTo}. Same split as the Connected port.
+ */
 @SuppressWarnings("unused")
-public class CNAdvancement implements DataProvider {
-
-    public static final EntityEquipmentPredicate FULL_ARMOR = new EntityEquipmentPredicate.Builder()
-        .head(ItemPredicate.Builder.item().of(CNItems.ANTI_RADIATION_HELMETS))
-        .chest(ItemPredicate.Builder.item().of(CNItems.ANTI_RADIATION_CHESTPLATES))
-        .legs(ItemPredicate.Builder.item().of(CNItems.ANTI_RADIATION_LEGGINGS))
-        .feet(ItemPredicate.Builder.item().of(CNItems.ANTI_RADIATION_BOOTS))
-        .build();
-
-    private static final List<ItemPredicate.Builder> PREDICATES = List.of(
-        ItemPredicate.Builder.item().of(CNBlocks.ENRICHED_SOUL_SOIL),
-        ItemPredicate.Builder.item().of(ItemTags.LOGS),
-        ItemPredicate.Builder.item().of(Tags.Items.RODS_WOODEN)
-    );
+public class CNAdvancement {
 
     public static final List<CreateNuclearAdvancement> ENTRIES = new ArrayList<>();
     public static final CreateNuclearAdvancement START = null,
@@ -63,7 +36,7 @@ public class CNAdvancement implements DataProvider {
     CRAFT_ENRICHING_CAMPFIRE = create("craft_enriching_campfire", b -> b.icon(CNBlocks.ENRICHING_CAMPFIRE.asItem())
             .title("Does That Make Smoke?")
             .description("Craft an Enriching Campfire")
-            .externalTrigger(RecipeCraftedTrigger.TriggerInstance.craftedItem(CreateNuclear.asResource("crafting/enriching_campfire"), PREDICATES))
+            .externalTrigger()
             .after(ROOT)
     ),
 
@@ -88,7 +61,7 @@ public class CNAdvancement implements DataProvider {
             .special(SECRET)
     ),
 
-    URANIUM_LIQUID = create("uranium_liquid", b -> b.icon(CNFluids.URANIUM.getBucket().get())
+    URANIUM_LIQUID = create("uranium_liquid", b -> b.icon(CNFluids.URANIUM.getBucket())
             .title("Turning Solid To Liquid")
             .description("Obtain some uranium liquid by mixing uranium powder")
             .after(URANIUM_POWDER)
@@ -106,7 +79,7 @@ public class CNAdvancement implements DataProvider {
             .title("What Did You Expect")
             .description("Bro..... you did what ??")
             .after(YELLOWCAKE)
-            .externalTrigger(ConsumeItemTrigger.TriggerInstance.usedItem(CNItems.YELLOWCAKE))
+            .externalTrigger()
             .special(SECRET)
     ),
 
@@ -138,7 +111,7 @@ public class CNAdvancement implements DataProvider {
             .whenIconCollected()
     ),
 
-    THORIUM_LIQUID = create("thorium_liquid", b -> b.icon(CNFluids.THORIUM.getBucket().get())
+    THORIUM_LIQUID = create("thorium_liquid", b -> b.icon(CNFluids.THORIUM.getBucket())
             .title("Molten Thorium")
             .description("Obtain some thorium liquid by mixing thorium dust")
             .after(THORIUM_DUST)
@@ -180,14 +153,14 @@ public class CNAdvancement implements DataProvider {
             .whenIconCollected()
     ),
 
-    ABSOLUTE_ZERO = create("absolute_zero", b -> b.icon(CNFluids.LIQUID_NITROGEN.getBucket().get())
+    ABSOLUTE_ZERO = create("absolute_zero", b -> b.icon(CNFluids.LIQUID_NITROGEN.getBucket())
             .title("Absolute Zero")
             .description("Mix cooled nitrogen concentrate to obtain liquid nitrogen")
             .after(CHILL_OUT)
             .whenIconCollected()
     ),
 
-    CRYOGENIC_BAPTISM = create("cryogenic_baptism", b -> b.icon(CNFluids.LIQUID_NITROGEN.getBucket().get())
+    CRYOGENIC_BAPTISM = create("cryogenic_baptism", b -> b.icon(CNFluids.LIQUID_NITROGEN.getBucket())
             .title("I can't Feel My Feet Anymore")
             .description("Swim in the liquid nitrogen for the first time")
             .after(ABSOLUTE_ZERO)
@@ -254,15 +227,7 @@ public class CNAdvancement implements DataProvider {
             .title("Best Keep Yourself Covered")
             .description("Equip anti-radiation armor for the first time")
             .after(ANTI_RADIATION_ARMOR)
-            .externalTrigger(
-                CriteriaTriggers.INVENTORY_CHANGED.createCriterion(
-                    new InventoryChangeTrigger.TriggerInstance(
-                        Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PLAYER).equipment(FULL_ARMOR).build())),
-                        InventoryChangeTrigger.TriggerInstance.Slots.ANY,
-                        List.of()
-                    )
-                )
-            )
+            .externalTrigger()
     ),
 
     DYE_ANTI_RADIATION_ARMOR = create("dye_anti_radiation_armor", b -> b.icon(CNItems.ANTI_RADIATION_HELMETS)
@@ -369,48 +334,8 @@ public class CNAdvancement implements DataProvider {
 
     ;
 
-    private final PackOutput output;
-    private final CompletableFuture<HolderLookup.Provider> registries;
-
-    private static CreateNuclearAdvancement create(String id, UnaryOperator<Builder> b) {
+    private static CreateNuclearAdvancement create(String id, UnaryOperator<CreateNuclearAdvancement.Builder> b) {
         return new CreateNuclearAdvancement(id, b);
-    }
-
-    public CNAdvancement(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        this.output = output;
-        this.registries = registries;
-    }
-
-    @Override
-    public CompletableFuture<?> run(CachedOutput cache) {
-        return this.registries.thenCompose(provider -> {
-            PackOutput.PathProvider pathProvider = output.createPathProvider(PackOutput.Target.DATA_PACK, "advancement");
-            List<CompletableFuture<?>> futures = new ArrayList<>();
-            Set<Identifier> set = Sets.newHashSet();
-
-            Consumer<AdvancementHolder> consumer = (advancement) -> {
-                Identifier id = advancement.id();
-                if (!set.add(id))
-                    throw new IllegalStateException("Duplicate advancement " + id);
-                Path path = pathProvider.json(id);
-                futures.add(DataProvider.saveStable(cache, provider, Advancement.CODEC, advancement.value(), path));
-            };
-
-            for (CreateNuclearAdvancement advancement : ENTRIES)
-                advancement.save(consumer, provider);
-
-            return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
-        });
-    }
-
-    @Override
-    public String getName() {
-        return "Create Nuclear Advancements";
-    }
-
-    public static void provideLang(BiConsumer<String, String> consumer) {
-        for (CreateNuclearAdvancement advancement : ENTRIES)
-            advancement.provideLang(consumer);
     }
 
     public static void register() {}

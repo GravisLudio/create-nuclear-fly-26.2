@@ -1,15 +1,6 @@
 package net.nuclearteam.createnuclear.foundation.advancement;
 
-import com.simibubi.create.foundation.advancement.CreateAdvancement;
-import net.nuclearteam.createnuclear.foundation.registrate.ItemProvider;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.advancements.AdvancementType;
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.*;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
@@ -18,61 +9,43 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.nuclearteam.createnuclear.CreateNuclear;
-import net.minecraft.core.HolderLookup.Provider;
+import net.nuclearteam.createnuclear.foundation.registrate.ItemProvider;
 
-
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
-
+/**
+ * Runtime half of an advancement. Upstream also built the {@code Advancement.Builder} and wrote the
+ * JSON and lang from here; those outputs are committed under {@code src/generated/resources}, so
+ * the builder methods that only shaped them are accepted and ignored.
+ * <p>
+ * <b>What is load-bearing is the builtin trigger.</b> An advancement with no external trigger gets
+ * {@code createnuclear:<id>_builtin} registered, and the committed JSON names exactly that id as its
+ * criterion. {@code externalTrigger} is kept because it decides whether that trigger exists; its
+ * argument, the vanilla criterion, only ever fed the JSON and is gone.
+ */
 @SuppressWarnings("unused")
 public class CreateNuclearAdvancement {
-
-    static final Identifier BACKGROUND = CreateNuclear.asResource("textures/gui/advancements/backgrounds/background_advancement.png");
-    static final String LANG = "advancement." + CreateNuclear.MOD_ID + ".";
-    static final String SECRET_SUFFIX = "\n\u00A77(Hidden Advancement)";
-
-    private final Advancement.Builder builder = Advancement.Builder.advancement();
     private SimpleCreateNuclearTrigger builtinTrigger;
-    private CreateNuclearAdvancement parent;
     private final Builder createNuclearBuilder = new Builder();
 
-    AdvancementHolder datagenResult;
-
     final String id;
-    private String title;
-    private String description;
 
-
-    public CreateNuclearAdvancement(String id, UnaryOperator<Builder> b) {
+    public CreateNuclearAdvancement(String id, java.util.function.UnaryOperator<Builder> b) {
         this.id = id;
 
         b.apply(createNuclearBuilder);
 
         if (!createNuclearBuilder.externalTrigger) {
             builtinTrigger = CNTriggers.addSimple(id + "_builtin");
-            builder.addCriterion("0", builtinTrigger.createCriterion(builtinTrigger.instance()));
         }
 
-        if (createNuclearBuilder.type == TaskType.SECRET)
-            description += SECRET_SUFFIX;
-
         CNAdvancement.ENTRIES.add(this);
-    }
-
-    private String titleKey() {
-        return LANG + id;
-    }
-
-    private String descriptionKey() {
-        return titleKey() + ".desc";
     }
 
     public boolean isAlreadyAwardedTo(Player player) {
         if (!(player instanceof ServerPlayer sp))
             return true;
-        AdvancementHolder advancement = sp.getServer()
+        // ServerPlayer.getServer() is gone; the server is reached through the level.
+        AdvancementHolder advancement = sp.level()
+                .getServer()
                 .getAdvancements()
                 .get(CreateNuclear.asResource(id));
         if (advancement == null)
@@ -91,131 +64,72 @@ public class CreateNuclearAdvancement {
         builtinTrigger.trigger(sp);
     }
 
-    void save(Consumer<AdvancementHolder> t, HolderLookup.Provider registries) {
-        if (parent != null)
-            builder.parent(parent.datagenResult);
-
-        if (createNuclearBuilder.func != null)
-            createNuclearBuilder.icon(createNuclearBuilder.func.apply(registries));
-
-        builder.display(
-                createNuclearBuilder.icon,
-                Component.translatable(titleKey()),
-                Component.translatable(descriptionKey()).withStyle(s -> s.withColor(0xDBA213)),
-                id.equals("root") ? BACKGROUND : null,
-                createNuclearBuilder.type.advancementType,
-                createNuclearBuilder.type.toast,
-                createNuclearBuilder.type.announce,
-                createNuclearBuilder.type.hide
-        );
-        datagenResult = builder.save(t, CreateNuclear.asResource(id).toString());
-    }
-
-    void provideLang(BiConsumer<String, String> consumer) {
-        consumer.accept(titleKey(), title);
-        consumer.accept(descriptionKey(), description);
-    }
-
     enum TaskType {
-
-        SILENT(AdvancementType.TASK, false, false, false),
-        NORMAL(AdvancementType.TASK, true, false, false),
-        NOISY(AdvancementType.TASK, true, true, false),
-        EXPERT(AdvancementType.GOAL, true, true, false),
-        SECRET(AdvancementType.GOAL, true, true, true),
-
-        ;
-
-        private final AdvancementType advancementType;
-        private final boolean toast;
-        private final boolean announce;
-        private final boolean hide;
-
-        TaskType(AdvancementType frame, boolean toast, boolean announce, boolean hide) {
-            this.advancementType = frame;
-            this.toast = toast;
-            this.announce = announce;
-            this.hide = hide;
-        }
+        SILENT, NORMAL, NOISY, EXPERT, SECRET
     }
 
-    class Builder {
-
-        private TaskType type = TaskType.NORMAL;
+    public class Builder {
         private boolean externalTrigger;
-        private int keyIndex;
-        private ItemStack icon;
-        private Function<Provider, ItemStack> func;
+
+        // --- accepted and ignored: these only shaped the generated JSON ---
 
         Builder special(TaskType type) {
-            this.type = type;
             return this;
         }
 
         Builder after(CreateNuclearAdvancement other) {
-            CreateNuclearAdvancement.this.parent = other;
             return this;
         }
 
         Builder icon(ItemProvider item) {
-            return icon(item.asStack());
-        }
-
-        Builder icon(ItemLike item) {
-            return icon(new ItemStack(item));
-        }
-
-        Builder icon(ItemStack stack) {
-            icon = stack;
             return this;
         }
 
-        Builder icon(Function<Provider, ItemStack> func) {
-            this.func = func;
+        Builder icon(ItemLike item) {
+            return this;
+        }
+
+        Builder icon(ItemStack stack) {
             return this;
         }
 
         Builder title(String title) {
-            CreateNuclearAdvancement.this.title = title;
             return this;
         }
 
         Builder description(String description) {
-            CreateNuclearAdvancement.this.description = description;
             return this;
         }
 
+        // --- these decide whether a builtin trigger is created, so they are real ---
+
         Builder whenBlockPlaced(Block block) {
-            return externalTrigger(ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(block));
+            return externalTrigger();
         }
 
         Builder whenIconCollected() {
-            return externalTrigger(InventoryChangeTrigger.TriggerInstance.hasItems(icon.getItem()));
+            return externalTrigger();
         }
 
         Builder whenItemCollected(ItemProvider item) {
-            return whenItemCollected(item.asStack()
-                    .getItem());
+            return externalTrigger();
         }
 
         Builder whenItemCollected(ItemLike itemProvider) {
-            return externalTrigger(InventoryChangeTrigger.TriggerInstance.hasItems(itemProvider));
+            return externalTrigger();
         }
 
         Builder whenItemCollected(TagKey<Item> tag) {
-            return externalTrigger(InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(tag).build()));
+            return externalTrigger();
         }
 
         Builder awardedForFree() {
-            return externalTrigger(InventoryChangeTrigger.TriggerInstance.hasItems(new ItemLike[] {}));
+            return externalTrigger();
         }
 
-        Builder externalTrigger(Criterion<?> trigger) {
-            builder.addCriterion(String.valueOf(keyIndex), trigger);
+        Builder externalTrigger() {
             externalTrigger = true;
-            keyIndex++;
             return this;
         }
-
     }
 }

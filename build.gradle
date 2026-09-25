@@ -33,6 +33,19 @@ sourceSets.main.java {
     exclude 'net/nuclearteam/createnuclear/api/data/**'
     // Generadores de blockstate de Registrate: sin referencias una vez quitado .blockstate(...).
     exclude 'net/nuclearteam/createnuclear/content/multiblock/**/*Generator.java'
+    // Bootstrap del worldgen (datagen): el bioma, el ruido, las density functions y las features
+    // ya estan como JSON en src/generated/resources/data/createnuclear/worldgen.
+    exclude 'net/nuclearteam/createnuclear/infrastructure/worldgen/CNConfiguredFeatures.java'
+    exclude 'net/nuclearteam/createnuclear/infrastructure/worldgen/CNLayerPatterns.java'
+    exclude 'net/nuclearteam/createnuclear/infrastructure/worldgen/biome/IrradiatedBiomes.java'
+    exclude 'net/nuclearteam/createnuclear/infrastructure/worldgen/biome/CNNoiseGeneratorSettings.java'
+    exclude 'net/nuclearteam/createnuclear/infrastructure/worldgen/biome/CNNoiseData.java'
+    exclude 'net/nuclearteam/createnuclear/infrastructure/worldgen/biome/CNDensityFunctions.java'
+    exclude 'net/nuclearteam/createnuclear/infrastructure/worldgen/biome/surfacerule/IrradiatedSurfaceRules.java'
+    // La condicion de superficie "createnuclear:biome_tag" solo la usaba IrradiatedSurfaceRules
+    // (datagen); ningun JSON committeado la nombra. Registrarla exigiria abrir SurfaceRules$Context,
+    // LazyYCondition y Context.biome en el classtweaker para nada.
+    exclude 'net/nuclearteam/createnuclear/infrastructure/worldgen/biome/surfacerule/BiomeTagRule.java'
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
