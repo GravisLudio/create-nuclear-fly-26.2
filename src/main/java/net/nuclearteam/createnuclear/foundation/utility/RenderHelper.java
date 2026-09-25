@@ -3,7 +3,7 @@ package net.nuclearteam.createnuclear.foundation.utility;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.nuclearteam.createnuclear.CreateNuclear;
 
 /**
@@ -24,7 +24,7 @@ public class RenderHelper {
      * @param coverage      scale factor (1.0 = normal size)
      * @param onlyFirstPerson  if true, renders only in first-person camera mode
      */
-    public static void renderOverlay(GuiGraphics graphics, ResourceLocation texture,
+    public static void renderOverlay(GuiGraphics graphics, Identifier texture,
                                      float alpha, float coverage, boolean onlyFirstPerson) {
         boolean isFirstPerson = Minecraft.getInstance().options.getCameraType().isFirstPerson();
 
@@ -68,7 +68,7 @@ public class RenderHelper {
     /**
      * Convenience overload: always renders in any camera mode, no scaling.
      */
-    public static void renderOverlay(GuiGraphics graphics, ResourceLocation texture, float alpha) {
+    public static void renderOverlay(GuiGraphics graphics, Identifier texture, float alpha) {
         renderOverlay(graphics, texture, alpha, 1f, false);
     }
 
@@ -76,7 +76,7 @@ public class RenderHelper {
      * Convenience overload: only in first-person, no scaling.
      */
     public static void renderFirstPersonOverlay(GuiGraphics graphics,
-                                                ResourceLocation texture, float alpha, float coverage) {
+                                                Identifier texture, float alpha, float coverage) {
         renderOverlay(graphics, texture, alpha, coverage, true);
     }
 
@@ -88,7 +88,7 @@ public class RenderHelper {
      * @param texture the texture to render
      * @param alpha transparency [0,1]
      */
-    public static void renderTextureOverlay(GuiGraphics graphics, ResourceLocation texture, float alpha) {
+    public static void renderTextureOverlay(GuiGraphics graphics, Identifier texture, float alpha) {
         // Skip rendering if parameters unchanged
         int width = graphics.guiWidth();
         int height = graphics.guiHeight();

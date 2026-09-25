@@ -47,12 +47,12 @@ import net.nuclearteam.createnuclear.CNEntityType;
 import net.nuclearteam.createnuclear.CNTags;
 import net.nuclearteam.createnuclear.content.contraptions.irradiated.AnimalUtil;
 
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.UUID;
 import java.util.function.Predicate;
 
-@ParametersAreNonnullByDefault
+
 @MethodsReturnNonnullByDefault
 @SuppressWarnings({"unused", "deprecation"})
 public class IrradiatedWolf extends TamableAnimal implements NeutralMob {

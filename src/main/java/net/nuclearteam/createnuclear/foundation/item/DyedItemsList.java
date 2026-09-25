@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.foundation.item;
 
-import com.tterrag.registrate.util.entry.ItemEntry;
+import net.nuclearteam.createnuclear.foundation.registrate.ItemEntry;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 

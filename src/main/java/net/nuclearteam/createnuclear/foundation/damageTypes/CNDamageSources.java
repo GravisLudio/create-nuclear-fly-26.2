@@ -10,7 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.nuclearteam.createnuclear.CNDamageTypes;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class CNDamageSources {
     public static DamageSource radiation(Level level) {

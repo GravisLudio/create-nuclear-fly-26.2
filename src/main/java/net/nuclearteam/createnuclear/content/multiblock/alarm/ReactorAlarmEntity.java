@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear.content.multiblock.alarm;
 
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -9,8 +9,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.nuclearteam.createnuclear.CNSoundEvents;
 import net.nuclearteam.createnuclear.CreateNuclear;
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.nuclearteam.createnuclear.foundation.advancement.CNAdvancement;
 import net.nuclearteam.createnuclear.foundation.advancement.CNAdvancementBehaviour;
 
@@ -22,7 +22,7 @@ public class ReactorAlarmEntity extends SmartBlockEntity {
     private CNAdvancementBehaviour advancement;
     private boolean advancementAwarded = false; // Prevents repeatedly awarding the advancement on every tick
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     protected ReactorAlarmSoundInstance soundInstance;
 
     public ReactorAlarmEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -41,7 +41,7 @@ public class ReactorAlarmEntity extends SmartBlockEntity {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     protected void tickAudio() {
         BlockState state = getBlockState();
         boolean powered = state.hasProperty(ReactorAlarm.POWERED) && state.getValue(ReactorAlarm.POWERED);
@@ -62,7 +62,7 @@ public class ReactorAlarmEntity extends SmartBlockEntity {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void stopSound() {
         if (soundInstance != null) {
             try {

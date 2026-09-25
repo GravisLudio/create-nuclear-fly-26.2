@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.alarm;
 
-import com.simibubi.create.foundation.block.IBE;
+import com.zurrtum.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -20,7 +20,7 @@ import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorContro
 import net.nuclearteam.createnuclear.content.multiblock.pattern.ReactorPattern;
 import net.nuclearteam.createnuclear.foundation.advancement.CNAdvancementBehaviour;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class ReactorAlarm extends Block implements IBE<ReactorAlarmEntity> {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;

@@ -11,7 +11,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.neoforge.common.Tags;
@@ -19,7 +19,7 @@ import net.nuclearteam.createnuclear.*;
 import net.nuclearteam.createnuclear.content.decoration.palettes.CNPaletteStoneTypes;
 import net.nuclearteam.createnuclear.foundation.advancement.CreateNuclearAdvancement.Builder;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.function.UnaryOperator;
 import static net.nuclearteam.createnuclear.foundation.advancement.CreateNuclearAdvancement.TaskType.*;
 
 @MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
+
 @SuppressWarnings("unused")
 public class CNAdvancement implements DataProvider {
 
@@ -386,10 +386,10 @@ public class CNAdvancement implements DataProvider {
         return this.registries.thenCompose(provider -> {
             PackOutput.PathProvider pathProvider = output.createPathProvider(PackOutput.Target.DATA_PACK, "advancement");
             List<CompletableFuture<?>> futures = new ArrayList<>();
-            Set<ResourceLocation> set = Sets.newHashSet();
+            Set<Identifier> set = Sets.newHashSet();
 
             Consumer<AdvancementHolder> consumer = (advancement) -> {
-                ResourceLocation id = advancement.id();
+                Identifier id = advancement.id();
                 if (!set.add(id))
                     throw new IllegalStateException("Duplicate advancement " + id);
                 Path path = pathProvider.json(id);

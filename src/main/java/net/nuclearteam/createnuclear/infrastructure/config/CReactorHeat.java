@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.infrastructure.config;
 
-import net.createmod.catnip.config.ConfigBase;
+import com.zurrtum.create.catnip.config.ConfigBase;
 
 public class CReactorHeat extends ConfigBase {
     public final ConfigInt size5Danger = i(256, 0, 8192, "size5Danger", "Heat threshold for DANGER level (5x5 reactor)");

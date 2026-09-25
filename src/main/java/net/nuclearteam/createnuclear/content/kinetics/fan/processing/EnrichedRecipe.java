@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.kinetics.fan.processing;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+
 
 
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
@@ -9,7 +9,7 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.nuclearteam.createnuclear.CNRecipeTypes;
 
-@ParametersAreNonnullByDefault
+
 public class EnrichedRecipe extends StandardProcessingRecipe<SingleRecipeInput> {
 
     public EnrichedRecipe(ProcessingRecipeParams params) {

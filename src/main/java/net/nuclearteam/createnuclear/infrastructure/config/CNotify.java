@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.infrastructure.config;
 
-import net.createmod.catnip.config.ConfigBase;
+import com.zurrtum.create.catnip.config.ConfigBase;
 
 public class CNotify extends ConfigBase {
     public final ConfigBool warnAllPlayers = b(false, "warn_all_players", Comments.warning);

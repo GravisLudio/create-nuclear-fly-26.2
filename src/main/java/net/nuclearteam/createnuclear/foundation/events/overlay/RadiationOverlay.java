@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.GameType;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.nuclearteam.createnuclear.CNEffects;
@@ -16,7 +16,7 @@ import net.nuclearteam.createnuclear.foundation.utility.RenderHelper;
  * HUD overlay for radiation effect when the player is irradiated.
  */
 public class RadiationOverlay extends EasingHudOverlay {
-    private static final ResourceLocation RADIATION_TEXTURE =
+    private static final Identifier RADIATION_TEXTURE =
             CreateNuclear.asResource("textures/misc/irradiated_vision/irradiated_vision.png");
     private static float coverage = 1f;
 
@@ -29,12 +29,12 @@ public class RadiationOverlay extends EasingHudOverlay {
     }
 
     @Override
-    public ResourceLocation getAfterOverlay() {
+    public Identifier getAfterOverlay() {
         return VanillaGuiLayers.CAMERA_OVERLAYS;
     }
 
     @Override
-    public ResourceLocation getOverlayId() {
+    public Identifier getOverlayId() {
         return CreateNuclear.asResource("radiation_overlay");
     }
 

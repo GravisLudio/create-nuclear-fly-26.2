@@ -1,14 +1,14 @@
 package net.nuclearteam.createnuclear;
 
-import com.simibubi.create.api.behaviour.display.DisplaySource;
-import com.simibubi.create.foundation.data.CreateRegistrate;
+import com.zurrtum.create.api.behaviour.display.DisplaySource;
+import net.nuclearteam.createnuclear.foundation.registrate.CNRegistrate;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 import net.nuclearteam.createnuclear.content.redstone.displayLink.source.*;
 
 import java.util.function.Supplier;
 
 public class CNDisplaySources {
-    private static final CreateRegistrate REGISTRATE = CreateNuclear.REGISTRATE;
+    private static final CNRegistrate REGISTRATE = CreateNuclear.REGISTRATE;
 
     public static final RegistryEntry<DisplaySource, HeatDisplaySource> HEAT = simple("heat", HeatDisplaySource::new);
     public static final RegistryEntry<DisplaySource, LiquidLevelDisplaySource> LIQUID_LEVEL = simple("liquid_level", LiquidLevelDisplaySource::new);

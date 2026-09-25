@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.decoration.palettes;
 
-import com.simibubi.create.foundation.data.CreateRegistrate;
+import net.nuclearteam.createnuclear.foundation.registrate.CNRegistrate;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
@@ -25,7 +25,7 @@ public enum CNPaletteStoneTypes {
             .register()),
     ;
 
-    private final Function<CreateRegistrate, NonNullSupplier<Block>> factory;
+    private final Function<CNRegistrate, NonNullSupplier<Block>> factory;
     private PalettesVariantEntry variant;
 
     public NonNullSupplier<Block> baseBlock;
@@ -33,7 +33,7 @@ public enum CNPaletteStoneTypes {
     public TagKey<Item> materialTag;
 
 
-    CNPaletteStoneTypes(PaletteBlockPattern[] variantTypes, Function<CreateRegistrate, NonNullSupplier<Block>> factory) {
+    CNPaletteStoneTypes(PaletteBlockPattern[] variantTypes, Function<CNRegistrate, NonNullSupplier<Block>> factory) {
         this.factory = factory;
         this.variantTypes = variantTypes;
     }
@@ -46,7 +46,7 @@ public enum CNPaletteStoneTypes {
         return variant;
     }
 
-    public static void register(CreateRegistrate registrate) {
+    public static void register(CNRegistrate registrate) {
         for (CNPaletteStoneTypes paletteStoneTypes : values()) {
             paletteStoneTypes.baseBlock = paletteStoneTypes.factory.apply(registrate);
             String id = CreateNuclearLang.asId(paletteStoneTypes.name());

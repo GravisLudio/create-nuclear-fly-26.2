@@ -4,18 +4,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.nuclearteam.createnuclear.CreateNuclear;
 import net.nuclearteam.createnuclear.content.contraptions.irradiated.CNModelLayers;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 
-@ParametersAreNonnullByDefault
+
+
 public class IrradiatedWolfRenderer extends MobRenderer<IrradiatedWolf, IrradiatedWolfModel<IrradiatedWolf>> {
-    private static final ResourceLocation WOLF_LOCATION = CreateNuclear.asResource("textures/entity/irradiated_wolf.png");
-    private static final ResourceLocation WOLF_TAME_LOCATION = CreateNuclear.asResource("textures/entity/irradiated_wolf.png");
-    private static final ResourceLocation WOLF_ANGRY_LOCATION = CreateNuclear.asResource("textures/entity/irradiated_wolf_angry.png");
+    private static final Identifier WOLF_LOCATION = CreateNuclear.asResource("textures/entity/irradiated_wolf.png");
+    private static final Identifier WOLF_TAME_LOCATION = CreateNuclear.asResource("textures/entity/irradiated_wolf.png");
+    private static final Identifier WOLF_ANGRY_LOCATION = CreateNuclear.asResource("textures/entity/irradiated_wolf_angry.png");
 
     public IrradiatedWolfRenderer(EntityRendererProvider.Context context) {
         super(context, new IrradiatedWolfModel<>(context.bakeLayer(CNModelLayers.IRRADIATED_WOLF)), 0.5F);
@@ -38,7 +38,7 @@ public class IrradiatedWolfRenderer extends MobRenderer<IrradiatedWolf, Irradiat
 
     }
 
-    public @NotNull ResourceLocation getTextureLocation(IrradiatedWolf entity) {
+    public @NotNull Identifier getTextureLocation(IrradiatedWolf entity) {
         if (entity.isTame()) {
             return WOLF_TAME_LOCATION;
         } else {

@@ -1,12 +1,12 @@
 package net.nuclearteam.createnuclear.content.kinetics.fan.processing;
 
-import com.simibubi.create.AllRecipeTypes;
+import com.zurrtum.create.AllRecipeTypes;
 import com.simibubi.create.api.registry.CreateBuiltInRegistries;
-import com.simibubi.create.content.kinetics.fan.processing.FanProcessingType;
-import com.simibubi.create.foundation.recipe.RecipeApplier;
+import com.zurrtum.create.content.kinetics.fan.processing.FanProcessingType;
+import com.zurrtum.create.foundation.recipe.RecipeApplier;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
-import net.createmod.catnip.math.VecHelper;
-import net.createmod.catnip.theme.Color;
+import com.zurrtum.create.catnip.math.VecHelper;
+import com.zurrtum.create.catnip.theme.Color;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
@@ -27,7 +27,7 @@ import net.nuclearteam.createnuclear.content.enriching.campfire.EnrichingCampfir
 import net.nuclearteam.createnuclear.content.radiation.capability.RadiationCapability;
 import net.nuclearteam.createnuclear.foundation.damagesTypes.CNDamageSources;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

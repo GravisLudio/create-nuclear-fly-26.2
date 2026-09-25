@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear;
 
-import com.simibubi.create.api.effect.OpenPipeEffectHandler;
+import com.zurrtum.create.api.effect.OpenPipeEffectHandler;
 import net.nuclearteam.createnuclear.content.radiation.RadiationEffectHandler;
 
 public class CNOpenPipeEffectHandlers {

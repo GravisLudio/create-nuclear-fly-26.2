@@ -49,3 +49,7 @@ run/downloads/log.json
 run/command_history.txt
 run/world/
 run/world*/
+
+# Fabric
+.idea/
+run/

@@ -3,7 +3,7 @@ package net.nuclearteam.createnuclear.api.data.recipe;
 import com.simibubi.create.api.data.recipe.ProcessingRecipeGen;
 import com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
-import net.createmod.catnip.registry.RegisteredObjectsHelper;
+import com.zurrtum.create.catnip.registry.RegisteredObjectsHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.crafting.Ingredient;

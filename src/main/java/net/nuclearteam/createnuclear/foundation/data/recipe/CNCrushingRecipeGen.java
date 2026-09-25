@@ -1,9 +1,9 @@
 package net.nuclearteam.createnuclear.foundation.data.recipe;
 
-import com.simibubi.create.AllItems;
+import com.zurrtum.create.AllItems;
 import com.simibubi.create.api.data.recipe.CrushingRecipeGen;
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
-import com.simibubi.create.content.kinetics.crusher.CrushingRecipe;
+import com.zurrtum.create.content.kinetics.crusher.CrushingRecipe;
 import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;

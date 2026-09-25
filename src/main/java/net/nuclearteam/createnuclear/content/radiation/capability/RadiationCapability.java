@@ -7,7 +7,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
@@ -35,7 +35,7 @@ public class RadiationCapability {
    public static final Codec<RadiationCapability> CODEC = RecordCodecBuilder.create(i -> i.group(
        Codec.DOUBLE.optionalFieldOf("radiation", 0D).forGetter(RadiationCapability::getRadiation),
        Codec.LONG.optionalFieldOf("hash", 0L).forGetter(RadiationCapability::getInventoryHash),
-       ResourceLocation.CODEC.optionalFieldOf("lastBiome").forGetter(c -> Optional.ofNullable(c.getLastBiomeLocation())),
+       Identifier.CODEC.optionalFieldOf("lastBiome").forGetter(c -> Optional.ofNullable(c.getLastBiomeLocation())),
        Codec.DOUBLE.optionalFieldOf("contagionDose", 0D).forGetter(RadiationCapability::getContagionDose),
        Codec.INT.optionalFieldOf("contagionTicks", 0).forGetter(RadiationCapability::getContagionTicks)
    ).apply(i, RadiationCapability::create));
@@ -43,7 +43,7 @@ public class RadiationCapability {
    public static final StreamCodec<RegistryFriendlyByteBuf, RadiationCapability> STREAM_CODEC = StreamCodec.composite(
        ByteBufCodecs.DOUBLE, RadiationCapability::getRadiation,
        ByteBufCodecs.VAR_LONG, RadiationCapability::getInventoryHash,
-       ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), c -> Optional.ofNullable(c.getLastBiomeLocation()),
+       ByteBufCodecs.optional(Identifier.STREAM_CODEC), c -> Optional.ofNullable(c.getLastBiomeLocation()),
        ByteBufCodecs.DOUBLE, RadiationCapability::getContagionDose,
        ByteBufCodecs.VAR_INT, RadiationCapability::getContagionTicks,
        RadiationCapability::create
@@ -51,7 +51,7 @@ public class RadiationCapability {
 
     private double radiation;
     private long inventoryHash;
-    private ResourceLocation lastBiomeLocation;
+    private Identifier lastBiomeLocation;
     private double contagionDose;
     private int contagionTicks;
 
@@ -61,8 +61,8 @@ public class RadiationCapability {
     public long getInventoryHash() { return this.inventoryHash; }
     public void setInventoryHash(long hash) { this.inventoryHash = hash; }
 
-    public ResourceLocation getLastBiomeLocation() { return this.lastBiomeLocation; }
-    public void setLastBiomeLocation(ResourceLocation location) { this.lastBiomeLocation = location; }
+    public Identifier getLastBiomeLocation() { return this.lastBiomeLocation; }
+    public void setLastBiomeLocation(Identifier location) { this.lastBiomeLocation = location; }
 
     public double getContagionDose() { return this.contagionDose; }
     public void setContagionDose(double dose) { this.contagionDose = dose; }
@@ -70,7 +70,7 @@ public class RadiationCapability {
     public int getContagionTicks() { return this.contagionTicks; }
     public void setContagionTicks(int ticks) { this.contagionTicks = ticks; }
 
-    private static RadiationCapability create(double radiation, long hash, Optional<ResourceLocation> lastBiome, double contagionDose, int contagionTicks) {
+    private static RadiationCapability create(double radiation, long hash, Optional<Identifier> lastBiome, double contagionDose, int contagionTicks) {
         RadiationCapability cap = new RadiationCapability();
         cap.setRadiation(radiation);
         cap.setInventoryHash(hash);
@@ -116,7 +116,7 @@ public class RadiationCapability {
         }
 
         ResourceKey<Biome> biomeKey = level.getBiome(entity.blockPosition()).unwrapKey().orElse(null);
-        ResourceLocation biomeLoc = biomeKey != null ? biomeKey.location() : null;
+        Identifier biomeLoc = biomeKey != null ? biomeKey.location() : null;
         if (!Objects.equals(biomeLoc, cap.getLastBiomeLocation())) {
             cap.setLastBiomeLocation(biomeLoc);
         }
@@ -187,7 +187,7 @@ public class RadiationCapability {
         if (source != cachedBlacklistSource) {
             Set<EntityType<?>> resolved = new HashSet<>();
             ConfigValueResolver.loadValuesInSet(source, resolved,
-                    entry -> BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.tryParse(entry)));
+                    entry -> BuiltInRegistries.ENTITY_TYPE.get(Identifier.tryParse(entry)));
             cachedBlacklist = resolved;
             cachedBlacklistSource = source;
         }

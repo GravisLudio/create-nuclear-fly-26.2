@@ -7,7 +7,7 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
@@ -40,7 +40,7 @@ public class SmithingClothRecipeBuilder {
         return this;
     }
 
-    public void save(RecipeOutput pRecipeOutput, ResourceLocation pLocation) {
+    public void save(RecipeOutput pRecipeOutput, Identifier pLocation) {
         this.ensureValid(pLocation);
         Advancement.Builder advancement = pRecipeOutput.advancement()
                 .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(pLocation))
@@ -51,7 +51,7 @@ public class SmithingClothRecipeBuilder {
         pRecipeOutput.accept(pLocation, recipe, advancement.build(pLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")));
     }
 
-    private void ensureValid(ResourceLocation pLocation) {
+    private void ensureValid(Identifier pLocation) {
         if (this.criteria.isEmpty()) {
             throw new IllegalStateException("No way of obtaining recipe " + pLocation);
         }

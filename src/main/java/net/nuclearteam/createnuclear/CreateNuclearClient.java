@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear;
 
-import net.createmod.ponder.foundation.PonderIndex;
-import net.neoforged.api.distmarker.Dist;
+import com.zurrtum.create.client.ponder.foundation.PonderIndex;
+import net.fabricmc.api.EnvType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;

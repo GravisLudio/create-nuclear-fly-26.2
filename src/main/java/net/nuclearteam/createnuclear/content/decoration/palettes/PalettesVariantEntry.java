@@ -1,12 +1,12 @@
 package net.nuclearteam.createnuclear.content.decoration.palettes;
 
 import com.google.common.collect.ImmutableList;
-import com.simibubi.create.foundation.data.CreateRegistrate;
+import net.nuclearteam.createnuclear.foundation.registrate.CNRegistrate;
 import com.tterrag.registrate.builders.BlockBuilder;
 import com.tterrag.registrate.builders.ItemBuilder;
 import com.tterrag.registrate.providers.ProviderType;
 import com.tterrag.registrate.util.DataIngredient;
-import com.tterrag.registrate.util.entry.BlockEntry;
+import net.nuclearteam.createnuclear.foundation.registrate.BlockEntry;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -16,11 +16,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.nuclearteam.createnuclear.CreateNuclear;
 
-import static com.simibubi.create.foundation.data.CreateRegistrate.connectedTextures;
-import static com.simibubi.create.foundation.data.TagGen.pickaxeOnly;
+import static com.simibubi.create.foundation.data.CNRegistrate.connectedTextures;
+import static net.nuclearteam.createnuclear.foundation.registrate.TagGen.pickaxeOnly;
 
 public class PalettesVariantEntry {
-    private static final CreateRegistrate REGISTRATE = CreateNuclear.REGISTRATE;
+    private static final CNRegistrate REGISTRATE = CreateNuclear.REGISTRATE;
 
     public final ImmutableList<BlockEntry<? extends Block>> registeredBlocks;
     public final ImmutableList<BlockEntry<? extends Block>> registeredPartials;
@@ -31,15 +31,12 @@ public class PalettesVariantEntry {
         NonNullSupplier<Block> baseBlock = paletteStoneVariants.baseBlock;
 
         for (PaletteBlockPattern pattern : paletteStoneVariants.variantTypes) {
-            BlockBuilder<? extends Block, CreateRegistrate> builder = REGISTRATE
+            BlockBuilder<? extends Block, CNRegistrate> builder = REGISTRATE
                     .block(pattern.createName(name), pattern.getBlockFactory())
                     .initialProperties(baseBlock)
                     .transform(pickaxeOnly())
-                    .blockstate(pattern.getBlockStateGenerator()
-                            .apply(pattern)
-                            .apply(name)::accept
-                    );
-            ItemBuilder<BlockItem, ? extends BlockBuilder<? extends Block, CreateRegistrate>> itemBuilder =
+                    ;
+            ItemBuilder<BlockItem, ? extends BlockBuilder<? extends Block, CNRegistrate>> itemBuilder =
                     builder.item();
 
             TagKey<Block>[] blockTags = pattern.getBlockTags();
@@ -56,10 +53,6 @@ public class PalettesVariantEntry {
             pattern.createCTBehaviour(name)
                     .ifPresent(b -> builder.onRegister(connectedTextures(b)));
 
-            builder.recipe((c, p) -> {
-                p.stonecutting(DataIngredient.tag(paletteStoneVariants.materialTag), RecipeCategory.BUILDING_BLOCKS, c);
-                pattern.addRecipes(baseBlock, c, p);
-            });
 
             itemBuilder.register();
             BlockEntry<? extends Block> block = builder.register();

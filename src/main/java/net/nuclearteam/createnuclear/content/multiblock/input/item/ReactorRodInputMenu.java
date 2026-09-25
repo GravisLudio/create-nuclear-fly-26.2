@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.item;
 
-import com.simibubi.create.foundation.gui.menu.MenuBase;
+import com.zurrtum.create.foundation.gui.menu.MenuBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.RegistryFriendlyByteBuf;

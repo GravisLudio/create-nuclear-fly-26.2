@@ -3,16 +3,16 @@ package net.nuclearteam.createnuclear.foundation.events.overlay;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 
 /**
  * Base interface for all HUD overlays.
  */
 public interface HudOverlay {
-    ResourceLocation getAfterOverlay();
+    Identifier getAfterOverlay();
 
-    ResourceLocation getOverlayId();
+    Identifier getOverlayId();
 
     boolean isActive();
 

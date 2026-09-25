@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.infrastructure.config;
 
-import net.createmod.catnip.config.ConfigBase;
+import com.zurrtum.create.catnip.config.ConfigBase;
 
 public class CExplode extends ConfigBase {
     public final ConfigInt size = i(10, "Size of the reactor explosion");

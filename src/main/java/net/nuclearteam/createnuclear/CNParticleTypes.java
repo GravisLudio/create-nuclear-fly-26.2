@@ -1,9 +1,9 @@
 package net.nuclearteam.createnuclear;
 
 import com.simibubi.create.foundation.particle.ICustomParticleData;
-import net.createmod.catnip.lang.Lang;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import com.zurrtum.create.client.catnip.lang.Lang;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,7 +31,7 @@ public enum CNParticleTypes {
         ParticleEntry.REGISTER.register(modEventBus);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void registerFactories(RegisterParticleProvidersEvent event) {
         for (CNParticleTypes particle : values())
             particle.entry.registerFactory(event);
@@ -60,7 +60,7 @@ public enum CNParticleTypes {
             object = REGISTER.register(name, () -> this.typeFactory.get().createType());
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         public void registerFactory(RegisterParticleProvidersEvent event) {
             typeFactory.get()
                     .register(object.get(), event);

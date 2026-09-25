@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.radiation;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 import net.nuclearteam.createnuclear.CreateNuclear;
@@ -26,7 +26,7 @@ public class RadiationEffect extends VicinityEffect {
         // Reduces movement speed by 20%
         this.addAttributeModifier(
             Attributes.MOVEMENT_SPEED,
-            ResourceLocation.fromNamespaceAndPath(CreateNuclear.MOD_ID, "radiation_movement_speed"),
+            Identifier.fromNamespaceAndPath(CreateNuclear.MOD_ID, "radiation_movement_speed"),
             -0.2D,
             AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
         );
@@ -34,7 +34,7 @@ public class RadiationEffect extends VicinityEffect {
         // Reduces attack damage by 20%
         this.addAttributeModifier(
             Attributes.ATTACK_DAMAGE,
-            ResourceLocation.fromNamespaceAndPath(CreateNuclear.MOD_ID, "radiation_attack_damage"),
+            Identifier.fromNamespaceAndPath(CreateNuclear.MOD_ID, "radiation_attack_damage"),
             -0.2D,
             AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
         );
@@ -42,7 +42,7 @@ public class RadiationEffect extends VicinityEffect {
         // Reduces attack speed by 20%
         this.addAttributeModifier(
             Attributes.ATTACK_SPEED,
-            ResourceLocation.fromNamespaceAndPath(CreateNuclear.MOD_ID, "radiation_attack_speed"),
+            Identifier.fromNamespaceAndPath(CreateNuclear.MOD_ID, "radiation_attack_speed"),
             -0.2D,
             AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
         );

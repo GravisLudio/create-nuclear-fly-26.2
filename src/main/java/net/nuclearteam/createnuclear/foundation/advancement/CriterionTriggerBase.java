@@ -3,17 +3,17 @@ package net.nuclearteam.createnuclear.foundation.advancement;
 import com.google.common.collect.Maps;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.nuclearteam.createnuclear.CreateNuclear;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
 public abstract class CriterionTriggerBase<T extends CriterionTriggerBase.Instance> implements CriterionTrigger<T> {
-    private final ResourceLocation id;
+    private final Identifier id;
     protected final Map<PlayerAdvancements, Set<Listener<T>>> listeners = Maps.newHashMap();
 
     public CriterionTriggerBase(String id) {
@@ -44,7 +44,7 @@ public abstract class CriterionTriggerBase<T extends CriterionTriggerBase.Instan
         this.listeners.remove(playerAdvancements);
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 

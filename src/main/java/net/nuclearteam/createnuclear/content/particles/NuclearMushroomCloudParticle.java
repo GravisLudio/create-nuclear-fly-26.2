@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -23,10 +23,10 @@ import net.nuclearteam.createnuclear.infrastructure.config.CNConfigs;
 
 public class NuclearMushroomCloudParticle extends Particle {
 
-    private static final ResourceLocation TEXTURE = CreateNuclear.asResource("textures/particle/nuclear_mushroom_cloud.png");
-    private static final ResourceLocation TEXTURE_GLOW = CreateNuclear.asResource("textures/particle/nuclear_mushroom_cloud_glow.png");
-    private static final ResourceLocation TEXTURE_PINK = CreateNuclear.asResource("textures/particle/nuclear_mushroom_cloud_pink.png");
-    private static final ResourceLocation TEXTURE_PINK_GLOW = CreateNuclear.asResource("textures/particle/nuclear_mushroom_cloud_pink_glow.png");
+    private static final Identifier TEXTURE = CreateNuclear.asResource("textures/particle/nuclear_mushroom_cloud.png");
+    private static final Identifier TEXTURE_GLOW = CreateNuclear.asResource("textures/particle/nuclear_mushroom_cloud_glow.png");
+    private static final Identifier TEXTURE_PINK = CreateNuclear.asResource("textures/particle/nuclear_mushroom_cloud_pink.png");
+    private static final Identifier TEXTURE_PINK_GLOW = CreateNuclear.asResource("textures/particle/nuclear_mushroom_cloud_pink_glow.png");
     private static final NuclearMushroomCloudModel MODEL = new NuclearMushroomCloudModel();
     private static final int BALL_FOR = 10;
     private static final int GLOW_FOR = 20;

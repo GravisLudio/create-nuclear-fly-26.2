@@ -30,11 +30,11 @@ import net.nuclearteam.createnuclear.CNEntityType;
 import net.nuclearteam.createnuclear.CNTags;
 import net.nuclearteam.createnuclear.content.contraptions.irradiated.IrradiatedAnimal;
 
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jetbrains.annotations.Nullable;
+
 
 @MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
+
 @SuppressWarnings("unused")
 public class IrradiatedChicken extends Animal implements IrradiatedAnimal {
     private static final EntityDimensions BABY_DIMENSIONS;

@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
@@ -17,7 +17,7 @@ import net.nuclearteam.createnuclear.foundation.utility.RenderHelper;
  * HUD overlay for displaying helmet condition based on durability.
  */
 public class HelmetOverlay  implements HudOverlay {
-    private static final ResourceLocation[] HELMET_TEXTURES = {
+    private static final Identifier[] HELMET_TEXTURES = {
             CreateNuclear.asResource("textures/misc/helmet_vision/helmet_new.png"),
             CreateNuclear.asResource("textures/misc/helmet_vision/helmet_minor_damage.png"),
             CreateNuclear.asResource("textures/misc/helmet_vision/helmet_crack1.png"),
@@ -28,13 +28,13 @@ public class HelmetOverlay  implements HudOverlay {
     private static final int BASE_PRIORITY = 50;
 
     @Override
-    public ResourceLocation getAfterOverlay() {
+    public Identifier getAfterOverlay() {
         return VanillaGuiLayers.CAMERA_OVERLAYS;
     }
 
     @Override
-    public ResourceLocation getOverlayId() {
-        return ResourceLocation.parse("helmet_overlay");
+    public Identifier getOverlayId() {
+        return Identifier.parse("helmet_overlay");
     }
 
     @Override

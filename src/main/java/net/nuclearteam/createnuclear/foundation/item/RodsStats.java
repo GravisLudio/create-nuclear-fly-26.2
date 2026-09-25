@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.foundation.item;
 
-import com.simibubi.create.foundation.item.TooltipModifier;
+import com.zurrtum.create.client.foundation.item.TooltipModifier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;

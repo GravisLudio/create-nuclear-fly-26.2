@@ -1,11 +1,11 @@
 package net.nuclearteam.createnuclear;
 
-import net.createmod.catnip.lang.Lang;
+import com.zurrtum.create.client.catnip.lang.Lang;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
@@ -25,12 +25,12 @@ import static net.nuclearteam.createnuclear.CNTags.NameSpace.*;
 
 @SuppressWarnings({"unused", "deprecation"})
 public class CNTags {
-    public static <T> TagKey<T> optionalTag(Registry<T> registry, ResourceLocation id) {
+    public static <T> TagKey<T> optionalTag(Registry<T> registry, Identifier id) {
         return TagKey.create(registry.key(), id);
     }
 
     public static <T> TagKey<T> forgeTag(Registry<T> registry, String path) {
-        return optionalTag(registry, ResourceLocation.fromNamespaceAndPath(NEO_FORGE.id, path));
+        return optionalTag(registry, Identifier.fromNamespaceAndPath(NEO_FORGE.id, path));
     }
 
     public static TagKey<Block> forgeBlockTag(String path) {
@@ -95,7 +95,7 @@ public class CNTags {
         }
 
         CNBlockTags(NameSpace nameSpace, String path, boolean optional, boolean alwaysDatagenDefault) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.BLOCK, id);
             } else {
@@ -148,7 +148,7 @@ public class CNTags {
         }
 
         CNItemTags(NameSpace nameSpace, String path, boolean optional, boolean alwaysDatagenDefault) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.ITEM, id);
             } else {
@@ -194,7 +194,7 @@ public class CNTags {
         }
 
         CNFluidTags(NameSpace nameSpace, String path, boolean optional, boolean alwaysDatagenDefault) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.FLUID, id);
             } else {
@@ -238,7 +238,7 @@ public class CNTags {
         }
 
         CNEntityTags(NameSpace nameSpace, String path, boolean optional, boolean alwaysDatagenDefault) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.ENTITY_TYPE, id);
             } else {
@@ -282,7 +282,7 @@ public class CNTags {
         }
 
         CNRecipeSerializerTags(NameSpace namespace, String path, boolean optional, boolean alwaysDatagen) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(namespace.id, path == null ? Lang.asId(name()) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.RECIPE_SERIALIZER, id);
             } else {

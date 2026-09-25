@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.fluid;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,10 +15,10 @@ import java.util.Map.Entry;
 
 /**
  * A lightweight, in-memory aggregation of fluid quantities keyed by
- * fluid ResourceLocation. This record is used to represent the combined
+ * fluid Identifier. This record is used to represent the combined
  * input fluids available to a reactor without modifying the real handlers.
  */
-public record VirtualReactorInputFluid(Map<ResourceLocation, Long> fluids) {
+public record VirtualReactorInputFluid(Map<Identifier, Long> fluids) {
 
     /**
      * Create an empty virtual inventory.
@@ -34,7 +34,7 @@ public record VirtualReactorInputFluid(Map<ResourceLocation, Long> fluids) {
      */
     public void addFluid(@NotNull FluidStack stack) {
         if (stack.isEmpty() || stack.getAmount() <= 0) return;
-        ResourceLocation id = BuiltInRegistries.FLUID.getKey(stack.getFluid());
+        Identifier id = BuiltInRegistries.FLUID.getKey(stack.getFluid());
         if (id == null) return;
         fluids.merge(id, (long) stack.getAmount(), Long::sum);
     }
@@ -45,7 +45,7 @@ public record VirtualReactorInputFluid(Map<ResourceLocation, Long> fluids) {
      * @param fluidId fluid identifier
      * @param amount maximum amount to remove
      */
-    public FluidStack removeFluid(@NotNull ResourceLocation fluidId, long amount) {
+    public FluidStack removeFluid(@NotNull Identifier fluidId, long amount) {
         if (amount < 0 || fluidId == null) return FluidStack.EMPTY;
         long current = fluids.getOrDefault(fluidId, 0L);
         long removed = Math.min(current, amount);
@@ -63,19 +63,19 @@ public record VirtualReactorInputFluid(Map<ResourceLocation, Long> fluids) {
      * @param fluidId fluid identifier
      * @return total amount stored for that fluid
      */
-    public long getAmount(@NotNull ResourceLocation fluidId) {
+    public long getAmount(@NotNull Identifier fluidId) {
         if (fluidId == null) return 0L;
         return fluids.getOrDefault(fluidId, 0L);
     }
 
     /**
-     * Convert a map of ResourceLocation->long into a list of BigFluidStack
+     * Convert a map of Identifier->long into a list of BigFluidStack
      * suitable for display or consumption elsewhere.
      */
-    public static List<BigFluidStack> toBigList(Map<ResourceLocation, Long> map) {
+    public static List<BigFluidStack> toBigList(Map<Identifier, Long> map) {
         List<BigFluidStack> list = new ArrayList<>();
-        for (Entry<ResourceLocation, Long> e : map.entrySet()) {
-            ResourceLocation id = e.getKey();
+        for (Entry<Identifier, Long> e : map.entrySet()) {
+            Identifier id = e.getKey();
             long total = e.getValue();
             Fluid fluid = BuiltInRegistries.FLUID.get(id);
             if (fluid == null || total <= 0) continue;

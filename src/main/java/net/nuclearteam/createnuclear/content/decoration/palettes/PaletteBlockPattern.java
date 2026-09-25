@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.decoration.palettes;
 
-import com.simibubi.create.content.decoration.palettes.ConnectedPillarBlock;
+import com.zurrtum.create.content.decoration.palettes.ConnectedPillarBlock;
 import com.simibubi.create.foundation.block.connected.*;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
@@ -9,15 +9,15 @@ import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.core.Direction.Axis;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.nuclearteam.createnuclear.CreateNuclear;
 
@@ -63,7 +63,7 @@ public class PaletteBlockPattern {
     private NonNullFunction<NonNullSupplier<Block>, NonNullBiConsumer<DataGenContext<Block, ? extends Block>, RegistrateRecipeProvider>> additionalRecipes;
     private PaletteBlockPartial<? extends Block>[] partials;
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private RenderType renderType;
 
     private static PaletteBlockPattern create(String name, PaletteBlockPattern.PatternNameType nameType,
@@ -144,22 +144,22 @@ public class PaletteBlockPattern {
     // Model generators
 
     public IBlockStateProvider cubeAll(String variant) {
-        ResourceLocation all = toLocation(variant, textures[0]);
+        Identifier all = toLocation(variant, textures[0]);
         return (ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models()
                 .cubeAll(createName(variant), all));
     }
 
     public IBlockStateProvider cubeBottomTop(String variant) {
-        ResourceLocation side = toLocation(variant, textures[0]);
-        ResourceLocation bottom = toLocation(variant, textures[1]);
-        ResourceLocation top = toLocation(variant, textures[2]);
+        Identifier side = toLocation(variant, textures[0]);
+        Identifier bottom = toLocation(variant, textures[1]);
+        Identifier top = toLocation(variant, textures[2]);
         return (ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models()
                 .cubeBottomTop(createName(variant), side, bottom, top));
     }
 
     public IBlockStateProvider pillar(String variant) {
-        ResourceLocation side = toLocation(variant, textures[0]);
-        ResourceLocation end = toLocation(variant, textures[1]);
+        Identifier side = toLocation(variant, textures[0]);
+        Identifier end = toLocation(variant, textures[1]);
 
         return (ctx, prov) -> prov.getVariantBuilder(ctx.getEntry())
                 .forAllStatesExcept(state -> {
@@ -182,8 +182,8 @@ public class PaletteBlockPattern {
     }
 
     public IBlockStateProvider cubeColumn(String variant) {
-        ResourceLocation side = toLocation(variant, textures[0]);
-        ResourceLocation end = toLocation(variant, textures[1]);
+        Identifier side = toLocation(variant, textures[0]);
+        Identifier end = toLocation(variant, textures[1]);
         return (ctx, prov) -> prov.simpleBlock(ctx.get(), prov.models()
                 .cubeColumn(createName(variant), side, end));
     }
@@ -202,16 +202,16 @@ public class PaletteBlockPattern {
         return nameType == SUFFIX ? String.format(formatString, variant, id) : String.format(formatString, id, variant);
     }
 
-    protected static ResourceLocation toLocation(String variant, String texture) {
+    protected static Identifier toLocation(String variant, String texture) {
         return CreateNuclear.asResource(
                 String.format(TEXTURE_LOCATION, texture, variant + (texture.equals("cut") ? "_" : "_cut_") + texture));
     }
 
     protected static CTSpriteShiftEntry ct(String variant, PaletteBlockPattern.CTs texture) {
-        ResourceLocation resLoc = texture.srcFactory.apply(variant);
-        ResourceLocation resLocTarget = texture.targetFactory.apply(variant);
+        Identifier resLoc = texture.srcFactory.apply(variant);
+        Identifier resLocTarget = texture.targetFactory.apply(variant);
         return CTSpriteShifter.getCT(texture.type, resLoc,
-                ResourceLocation.fromNamespaceAndPath(resLocTarget.getNamespace(), resLocTarget.getPath() + "_connected"));
+                Identifier.fromNamespaceAndPath(resLocTarget.getNamespace(), resLocTarget.getPath() + "_connected"));
     }
 
     @FunctionalInterface
@@ -239,15 +239,15 @@ public class PaletteBlockPattern {
         ;
 
         public CTType type;
-        private final Function<String, ResourceLocation> srcFactory;
-        private final Function<String, ResourceLocation> targetFactory;
+        private final Function<String, Identifier> srcFactory;
+        private final Function<String, Identifier> targetFactory;
 
-        CTs(CTType type, Function<String, ResourceLocation> factory) {
+        CTs(CTType type, Function<String, Identifier> factory) {
             this(type, factory, factory);
         }
 
-        CTs(CTType type, Function<String, ResourceLocation> srcFactory,
-            Function<String, ResourceLocation> targetFactory) {
+        CTs(CTType type, Function<String, Identifier> srcFactory,
+            Function<String, Identifier> targetFactory) {
             this.type = type;
             this.srcFactory = srcFactory;
             this.targetFactory = targetFactory;

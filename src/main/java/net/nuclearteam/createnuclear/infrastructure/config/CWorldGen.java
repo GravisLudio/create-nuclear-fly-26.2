@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.infrastructure.config;
 
-import net.createmod.catnip.config.ConfigBase;
+import com.zurrtum.create.catnip.config.ConfigBase;
 
 public class CWorldGen extends ConfigBase {
     public final ConfigBool enable = b(true, "enable_world_gen", Comments.enable);

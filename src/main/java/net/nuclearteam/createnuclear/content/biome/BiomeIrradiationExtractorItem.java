@@ -16,10 +16,10 @@ import net.nuclearteam.createnuclear.foundation.utility.CreateNuclearLang;
 import net.nuclearteam.createnuclear.infrastructure.config.CNConfigs;
 import net.nuclearteam.createnuclear.infrastructure.worldgen.biome.BiomeIrradiationService;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+
 import java.util.List;
 
-@ParametersAreNonnullByDefault
+
 public class BiomeIrradiationExtractorItem extends Item {
     public static final String TAG = "biome_restore";
     private static final int CHARGE_PER_CLICK = 1;

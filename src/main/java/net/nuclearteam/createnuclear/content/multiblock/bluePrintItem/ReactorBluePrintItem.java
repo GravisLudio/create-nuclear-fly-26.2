@@ -23,10 +23,10 @@ import net.nuclearteam.createnuclear.CNDataComponents;
 import net.nuclearteam.createnuclear.CNItems;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+
 import java.util.List;
 
-@ParametersAreNonnullByDefault
+
 @MethodsReturnNonnullByDefault
 public class ReactorBluePrintItem extends Item implements MenuProvider {
 

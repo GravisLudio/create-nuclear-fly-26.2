@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.foundation.mixin.client;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorMaterial;
@@ -17,13 +17,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientHooks.class)
 public class AntiRadiationArmorTextureMixin {
     @Inject(
-            method = "getArmorTexture(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ArmorMaterial$Layer;ZLnet/minecraft/world/entity/EquipmentSlot;)Lnet/minecraft/resources/ResourceLocation;",
+            method = "getArmorTexture(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ArmorMaterial$Layer;ZLnet/minecraft/world/entity/EquipmentSlot;)Lnet/minecraft/resources/Identifier;",
             at = @At("HEAD"),
             cancellable = true
     )
     private static void CN$overrideClothTexture(Entity entity, ItemStack stack, ArmorMaterial.Layer layer,
                                                 boolean innerModel, EquipmentSlot slot,
-                                                CallbackInfoReturnable<ResourceLocation> cir) {
+                                                CallbackInfoReturnable<Identifier> cir) {
         if (stack.getItem() instanceof AntiRadiationArmorItem && stack.has(CNDataComponents.CLOTH_COLOR)) {
             cir.setReturnValue(ClothTagHelper.getArmorTexturePath(stack, "anti_radiation_suit.png"));
         }

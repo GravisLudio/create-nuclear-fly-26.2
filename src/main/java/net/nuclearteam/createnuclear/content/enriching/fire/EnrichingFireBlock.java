@@ -14,10 +14,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.nuclearteam.createnuclear.CNTags.CNBlockTags;
 import net.nuclearteam.createnuclear.CreateNuclear;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+
 
 @MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
+
 @SuppressWarnings({"deprecation"})
 public class EnrichingFireBlock extends BaseFireBlock {
     public static final MapCodec<EnrichingFireBlock> CODEC = simpleCodec(EnrichingFireBlock::new);

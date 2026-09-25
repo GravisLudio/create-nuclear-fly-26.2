@@ -1,9 +1,9 @@
 package net.nuclearteam.createnuclear.content.multiblock.controller;
 
-import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation;
-import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import com.simibubi.create.foundation.utility.IInteractionChecker;
+import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.foundation.utility.IInteractionChecker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
 import lib.multiblock.SimpleMultiBlockAislePatternBuilder;
@@ -25,8 +25,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -76,7 +76,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
     private boolean isExploding = false;
 
     /** Client-only looping "running" sound instance; never accessed server-side. */
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private ReactorRunningSoundInstance runningSound;
 
     private final ConsumptionCycleManager cycleManager = new ConsumptionCycleManager();
@@ -415,7 +415,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
      * Driven by the {@code ACTIVE} blockstate property, which the server recomputes every tick in
      * {@link #updateReactorStateVisibility()} and vanilla syncs to the client automatically.
      */
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private void tickRunningSound() {
         BlockState state = getBlockState();
         boolean active = state.hasProperty(ReactorControllerBlock.ACTIVE)

@@ -1,9 +1,9 @@
 package net.nuclearteam.createnuclear.compat;
 
-import net.createmod.catnip.lang.Lang;
-import net.createmod.catnip.registry.RegisteredObjectsHelper;
+import com.zurrtum.create.client.catnip.lang.Lang;
+import com.zurrtum.create.catnip.registry.RegisteredObjectsHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -33,8 +33,8 @@ public enum Mods {
         return id;
     }
 
-    public ResourceLocation rl(String path) {
-        return ResourceLocation.fromNamespaceAndPath(id, path);
+    public Identifier rl(String path) {
+        return Identifier.fromNamespaceAndPath(id, path);
     }
 
     public Block getBlock(String id) {

@@ -2,10 +2,10 @@ package net.nuclearteam.createnuclear;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.AllSoundEvents.ConfiguredSoundEvent;
-import com.simibubi.create.AllSoundEvents.SoundEntry;
-import com.simibubi.create.Create;
+import com.zurrtum.create.AllSoundEvents;
+import com.zurrtum.create.AllSoundEvents.ConfiguredSoundEvent;
+import com.zurrtum.create.AllSoundEvents.SoundEntry;
+import com.zurrtum.create.Create;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -13,7 +13,7 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 
 public class CNSoundEvents {
 
-    public static final Map<ResourceLocation, SoundEntry> ALL = new HashMap<>();
+    public static final Map<Identifier, SoundEntry> ALL = new HashMap<>();
 
     public static final SoundEntry
 
@@ -133,7 +133,7 @@ public class CNSoundEvents {
         return create(CreateNuclear.asResource(name));
     }
 
-    private static SoundEntryBuilder create(ResourceLocation id) {
+    private static SoundEntryBuilder create(Identifier id) {
         return new SoundEntryBuilder(id);
     }
 
@@ -203,14 +203,14 @@ public class CNSoundEvents {
 
     public static class SoundEntryBuilder {
 
-        protected ResourceLocation id;
+        protected Identifier id;
         protected String subtitle = "unregistered";
         protected SoundSource category = SoundSource.BLOCKS;
         protected List<ConfiguredSoundEvent> wrappedEvents;
-        protected List<ResourceLocation> variants;
+        protected List<Identifier> variants;
         protected int attenuationDistance;
 
-        public SoundEntryBuilder(ResourceLocation id) {
+        public SoundEntryBuilder(Identifier id) {
             wrappedEvents = new ArrayList<>();
             variants = new ArrayList<>();
             this.id = id;
@@ -240,7 +240,7 @@ public class CNSoundEvents {
             return addVariant(Create.asResource(name));
         }
 
-        public SoundEntryBuilder addVariant(ResourceLocation id) {
+        public SoundEntryBuilder addVariant(Identifier id) {
             variants.add(id);
             return this;
         }
@@ -274,10 +274,10 @@ public class CNSoundEvents {
 
     private static class CustomSoundEntry extends SoundEntry {
 
-        protected List<ResourceLocation> variants;
+        protected List<Identifier> variants;
         protected DeferredHolder<SoundEvent, SoundEvent> event;
 
-        public CustomSoundEntry(ResourceLocation id, List<ResourceLocation> variants, String subtitle,
+        public CustomSoundEntry(Identifier id, List<Identifier> variants, String subtitle,
                                 SoundSource category, int attenuationDistance) {
             super(id, subtitle, category, attenuationDistance);
             this.variants = variants;
@@ -290,7 +290,7 @@ public class CNSoundEvents {
 
         @Override
         public void register(RegisterEvent.RegisterHelper<SoundEvent> helper) {
-            ResourceLocation location = event.getId();
+            Identifier location = event.getId();
             helper.register(location, SoundEvent.createVariableRangeEvent(location));
         }
 
@@ -316,7 +316,7 @@ public class CNSoundEvents {
                 s.addProperty("attenuation_distance", attenuationDistance);
             list.add(s);
 
-            for (ResourceLocation variant : variants) {
+            for (Identifier variant : variants) {
                 s = new JsonObject();
                 s.addProperty("name", variant.toString());
                 s.addProperty("type", "file");
@@ -348,7 +348,7 @@ public class CNSoundEvents {
         private List<ConfiguredSoundEvent> wrappedEvents;
         private List<CompiledSoundEvent> compiledEvents;
 
-        public WrappedSoundEntry(ResourceLocation id, String subtitle,
+        public WrappedSoundEntry(Identifier id, String subtitle,
                                  List<ConfiguredSoundEvent> wrappedEvents, SoundSource category, int attenuationDistance) {
             super(id, subtitle, category, attenuationDistance);
             this.wrappedEvents = wrappedEvents;
@@ -359,7 +359,7 @@ public class CNSoundEvents {
         public void prepare() {
             for (int i = 0; i < wrappedEvents.size(); i++) {
                 ConfiguredSoundEvent wrapped = wrappedEvents.get(i);
-                ResourceLocation location = getIdOf(i);
+                Identifier location = getIdOf(i);
                 DeferredHolder<SoundEvent, SoundEvent> event = DeferredHolder.create(Registries.SOUND_EVENT, location);
                 compiledEvents.add(new CompiledSoundEvent(event, wrapped.volume(), wrapped.pitch()));
             }
@@ -368,7 +368,7 @@ public class CNSoundEvents {
         @Override
         public void register(RegisterEvent.RegisterHelper<SoundEvent> helper) {
             for (CompiledSoundEvent compiledEvent : compiledEvents) {
-                ResourceLocation location = compiledEvent.event().getId();
+                Identifier location = compiledEvent.event().getId();
                 helper.register(location, SoundEvent.createVariableRangeEvent(location));
             }
         }
@@ -384,8 +384,8 @@ public class CNSoundEvents {
                     .event().get();
         }
 
-        protected ResourceLocation getIdOf(int i) {
-            return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), i == 0 ? id.getPath() : id.getPath() + "_compounded_" + i);
+        protected Identifier getIdOf(int i) {
+            return Identifier.fromNamespaceAndPath(id.getNamespace(), i == 0 ? id.getPath() : id.getPath() + "_compounded_" + i);
         }
 
         @Override

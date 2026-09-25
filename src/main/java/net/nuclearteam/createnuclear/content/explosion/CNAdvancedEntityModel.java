@@ -1,10 +1,10 @@
 package net.nuclearteam.createnuclear.content.explosion;
 
 import net.minecraft.world.entity.Entity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public abstract class CNAdvancedEntityModel<T extends Entity> extends CNBasicEntityModel<T> {
     private float movementScale = 1.0F;
     public int texWidth = 32;

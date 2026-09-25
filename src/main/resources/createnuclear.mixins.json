@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "priority": 1100,
   "package": "net.nuclearteam.createnuclear.foundation.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "mixins": [
     "BaseFireBlockMixin",
     "SmithingTransformRecipeMixin"

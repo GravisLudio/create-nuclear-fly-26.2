@@ -1,8 +1,8 @@
 package net.nuclearteam.createnuclear.infrastructure.worldgen;
 
-import com.simibubi.create.infrastructure.worldgen.AllFeatures;
-import com.simibubi.create.infrastructure.worldgen.LayerPattern;
-import com.simibubi.create.infrastructure.worldgen.LayeredOreConfiguration;
+import com.zurrtum.create.infrastructure.worldgen.AllFeatures;
+import com.zurrtum.create.infrastructure.worldgen.LayerPattern;
+import com.zurrtum.create.infrastructure.worldgen.LayeredOreConfiguration;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;

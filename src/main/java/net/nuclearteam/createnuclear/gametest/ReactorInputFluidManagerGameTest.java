@@ -7,7 +7,7 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -312,7 +312,7 @@ public class ReactorInputFluidManagerGameTest {
 
         VirtualReactorInputFluid inventory = manager(helper, rel1, rel2).getInventory(helper.getLevel());
 
-        ResourceLocation waterId = BuiltInRegistries.FLUID.getKey(Fluids.WATER);
+        Identifier waterId = BuiltInRegistries.FLUID.getKey(Fluids.WATER);
         long total = inventory.getAmount(waterId);
         helper.assertTrue(total == 550, "expected aggregated total of 550, found " + total);
         helper.succeed();

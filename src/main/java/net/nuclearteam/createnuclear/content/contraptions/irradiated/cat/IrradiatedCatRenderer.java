@@ -6,27 +6,27 @@ import com.mojang.math.MethodsReturnNonnullByDefault;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.nuclearteam.createnuclear.CreateNuclear;
 import net.nuclearteam.createnuclear.content.contraptions.irradiated.CNModelLayers;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+
 import java.util.List;
 
-@ParametersAreNonnullByDefault
+
 @MethodsReturnNonnullByDefault
 public class IrradiatedCatRenderer extends MobRenderer<IrradiatedCat, IrradiatedCatModel<IrradiatedCat>> {
-    private static final ResourceLocation IRRADIATED_CAT_LOCATION = CreateNuclear.asResource("textures/entity/irradiated_cat.png");
+    private static final Identifier IRRADIATED_CAT_LOCATION = CreateNuclear.asResource("textures/entity/irradiated_cat.png");
 
     public IrradiatedCatRenderer(EntityRendererProvider.Context context) {
         super(context, new IrradiatedCatModel<>(context.bakeLayer(CNModelLayers.IRRADIATED_CAT)), 0.4f);
     }
 
     @Override
-    public ResourceLocation getTextureLocation(IrradiatedCat entity) {
+    public Identifier getTextureLocation(IrradiatedCat entity) {
         return IRRADIATED_CAT_LOCATION;
     }
     protected void scale(IrradiatedCat livingEntity, PoseStack matrixStack, float partialTickTime) {

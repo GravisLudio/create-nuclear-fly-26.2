@@ -1,12 +1,12 @@
 package net.nuclearteam.createnuclear.content.explosion;
 
 import net.minecraft.core.Direction;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.joml.Vector3f;
 
 public class CNTabulaModelRenderUtils {
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     static class PositionTextureVertex {
         public final Vector3f position;
         public final float textureU;
@@ -27,7 +27,7 @@ public class CNTabulaModelRenderUtils {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     static class TexturedQuad {
         public final PositionTextureVertex[] vertexPositions;
         public final Vector3f normal;
@@ -58,7 +58,7 @@ public class CNTabulaModelRenderUtils {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static class ModelBox {
         public final TexturedQuad[] quads;
         public final float posX1;

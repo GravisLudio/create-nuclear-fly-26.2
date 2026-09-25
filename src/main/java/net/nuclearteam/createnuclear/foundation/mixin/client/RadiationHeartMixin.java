@@ -2,7 +2,7 @@ package net.nuclearteam.createnuclear.foundation.mixin.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.nuclearteam.createnuclear.CNEffects;
 import net.nuclearteam.createnuclear.CreateNuclear;
@@ -17,11 +17,11 @@ public class RadiationHeartMixin {
             method = "renderHeart",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/ResourceLocation;IIII)V"
+                    target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/Identifier;IIII)V"
             ),
             index = 0
     )
-    private ResourceLocation CN$changeHeartTexture(ResourceLocation originalTexture) {
+    private Identifier CN$changeHeartTexture(Identifier originalTexture) {
         Player player = Minecraft.getInstance().player;
 
         if (player != null && player.hasEffect(CNEffects.RADIATION)) {

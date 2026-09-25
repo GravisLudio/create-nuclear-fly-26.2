@@ -27,10 +27,10 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.joml.Vector3f;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+
 
 @MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
+
 @SuppressWarnings({"unused"})
 public class UraniumOreBlock extends Block {
     public static final BooleanProperty LIT = BlockStateProperties.LIT;

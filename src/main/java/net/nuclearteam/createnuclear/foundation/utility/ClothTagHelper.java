@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.foundation.utility;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.nuclearteam.createnuclear.CNDataComponents;
@@ -34,7 +34,7 @@ public final class ClothTagHelper {
         return color != null ? color : defaultColor;
     }
 
-    public static ResourceLocation getArmorTexturePath(ItemStack stack, String armorFileName) {
+    public static Identifier getArmorTexturePath(ItemStack stack, String armorFileName) {
         DyeColor color = getClothColor(stack, null);
         String prefix = color != null ? color.getSerializedName() : "default";
         String textureFile = prefix + "_" + armorFileName;

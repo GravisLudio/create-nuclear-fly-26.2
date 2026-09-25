@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+    "${mod_authors}",
+    "GravisLudio (Fabric 26.2 port)"
+  ],
+  "contributors": [
+    "ZurrTum (Create Fly)"
+  ],
+  "contact": {
+    "sources": "https://github.com/GravisLudio/create-nuclear-fly",
+    "original": "https://github.com/Create-Nuclear-Team/CreateNuclearNeoForge"
+  },
+  "license": "${mod_license}",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.nuclearteam.createnuclear.CreateNuclear"
+    ],
+    "client": [
+      "net.nuclearteam.createnuclear.CreateNuclearClient"
+    ],
+    "jei_mod_plugin": [
+      "net.nuclearteam.createnuclear.compat.jei.CreateNuclearJEI"
+    ]
+  },
+  "accessWidener": "createnuclear.classtweaker",
+  "mixins": [
+    "createnuclear.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": ">=26.2- <26.3-",
+    "java": ">=25",
+    "fabric-api": "*",
+    "create": "*"
+  }
+}

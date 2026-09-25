@@ -35,7 +35,7 @@ public class AntiRadiationArmorItem extends ArmorItem {
     public ItemAttributeModifiers getDefaultAttributeModifiers() {
         return super.getDefaultAttributeModifiers().withModifierAdded(
             CNAttributes.IRRADIATED_RESISTANCE,
-            // The id must be unique per slot: modifiers are keyed by ResourceLocation, so sharing one id
+            // The id must be unique per slot: modifiers are keyed by Identifier, so sharing one id
             // between the 4 pieces would make them overwrite each other instead of stacking to 1.0.
             new AttributeModifier(CreateNuclear.asResource("armor_resistance_irradiation_" + this.getType().getName()), RADIATION_VALUE, AttributeModifier.Operation.ADD_VALUE),
             EquipmentSlotGroup.bySlot(this.getType().getSlot())

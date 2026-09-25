@@ -1,11 +1,11 @@
 package net.nuclearteam.createnuclear.foundation.events;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
+import net.fabricmc.api.EnvType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
@@ -22,7 +22,7 @@ public class RodsTooltipHandler {
 
         if (player == null) return;
 
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
         // Mod items already get their rod tooltip via Registrate's setTooltipModifierFactory
         // (CreateNuclear.REGISTRATE). This handler only serves EXTERNAL items (other mods or
         // datapack-defined RodTypes resolved at runtime via RodType.resolveRodType), which

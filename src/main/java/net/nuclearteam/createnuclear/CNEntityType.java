@@ -33,7 +33,7 @@ public class CNEntityType {
 
     public static final EntityEntry<IrradiatedCat> IRRADIATED_CAT = CreateNuclear.REGISTRATE
         .entity("irradiated_cat", IrradiatedCat::new, MobCategory.CREATURE)
-        .loot((tb, e) -> tb.add(e, LootTable.lootTable()))
+        
         .tag(CNEntityTags.IRRADIATED_IMMUNE.tag)
         .properties(p -> p.sized(0.6f, 0.7f))
         .lang("Irradiated Cat")
@@ -43,7 +43,7 @@ public class CNEntityType {
 
     public static final EntityEntry<IrradiatedChicken> IRRADIATED_CHICKEN = CreateNuclear.REGISTRATE
         .entity("irradiated_chicken", IrradiatedChicken::new, MobCategory.CREATURE)
-        .loot((tb, e) -> tb.add(e, LootTable.lootTable()))
+        
         .tag(CNEntityTags.IRRADIATED_IMMUNE.tag)
         .properties(p -> p.sized(0.6f, 0.7f))
         .lang("Irradiated Chicken")
@@ -53,7 +53,7 @@ public class CNEntityType {
 
     public static final EntityEntry<IrradiatedWolf> IRRADIATED_WOLF = CreateNuclear.REGISTRATE
         .entity("irradiated_wolf", IrradiatedWolf::new, MobCategory.CREATURE)
-        .loot((tb, e) -> tb.add(e, LootTable.lootTable()))
+        
         .tag(CNEntityTags.IRRADIATED_IMMUNE.tag)
         .properties(p -> p.sized(0.6f, 0.85f).eyeHeight(0.68f))
         .lang("Irradiated Wolf")
@@ -63,7 +63,7 @@ public class CNEntityType {
 
     public static final EntityEntry<IrradiatedCow> IRRADIATED_COW = CreateNuclear.REGISTRATE
         .entity("irradiated_cow", IrradiatedCow::new, MobCategory.CREATURE)
-        .loot((tb, e) -> tb.add(e, LootTable.lootTable()))
+        
         .tag(CNEntityTags.IRRADIATED_IMMUNE.tag)
         .properties(p -> p.sized(0.6f, 0.85f))
         .lang("Irradiated Cow")

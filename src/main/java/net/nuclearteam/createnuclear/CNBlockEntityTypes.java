@@ -1,8 +1,8 @@
 package net.nuclearteam.createnuclear;
 
-import com.simibubi.create.AllPartialModels;
-import com.simibubi.create.content.kinetics.base.OrientedRotatingVisual;
-import com.tterrag.registrate.util.entry.BlockEntityEntry;
+import com.zurrtum.create.client.AllPartialModels;
+import com.zurrtum.create.client.content.kinetics.base.OrientedRotatingVisual;
+import net.nuclearteam.createnuclear.foundation.registrate.BlockEntityEntry;
 import net.nuclearteam.createnuclear.content.enriching.campfire.EnrichingCampfireBlockEntity;
 import net.nuclearteam.createnuclear.content.multiblock.alarm.ReactorAlarmEntity;
 import net.nuclearteam.createnuclear.content.multiblock.casing.ReactorCasingEntity;

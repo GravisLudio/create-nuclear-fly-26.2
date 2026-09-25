@@ -1,17 +1,17 @@
 package net.nuclearteam.createnuclear.foundation.ponder;
 
-import com.tterrag.registrate.util.entry.ItemProviderEntry;
+import net.nuclearteam.createnuclear.foundation.registrate.ItemProvider;
 import com.tterrag.registrate.util.entry.RegistryEntry;
-import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper;
-import net.minecraft.resources.ResourceLocation;
+import com.zurrtum.create.client.ponder.api.registration.PonderSceneRegistrationHelper;
+import net.minecraft.resources.Identifier;
 import net.nuclearteam.createnuclear.CNBlocks;
 import net.nuclearteam.createnuclear.CNItems;
 import net.nuclearteam.createnuclear.infrastructure.ponder.scenes.CNPonderReactorScenes;
 
 public class CNPonderIndex {
 
-    public static void register(PonderSceneRegistrationHelper<ResourceLocation> helper) {
-        PonderSceneRegistrationHelper<ItemProviderEntry<?, ?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
+    public static void register(PonderSceneRegistrationHelper<Identifier> helper) {
+        PonderSceneRegistrationHelper<ItemProvider> HELPER = helper.withKeyFunction(RegistryEntry::getId);
 
         // Reactor - Storyboards pour chaque taille
         HELPER.forComponents(CNBlocks.REACTOR_CONTROLLER)

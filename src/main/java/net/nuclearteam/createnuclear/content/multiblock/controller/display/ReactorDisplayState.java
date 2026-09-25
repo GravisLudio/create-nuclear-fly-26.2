@@ -5,7 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.nuclearteam.createnuclear.content.logistics.BigFluidStack;
 
@@ -117,7 +117,7 @@ public record ReactorDisplayState(Map<Item, Integer> items, List<BigFluidStack> 
             ListTag list = compound.getList(COMPONENT_CLIENT_DISPLAY_ITEMS, Tag.TAG_COMPOUND);
             for (int i = 0; i < list.size(); i++) {
                 CompoundTag tag = list.getCompound(i);
-                ResourceLocation id = ResourceLocation.tryParse(tag.getString(COMPONENT_ITEM));
+                Identifier id = Identifier.tryParse(tag.getString(COMPONENT_ITEM));
                 if (id == null) continue;
                 Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(null);
                 if (item != null) {

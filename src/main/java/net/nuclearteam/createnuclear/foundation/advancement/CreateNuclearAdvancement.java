@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear.foundation.advancement;
 
 import com.simibubi.create.foundation.advancement.CreateAdvancement;
-import com.tterrag.registrate.util.entry.ItemProviderEntry;
+import net.nuclearteam.createnuclear.foundation.registrate.ItemProvider;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementType;
@@ -9,7 +9,7 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
@@ -29,7 +29,7 @@ import java.util.function.UnaryOperator;
 @SuppressWarnings("unused")
 public class CreateNuclearAdvancement {
 
-    static final ResourceLocation BACKGROUND = CreateNuclear.asResource("textures/gui/advancements/backgrounds/background_advancement.png");
+    static final Identifier BACKGROUND = CreateNuclear.asResource("textures/gui/advancements/backgrounds/background_advancement.png");
     static final String LANG = "advancement." + CreateNuclear.MOD_ID + ".";
     static final String SECRET_SUFFIX = "\n\u00A77(Hidden Advancement)";
 
@@ -157,7 +157,7 @@ public class CreateNuclearAdvancement {
             return this;
         }
 
-        Builder icon(ItemProviderEntry<?, ?> item) {
+        Builder icon(ItemProvider item) {
             return icon(item.asStack());
         }
 
@@ -193,7 +193,7 @@ public class CreateNuclearAdvancement {
             return externalTrigger(InventoryChangeTrigger.TriggerInstance.hasItems(icon.getItem()));
         }
 
-        Builder whenItemCollected(ItemProviderEntry<?, ?> item) {
+        Builder whenItemCollected(ItemProvider item) {
             return whenItemCollected(item.asStack()
                     .getItem());
         }

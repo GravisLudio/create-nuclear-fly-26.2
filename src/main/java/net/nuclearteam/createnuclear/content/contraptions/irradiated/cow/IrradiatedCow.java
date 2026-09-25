@@ -23,7 +23,7 @@ import net.nuclearteam.createnuclear.CNEntityType;
 import net.nuclearteam.createnuclear.CNItems;
 import net.nuclearteam.createnuclear.content.contraptions.irradiated.AnimalUtil;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class IrradiatedCow extends Animal {
     public IrradiatedCow(EntityType<? extends IrradiatedCow> pEntityType, Level pLevel) {

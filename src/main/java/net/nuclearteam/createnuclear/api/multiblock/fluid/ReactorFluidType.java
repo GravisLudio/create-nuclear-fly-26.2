@@ -10,7 +10,7 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFixedCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -54,7 +54,7 @@ public record ReactorFluidType(Holder<Fluid> fluid, int maxHeat, int efficiency,
      *         {@code ReactorFluidType} if found, otherwise {@link Optional#empty()}
      */
     public static Optional<Reference<ReactorFluidType>> getTypeForFluid(RegistryAccess registryAccess, Fluid fluid) {
-        ResourceLocation fluidKey = BuiltInRegistries.FLUID.getKey(fluid);
+        Identifier fluidKey = BuiltInRegistries.FLUID.getKey(fluid);
         if (fluidKey == null) return Optional.empty();
 
         return registryAccess.lookupOrThrow(CreateNuclearRegistries.FLUID_TYPE)
@@ -185,7 +185,7 @@ public record ReactorFluidType(Holder<Fluid> fluid, int maxHeat, int efficiency,
         String fluidNames = this.fluid.unwrapKey()
             .map(k -> k.location().toString())
             .orElseGet(() -> {
-                ResourceLocation rl = BuiltInRegistries.FLUID.getKey(this.fluid.value());
+                Identifier rl = BuiltInRegistries.FLUID.getKey(this.fluid.value());
                 return rl != null ? rl.toString() : this.fluid.value().toString();
             });
 

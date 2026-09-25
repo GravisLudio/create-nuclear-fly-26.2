@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.function.Function;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 
 public abstract class CNBasicEntityModel<T extends Entity> extends EntityModel<T> {
@@ -16,7 +16,7 @@ public abstract class CNBasicEntityModel<T extends Entity> extends EntityModel<T
         this(RenderType::entityCutoutNoCull);
     }
 
-    protected CNBasicEntityModel(Function<ResourceLocation, RenderType> p_102613_) {
+    protected CNBasicEntityModel(Function<Identifier, RenderType> p_102613_) {
         super(p_102613_);
         this.textureWidth = 64;
         this.textureHeight = 32;

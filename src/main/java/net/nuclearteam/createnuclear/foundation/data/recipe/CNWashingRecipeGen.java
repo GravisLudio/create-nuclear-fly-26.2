@@ -1,10 +1,10 @@
 package net.nuclearteam.createnuclear.foundation.data.recipe;
 
-import com.simibubi.create.AllItems;
+import com.zurrtum.create.AllItems;
 import com.simibubi.create.api.data.recipe.WashingRecipeGen;
-import com.simibubi.create.content.kinetics.fan.processing.SplashingRecipe;
+import com.zurrtum.create.content.kinetics.fan.processing.SplashingRecipe;
 import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
-import com.tterrag.registrate.util.entry.ItemEntry;
+import net.nuclearteam.createnuclear.foundation.registrate.ItemEntry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.Item;

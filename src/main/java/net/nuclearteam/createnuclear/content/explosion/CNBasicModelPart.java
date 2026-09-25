@@ -8,14 +8,14 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class CNBasicModelPart {
     public float textureWidth;
     public float textureHeight;
@@ -202,7 +202,7 @@ public class CNBasicModelPart {
         return this.cubeList.size() > 0 ? (CNBasicModelPart.ModelBox)this.cubeList.get(randomIn.nextInt(this.cubeList.size())) : null;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static class ModelBox {
         private final CNBasicModelPart.TexturedQuad[] quads;
         public final float posX1;
@@ -261,7 +261,7 @@ public class CNBasicModelPart {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     static class PositionTextureVertex {
         public final Vector3f position;
         public final float textureU;
@@ -282,7 +282,7 @@ public class CNBasicModelPart {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     static class TexturedQuad {
         public final CNBasicModelPart.PositionTextureVertex[] vertexPositions;
         public final Vector3f normal;

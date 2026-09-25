@@ -2,18 +2,18 @@ package net.nuclearteam.createnuclear.compat.jei.category;
 
 import com.simibubi.create.compat.jei.category.ProcessingViaFanCategory;
 import com.simibubi.create.compat.jei.category.animations.AnimatedKinetics;
-import com.simibubi.create.foundation.gui.AllGuiTextures;
-import net.createmod.catnip.gui.element.GuiGameElement;
+import com.zurrtum.create.client.foundation.gui.AllGuiTextures;
+import com.zurrtum.create.client.catnip.gui.element.GuiGameElement;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
 import net.nuclearteam.createnuclear.content.kinetics.fan.processing.SnowPowderRecipe;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+
 
 @MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
+
 public class FanSnowPowderCategory extends ProcessingViaFanCategory.MultiOutput<SnowPowderRecipe> {
     public FanSnowPowderCategory(Info<SnowPowderRecipe> info) {
         super(info);

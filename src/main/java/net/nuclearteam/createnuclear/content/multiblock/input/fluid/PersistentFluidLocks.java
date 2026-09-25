@@ -5,7 +5,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -77,7 +77,7 @@ public class PersistentFluidLocks extends SavedData {
         list.forEach(tag -> {
             CompoundTag e = (CompoundTag) tag;
             BlockPos pos = new BlockPos(e.getInt("x"), e.getInt("y"), e.getInt("z"));
-            ResourceLocation rl = ResourceLocation.tryParse(e.getString("fluid"));
+            Identifier rl = Identifier.tryParse(e.getString("fluid"));
             if (rl != null) {
                 Fluid f = BuiltInRegistries.FLUID.get(rl);
                 if (f != null) locks.put(pos, f);
@@ -93,7 +93,7 @@ public class PersistentFluidLocks extends SavedData {
             e.putInt("x", pos.getX());
             e.putInt("y", pos.getY());
             e.putInt("z", pos.getZ());
-            ResourceLocation rl = BuiltInRegistries.FLUID.getKey(fluid);
+            Identifier rl = BuiltInRegistries.FLUID.getKey(fluid);
             if (rl != null) {
                 e.putString("fluid", rl.toString());
             }

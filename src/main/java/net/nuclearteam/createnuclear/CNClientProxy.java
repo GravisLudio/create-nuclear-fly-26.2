@@ -7,15 +7,15 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.resources.Identifier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.nuclearteam.createnuclear.infrastructure.config.CNConfigs;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class CNClientProxy {
 
-    public static final ResourceLocation BOMB_FLASH = CreateNuclear.asResource("textures/misc/bomb_flash.png");
+    public static final Identifier BOMB_FLASH = CreateNuclear.asResource("textures/misc/bomb_flash.png");
 
     public static int muteNonNukeSoundsFor = 0;
     public static int renderNukeFlashFor = 0;

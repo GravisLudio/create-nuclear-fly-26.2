@@ -6,10 +6,10 @@ import com.simibubi.create.AllTags;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
 import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
-import net.createmod.catnip.lang.Lang;
+import com.zurrtum.create.client.catnip.lang.Lang;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.crafting.*;
 import net.neoforged.bus.api.IEventBus;
@@ -35,7 +35,7 @@ public enum CNRecipeTypes implements IRecipeTypeInfo, StringRepresentable {
         .getPath()
         .endsWith("_manual_only");
 
-    public final ResourceLocation id;
+    public final Identifier id;
     public final Supplier<RecipeSerializer<?>> serializerSupplier;
     private final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<?>> serializerObject;
     @Nullable
@@ -83,7 +83,7 @@ public enum CNRecipeTypes implements IRecipeTypeInfo, StringRepresentable {
     }
 
     @Override
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 

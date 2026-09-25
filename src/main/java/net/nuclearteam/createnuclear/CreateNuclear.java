@@ -3,17 +3,17 @@ package net.nuclearteam.createnuclear;
 
 import com.mojang.logging.LogUtils;
 import com.simibubi.create.CreateBuildInfo;
-import com.simibubi.create.content.equipment.goggles.GogglesItem;
-import com.simibubi.create.foundation.data.CreateRegistrate;
-import com.simibubi.create.foundation.item.ItemDescription;
-import com.simibubi.create.foundation.item.KineticStats;
+import com.zurrtum.create.content.equipment.goggles.GogglesItem;
+import net.nuclearteam.createnuclear.foundation.registrate.CNRegistrate;
+import com.zurrtum.create.client.foundation.item.ItemDescription;
+import com.zurrtum.create.client.foundation.item.KineticStats;
 import net.nuclearteam.createnuclear.content.equipment.armor.AntiRadiationArmorItem;
 import net.nuclearteam.createnuclear.foundation.item.RodsStats;
-import com.simibubi.create.foundation.item.TooltipModifier;
-import net.createmod.catnip.lang.FontHelper;
+import com.zurrtum.create.client.foundation.item.TooltipModifier;
+import com.zurrtum.create.client.catnip.lang.FontHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.EventPriority;
@@ -46,11 +46,11 @@ public class CreateNuclear {
 
     /**
      * <b>Other mods should not use this field!</b> If you are an addon developer, create your own instance of
-     * {@link CreateRegistrate}.
+     * {@link CNRegistrate}.
      * </br
      * If you were using this instance to render a callback listener use {@link CreateRegistrateRegistrationCallback#register} instead.
      */
-    public static final CreateRegistrate REGISTRATE = CreateRegistrate.create(MOD_ID)
+    public static final CNRegistrate REGISTRATE = CNRegistrate.create(MOD_ID)
             .defaultCreativeTab((ResourceKey<CreativeModeTab>) null)
             .setTooltipModifierFactory(item ->
                     new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
@@ -130,8 +130,8 @@ public class CreateNuclear {
     }
 
 
-    public static ResourceLocation asResource(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier asResource(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
 }

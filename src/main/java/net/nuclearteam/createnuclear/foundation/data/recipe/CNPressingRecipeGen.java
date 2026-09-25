@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.foundation.data.recipe;
 
-import com.simibubi.create.AllRecipeTypes;
+import com.zurrtum.create.AllRecipeTypes;
 import com.simibubi.create.api.data.recipe.PressingRecipeGen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;

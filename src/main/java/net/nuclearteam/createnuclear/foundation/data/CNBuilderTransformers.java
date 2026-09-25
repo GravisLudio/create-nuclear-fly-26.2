@@ -2,9 +2,9 @@ package net.nuclearteam.createnuclear.foundation.data;
 
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateItemModelProvider;
-import com.tterrag.registrate.util.entry.ItemEntry;
+import net.nuclearteam.createnuclear.foundation.registrate.ItemEntry;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.DyeColor;
@@ -37,7 +37,7 @@ public class CNBuilderTransformers {
      */
     public static <T extends Item> NonNullBiConsumer<DataGenContext<Item, T>, RegistrateItemModelProvider> coloredArmorModel(String slot, String... textureKeys) {
         return (c, p) -> {
-            ResourceLocation baseParent = p.modLoc("item/" + c.getName() + "/item");
+            Identifier baseParent = p.modLoc("item/" + c.getName() + "/item");
             ItemModelBuilder outer = p.generated(c, CreateNuclear.asResource("item/armors/default_anti_radiation_" + slot));
             // DyeColor.values() is ordered by id (0..15); overrides must be ascending by predicate
             // value so vanilla override resolution selects the exact color (returns last match <= value).cloth
@@ -91,7 +91,7 @@ public class CNBuilderTransformers {
         return CreateNuclear.REGISTRATE
                 .item(name, p -> new DeferredSpawnEggItem(entity, backgroundColor, highlightColor, p))
                 .lang(nameItems)
-                .model((c, p) -> p.withExistingParent(c.getName(), ResourceLocation.parse("item/template_spawn_egg")))
+                .model((c, p) -> p.withExistingParent(c.getName(), Identifier.parse("item/template_spawn_egg")))
                 .register();
     }
 }

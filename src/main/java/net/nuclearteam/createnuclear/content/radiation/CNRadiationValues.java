@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.radiation;
 
-import com.simibubi.create.AllItems;
+import com.zurrtum.create.AllItems;
 import net.nuclearteam.createnuclear.api.radiation.RadiationRegistry;
 import net.nuclearteam.createnuclear.infrastructure.worldgen.biome.CNBiomes;
 

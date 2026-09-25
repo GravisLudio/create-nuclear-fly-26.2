@@ -3,7 +3,7 @@ package net.nuclearteam.createnuclear.content.multiblock.frame;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 import net.createmod.catnip.platform.CatnipServices;
-import net.createmod.catnip.render.FluidRenderHelper;
+import com.zurrtum.create.client.catnip.render.FluidRenderHelper;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.neoforged.neoforge.fluids.FluidStack;

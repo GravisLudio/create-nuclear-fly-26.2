@@ -1,20 +1,20 @@
 package net.nuclearteam.createnuclear.compat.jei;
 
 
-import com.simibubi.create.AllFluids;
-import com.simibubi.create.AllItems;
+import com.zurrtum.create.AllFluids;
+import com.zurrtum.create.AllItems;
 import com.simibubi.create.compat.jei.*;
 import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
 import com.simibubi.create.compat.jei.category.ProcessingViaFanCategory;
-import com.simibubi.create.content.equipment.blueprint.BlueprintScreen;
+import com.zurrtum.create.client.content.equipment.blueprint.BlueprintScreen;
 import com.simibubi.create.content.fluids.potion.PotionFluid;
-import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelSetItemScreen;
-import com.simibubi.create.content.logistics.filter.AbstractFilterScreen;
-import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterScreen;
-import com.simibubi.create.content.redstone.link.controller.LinkedControllerScreen;
-import com.simibubi.create.content.trains.schedule.ScheduleScreen;
-import com.simibubi.create.foundation.gui.menu.AbstractSimiContainerScreen;
-import com.simibubi.create.foundation.item.ItemHelper;
+import com.zurrtum.create.client.content.logistics.factoryBoard.FactoryPanelSetItemScreen;
+import com.zurrtum.create.client.content.logistics.filter.AbstractFilterScreen;
+import com.zurrtum.create.client.content.logistics.redstoneRequester.RedstoneRequesterScreen;
+import com.zurrtum.create.client.content.redstone.link.controller.LinkedControllerScreen;
+import com.zurrtum.create.client.content.trains.schedule.ScheduleScreen;
+import com.zurrtum.create.client.foundation.gui.menu.AbstractSimiContainerScreen;
+import com.zurrtum.create.foundation.item.ItemHelper;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
@@ -29,7 +29,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -48,18 +48,18 @@ import net.nuclearteam.createnuclear.compat.jei.category.FanSnowPowderCategory;
 import net.nuclearteam.createnuclear.content.kinetics.fan.processing.EnrichedRecipe;
 import net.nuclearteam.createnuclear.content.kinetics.fan.processing.SnowPowderRecipe;
 
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @JeiPlugin
 @SuppressWarnings("unused")
-@ParametersAreNonnullByDefault
+
 @MethodsReturnNonnullByDefault
 public class CreateNuclearJEI implements IModPlugin {
-    private static final ResourceLocation ID = CreateNuclear.asResource("jei_plugin");
+    private static final Identifier ID = CreateNuclear.asResource("jei_plugin");
 
     private final List<CreateRecipeCategory<?>> allCategories = new ArrayList<>();
     private IIngredientManager ingredientManager;
@@ -90,8 +90,8 @@ public class CreateNuclearJEI implements IModPlugin {
     }
 
     @Override
-    @Nonnull
-    public ResourceLocation getPluginUid() {
+    @NotNull
+    public Identifier getPluginUid() {
         return ID;
     }
 
@@ -180,7 +180,7 @@ public class CreateNuclearJEI implements IModPlugin {
         }
 
         @Override
-        public CreateRecipeCategory<T> build(ResourceLocation id, CreateRecipeCategory.Factory<T> factory) {
+        public CreateRecipeCategory<T> build(Identifier id, CreateRecipeCategory.Factory<T> factory) {
             CreateRecipeCategory<T> category = super.build(id, factory);
             allCategories.add(category);
             return category;

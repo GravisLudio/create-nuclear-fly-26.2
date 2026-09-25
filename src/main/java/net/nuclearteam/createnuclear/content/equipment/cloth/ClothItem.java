@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear.content.equipment.cloth;
 
 import com.mojang.serialization.Codec;
-import com.tterrag.registrate.util.entry.ItemEntry;
+import net.nuclearteam.createnuclear.foundation.registrate.ItemEntry;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,7 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.nuclearteam.createnuclear.CNItems;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.Map;
 
