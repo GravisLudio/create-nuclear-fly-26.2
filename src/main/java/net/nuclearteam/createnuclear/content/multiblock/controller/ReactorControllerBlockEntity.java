@@ -31,7 +31,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.nuclearteam.createnuclear.foundation.utility.NbtViews;
-import com.zurrtum.create.foundation.item.ItemHelper;
+import net.minecraft.world.Containers;
 
 import net.nuclearteam.createnuclear.CNDataComponents;
 import net.nuclearteam.createnuclear.CNSoundEvents;
@@ -331,7 +331,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
     public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
         super.preRemoveSideEffects(pos, oldState);
         if (level != null)
-            ItemHelper.dropContents(level, pos, inventory);
+            Containers.dropContents(level, pos, inventory);
     }
 
     public boolean isAssembled() {

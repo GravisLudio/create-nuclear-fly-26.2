@@ -1,12 +1,15 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.item;
 
-
+import com.zurrtum.create.infrastructure.items.ItemStackHandler;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.ItemStackHandler;
 import net.nuclearteam.createnuclear.api.multiblock.rods.RodType.TypeRodPredicate;
-import org.jetbrains.annotations.NotNull;
 
+/**
+ * The rod input's one slot. Create Fly's {@link ItemStackHandler} is a vanilla {@code Container}:
+ * NeoForge's {@code onContentsChanged(slot)} is {@link #setChanged()} and {@code isItemValid} is
+ * {@link #canPlaceItem}.
+ */
 public class ReactorRodInputInventory extends ItemStackHandler {
     private final ReactorRodInputEntity be;
 
@@ -16,17 +19,13 @@ public class ReactorRodInputInventory extends ItemStackHandler {
     }
 
     @Override
-    protected void onContentsChanged(int slot) {
-        super.onContentsChanged(slot);
+    public void setChanged() {
         be.setChanged();
     }
 
     @Override
-    public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+    public boolean canPlaceItem(int slot, ItemStack stack) {
         Level level = be.getLevel();
-        return switch (slot) {
-            case 0 -> level != null && (TypeRodPredicate.isFuel(stack, level) || TypeRodPredicate.isCooled(stack, level));
-            default -> !super.isItemValid(slot, stack);
-        };
+        return slot == 0 && level != null && (TypeRodPredicate.isFuel(stack, level) || TypeRodPredicate.isCooled(stack, level));
     }
 }

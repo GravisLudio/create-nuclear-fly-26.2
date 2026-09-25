@@ -1,15 +1,19 @@
 package net.nuclearteam.createnuclear.foundation.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.zurrtum.create.client.catnip.gui.UIRenderHelper;
-import com.zurrtum.create.client.catnip.gui.element.ScreenElement;
 import com.zurrtum.create.catnip.theme.Color;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.Identifier;
+import com.zurrtum.create.client.catnip.gui.element.ScreenElement;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.nuclearteam.createnuclear.CreateNuclear;
 
+/**
+ * GUI texture regions. 26.2's GUI draws through {@link GuiGraphicsExtractor} with an explicit
+ * pipeline and texture size, the way Create Fly's {@code AllGuiTextures} does; the tinted variant
+ * passes its colour to the same blit instead of binding a shader colour.
+ */
 public enum CNGuiTextures implements ScreenElement {
     //    REACTOR_CONTROLLER("toolbox", 188, 171),
     REACTOR_CONTROLLER("reactor-controller", 222, 207),
@@ -44,19 +48,14 @@ public enum CNGuiTextures implements ScreenElement {
         this.startY = startY;
     }
 
+    @Override
     @Environment(EnvType.CLIENT)
-    public void bind() {
-        RenderSystem.setShaderTexture(0, location);
+    public void render(GuiGraphicsExtractor graphics, int x, int y) {
+        graphics.blit(RenderPipelines.GUI_TEXTURED, location, x, y, startX, startY, width, height, 256, 256);
     }
 
     @Environment(EnvType.CLIENT)
-    public void render(GuiGraphics graphics, int x, int y) {
-        graphics.blit(location, x, y, startX, startY, width, height);
-    }
-
-    @Environment(EnvType.CLIENT)
-    public void render(GuiGraphics graphics, int x, int y, Color c) {
-        bind();
-        UIRenderHelper.drawColoredTexture(graphics, c, x, y, startX, startY, width, height);
+    public void render(GuiGraphicsExtractor graphics, int x, int y, Color c) {
+        graphics.blit(RenderPipelines.GUI_TEXTURED, location, x, y, startX, startY, width, height, 256, 256, c.getRGB());
     }
 }

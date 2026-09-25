@@ -34,7 +34,7 @@ public class ReactorFrameEntity extends SmartBlockEntity {
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) { }
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) { }
 
     /** Assigns the owning reactor controller and syncs the change to clients. */
     public void setController(@Nullable BlockPos controllerPos) {

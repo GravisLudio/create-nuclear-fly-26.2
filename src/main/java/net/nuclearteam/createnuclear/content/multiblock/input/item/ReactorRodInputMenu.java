@@ -1,32 +1,21 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.item;
 
 import com.zurrtum.create.foundation.gui.menu.MenuBase;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.items.SlotItemHandler;
 import net.nuclearteam.createnuclear.CNMenus;
 
+/**
+ * Create Fly's {@code MenuBase} takes the holder directly; the client-side reading of the block
+ * entity out of the open packet moved to {@link ReactorRodInputScreen#create}, the screen factory.
+ */
 public class ReactorRodInputMenu extends MenuBase<ReactorRodInputEntity> {
 
-
-    public ReactorRodInputMenu(MenuType<?> type, int id, Inventory inv, RegistryFriendlyByteBuf extraData) {
-        super(type, id, inv, extraData);
-    }
-
-    public ReactorRodInputMenu(MenuType<?> type, int id, Inventory inv, ReactorRodInputEntity contentHolder) {
-        super(type, id, inv, contentHolder);
-    }
-
-    public static ReactorRodInputMenu create(int id, Inventory inv, ReactorRodInputEntity contentHolder) {
-        return new ReactorRodInputMenu(CNMenus.SLOT_ITEM_STORAGE.get(), id, inv, contentHolder);
+    public ReactorRodInputMenu(int id, Inventory inv, ReactorRodInputEntity contentHolder) {
+        super(CNMenus.SLOT_ITEM_STORAGE, id, inv, contentHolder);
     }
 
     @Override
@@ -37,7 +26,7 @@ public class ReactorRodInputMenu extends MenuBase<ReactorRodInputEntity> {
             ItemStack stackInSlot = slot.getItem();
             result = stackInSlot.copy();
 
-            int playerInventorySize = player.getInventory().items.size(); // normally 36
+            int playerInventorySize = player.getInventory().getNonEquipmentItems().size(); // normally 36
             int containerStart = playerInventorySize;
             int containerEnd = containerStart + 1; // 1 machine slot
 
@@ -71,18 +60,6 @@ public class ReactorRodInputMenu extends MenuBase<ReactorRodInputEntity> {
 
 
     @Override
-    protected ReactorRodInputEntity createOnClient(RegistryFriendlyByteBuf extraData) {
-        ClientLevel world = Minecraft.getInstance().level;
-        BlockEntity blockEntity = world.getBlockEntity(extraData.readBlockPos());
-
-        if (blockEntity instanceof ReactorRodInputEntity reactorInput) {
-            reactorInput.readClient(extraData.readNbt(), extraData.registryAccess());
-            return reactorInput;
-        }
-        return null;
-    }
-
-    @Override
     protected void initAndReadInventory(ReactorRodInputEntity contentHolder) {
 
     }
@@ -100,7 +77,12 @@ public class ReactorRodInputMenu extends MenuBase<ReactorRodInputEntity> {
             }
         }
 
-        Slot slot1 = new SlotItemHandler(contentHolder.inventory, 0, 42, 29);
+        Slot slot1 = new Slot(contentHolder.inventory, 0, 42, 29) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return contentHolder.inventory.canPlaceItem(0, stack);
+            }
+        };
 
         addSlot(slot1);
     }
@@ -110,12 +92,12 @@ public class ReactorRodInputMenu extends MenuBase<ReactorRodInputEntity> {
     }
 
     @Override
-    public void clicked(int slotId, int button, ClickType clickType, Player player) {
-        if (clickType == ClickType.THROW) {
+    public void clicked(int slotId, int button, ContainerInput clickType, Player player) {
+        if (clickType == ContainerInput.THROW) {
             int[] targetSlotIds = {9, 18, 27, 0, 1, 28, 19, 10, 16, 17, 26, 25, 34, 35, 8, 7};
             for (int id : targetSlotIds) {
                 if (slotId == id) {
-                    clickType = ClickType.PICKUP;
+                    clickType = ContainerInput.PICKUP;
                     super.clicked(slotId, button, clickType, player);
                 }
             }

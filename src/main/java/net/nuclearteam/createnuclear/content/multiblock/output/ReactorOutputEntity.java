@@ -1,20 +1,14 @@
 package net.nuclearteam.createnuclear.content.multiblock.output;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.zurrtum.create.content.kinetics.base.GeneratingKineticBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
-import com.zurrtum.create.client.foundation.blockEntity.behaviour.ValueBoxTransform;
 import com.zurrtum.create.client.foundation.utility.CreateLang;
-import com.zurrtum.create.client.flywheel.lib.transform.TransformStack;
-import com.zurrtum.create.catnip.math.AngleHelper;
-import com.zurrtum.create.catnip.math.VecHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -37,7 +31,7 @@ public class ReactorOutputEntity extends GeneratingKineticBlockEntity {
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
         super.addBehaviours(behaviours);
 
     }
@@ -67,32 +61,34 @@ public class ReactorOutputEntity extends GeneratingKineticBlockEntity {
     private BlockPos outputPos;
 
     @Override
-    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(compound, registries, clientPacket);
+    protected void read(ValueInput view, boolean clientPacket) {
+        super.read(view, clientPacket);
 
         // Restore the generated rotation speed
-        generatedSpeed = compound.getFloatOr("generatedSpeed", 0f);
+        generatedSpeed = view.getFloatOr("generatedSpeed", 0f);
 
         // Restore the output position, if present in the tag
-        if (compound.contains("outputPos")) {
-            this.outputPos = BlockPos.of(compound.getLongOr("outputPos", 0L));
-        }
+        view.getLong("outputPos").ifPresent(pos -> this.outputPos = BlockPos.of(pos));
     }
 
     @Override
-    public void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(compound, registries, clientPacket);
+    public void write(ValueOutput view, boolean clientPacket) {
+        super.write(view, clientPacket);
 
         // Persist the generated rotation speed
-        compound.putFloat("generatedSpeed", generatedSpeed);
+        view.putFloat("generatedSpeed", generatedSpeed);
 
         // Persist the output position, if set
         if (this.outputPos != null) {
-            compound.putLong("outputPos", this.outputPos.asLong());
+            view.putLong("outputPos", this.outputPos.asLong());
         }
     }
 
-     @Override
+     /**
+      * Goggle tooltip body. 26.2 reads goggle tooltips off a client {@code TooltipBehaviour}, not
+      * off the block entity, so this is called from the one {@code client.CNBlockEntityBehaviours}
+      * registers for this type.
+      */
      public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
 
          float stressBase = calculateAddedStressCapacity();
@@ -134,39 +130,4 @@ public class ReactorOutputEntity extends GeneratingKineticBlockEntity {
         return Mth.clamp(generatedSpeed, 0, 1500000);
     }
 
-    static class ReactorOutputValue extends ValueBoxTransform.Sided {
-
-        @Override
-        protected Vec3 getSouthLocation() {
-            return VecHelper.voxelSpace(8, 8, 12.5);
-        }
-
-        @Override
-        public Vec3 getLocalOffset(LevelAccessor level, BlockPos pos, BlockState state) {
-            Direction facing = state.getValue(ReactorOutput.FACING);
-            return super.getLocalOffset(level, pos, state).add(Vec3.atLowerCornerOf(facing.getNormal())
-                    .scale(-1 / 16f));
-        }
-
-        @Override
-        public void rotate(LevelAccessor level, BlockPos pos, BlockState state, PoseStack ms) {
-            super.rotate(level, pos, state, ms);
-            Direction facing = state.getValue(ReactorOutput.FACING);
-            if (facing.getAxis() == Direction.Axis.Y)
-                return;
-            if (getSide() != Direction.UP)
-                return;
-            TransformStack.of(ms)
-                    .rotateZ(-AngleHelper.horizontalAngle(facing) + 180);
-        }
-
-        @Override
-        protected boolean isSideActive(BlockState state, Direction direction) {
-            Direction facing = state.getValue(ReactorOutput.FACING);
-            if (facing.getAxis() != Direction.Axis.Y && direction == Direction.DOWN)
-                return false;
-            return direction.getAxis() != facing.getAxis();
-        }
-
-    }
 }

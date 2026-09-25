@@ -91,7 +91,7 @@ public class ReactorAlarmEntity extends SmartBlockEntity {
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
         behaviours.add(advancement = new CNAdvancementBehaviour(this, CNAdvancement.SILENCE_THE_CORE));
     }
 

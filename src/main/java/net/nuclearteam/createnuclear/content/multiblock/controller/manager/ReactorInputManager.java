@@ -9,8 +9,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraft.world.Container;
 import net.nuclearteam.createnuclear.api.multiblock.rods.RodType.TypeRodPredicate;
 import net.nuclearteam.createnuclear.content.multiblock.input.item.ReactorRodInputEntity;
 import net.nuclearteam.createnuclear.content.multiblock.input.item.VirtualReactorInputsItem;
@@ -22,7 +21,7 @@ import java.util.List;
  * Manager for reactor input positions (`ReactorInput`).
  *
  * Serializes positions as x/y/z triplets and provides utilities to
- * obtain valid `IItemHandler` instances present at those positions.
+ * obtain valid `Container` instances present at those positions.
  */
 public class ReactorInputManager extends AbstractReactorIOManager implements ReactorInputManagerI {
     private static final String NBT_KEY = "ReactorInput";
@@ -52,19 +51,17 @@ public class ReactorInputManager extends AbstractReactorIOManager implements Rea
     }
 
     /**
-     * Retrieves all `IItemHandler` instances located at the input positions.
+     * Retrieves all `Container` instances located at the input positions.
      * Returns an empty list when no handlers are found.
      */
     @Override
-    public List<IItemHandler> getItemHandlers(Level level) {
-        List<IItemHandler> handlers = new ArrayList<>();
+    public List<Container> getItemHandlers(Level level) {
+        List<Container> handlers = new ArrayList<>();
         for (BlockPos p: new ArrayList<>(positions)) {
             if (level == null || !level.isLoaded(p)) continue;
-            BlockEntity be = level.getBlockEntity(p);
-            if (be == null) continue;
-            IItemHandler cap = level.getCapability(Capabilities.ItemHandler.BLOCK, p, null);
-            if (cap != null) {
-                handlers.add(cap);
+            // Was the item handler capability; Create Fly has none, the input's inventory is read directly.
+            if (level.getBlockEntity(p) instanceof ReactorRodInputEntity input) {
+                handlers.add(input.inventory);
             }
         }
 
@@ -73,15 +70,15 @@ public class ReactorInputManager extends AbstractReactorIOManager implements Rea
 
     @Override
     public VirtualReactorInputsItem getInventory(Level level) {
-        List<IItemHandler> handlers = this.getItemHandlers(level);
+        List<Container> handlers = this.getItemHandlers(level);
         if (handlers.isEmpty()) return new VirtualReactorInputsItem();
 
         int totalFuel = 0;
         int totalCooler = 0;
-        for (IItemHandler h : handlers) {
-            int slots = h.getSlots();
+        for (Container h : handlers) {
+            int slots = h.getContainerSize();
             for (int s = 0; s < slots; s++) {
-                ItemStack st = h.getStackInSlot(s);
+                ItemStack st = h.getItem(s);
 
                 if (TypeRodPredicate.isFuel(st, level)) totalFuel += st.getCount();
                 else if (TypeRodPredicate.isCooled(st, level)) totalCooler += st.getCount();
@@ -94,26 +91,26 @@ public class ReactorInputManager extends AbstractReactorIOManager implements Rea
     @Override
     public boolean extractItems(Level level, int fuelNeeded, int coolerNeeded) {
         if (level == null) return false;
-        List<IItemHandler> handlers = getItemHandlers(level);
+        List<Container> handlers = getItemHandlers(level);
         if (handlers.isEmpty()) return false;
 
         int fuelRemaining = fuelNeeded;
         int coolerRemaining = coolerNeeded;
 
-        for (IItemHandler handler : handlers) {
-            int slots = handler.getSlots();
+        for (Container handler : handlers) {
+            int slots = handler.getContainerSize();
             for (int s = 0; s < slots && (fuelRemaining > 0 || coolerRemaining > 0); s++) {
-                ItemStack stack = handler.getStackInSlot(s);
+                ItemStack stack = handler.getItem(s);
                 if (stack.isEmpty()) continue;
 
 
                 if (fuelRemaining > 0 && TypeRodPredicate.isFuel(stack, level)) {
                     int toExtract = Math.min(fuelRemaining, stack.getCount());
-                    handler.extractItem(s, toExtract, false);
+                    handler.removeItem(s, toExtract);
                     fuelRemaining -= toExtract;
                 } else if (coolerRemaining > 0 && TypeRodPredicate.isCooled(stack, level)) {
                     int toExtract = Math.min(coolerRemaining, stack.getCount());
-                    handler.extractItem(s, toExtract, false);
+                    handler.removeItem(s, toExtract);
                     coolerRemaining -= toExtract;
                 }
             }
@@ -126,13 +123,13 @@ public class ReactorInputManager extends AbstractReactorIOManager implements Rea
     public boolean extractItemByName(Level level, String itemName) {
         if (level == null || itemName == null) return false;
 
-        List<IItemHandler> handlers = getItemHandlers(level);
+        List<Container> handlers = getItemHandlers(level);
         if (handlers.isEmpty()) return false;
 
-        for (IItemHandler handler : handlers) {
-            int slots = handler.getSlots();
+        for (Container handler : handlers) {
+            int slots = handler.getContainerSize();
             for (int s = 0; s < slots; s++) {
-                ItemStack stack = handler.getStackInSlot(s);
+                ItemStack stack = handler.getItem(s);
                 if (stack.isEmpty()) continue;
 
                 // On récupère le nom de l'item (ex: "uranium_rod")
@@ -141,7 +138,7 @@ public class ReactorInputManager extends AbstractReactorIOManager implements Rea
                 // Comparaison intelligente : on ignore la casse et les underscores (_)
                 if (isMatching(registryPath, itemName)) {
                     // On tente d'extraire 1 unité
-                    ItemStack extracted = handler.extractItem(s, 1, false);
+                    ItemStack extracted = handler.removeItem(s, 1);
 
                     // Si l'extraction a réussi, on s'arrête là et on renvoie true
                     if (!extracted.isEmpty()) {

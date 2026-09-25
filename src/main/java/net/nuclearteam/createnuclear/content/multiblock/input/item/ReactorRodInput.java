@@ -1,5 +1,10 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.item;
 
+import com.zurrtum.create.infrastructure.items.ItemInventoryProvider;
+import net.minecraft.core.Direction;
+import net.minecraft.world.Container;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.server.level.ServerLevel;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
@@ -37,7 +42,14 @@ import org.jetbrains.annotations.Nullable;
 
 
 
-public class ReactorRodInput extends MultiDirectionalReactorBlock implements IWrenchable, IBE<ReactorRodInputEntity> {
+public class ReactorRodInput extends MultiDirectionalReactorBlock implements IWrenchable, IBE<ReactorRodInputEntity>, ItemInventoryProvider<ReactorRodInputEntity> {
+
+    /** Was the block entity's item handler capability; hoppers, funnels and chutes ask this. */
+    @Override
+    public Container getInventory(LevelAccessor world, BlockPos pos, BlockState state, ReactorRodInputEntity blockEntity, Direction context) {
+        return blockEntity.inventory;
+    }
+
 
     public ReactorRodInput(Properties properties) {
         super(properties);
@@ -60,7 +72,7 @@ public class ReactorRodInput extends MultiDirectionalReactorBlock implements IWr
 
         if (level.isClientSide()) {return InteractionResult.SUCCESS;}
 
-        withBlockEntityDo(level, pos, be -> player.openMenu(be, be::sendToMenu));
+        withBlockEntityDo(level, pos, be -> be.openHandledScreen((ServerPlayer) player));
         return InteractionResult.SUCCESS;
     }
 

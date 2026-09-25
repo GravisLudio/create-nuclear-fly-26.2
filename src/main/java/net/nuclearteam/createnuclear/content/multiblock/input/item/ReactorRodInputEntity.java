@@ -1,70 +1,69 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.item;
 
-import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.foundation.gui.menu.MenuBase;
+import com.zurrtum.create.foundation.gui.menu.MenuProvider;
+import net.minecraft.world.Containers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.nuclearteam.createnuclear.CNBlockEntityTypes;
-
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
+/**
+ * Holds the reactor's rods. Upstream registered the inventory as a NeoForge item handler
+ * capability; the block now exposes it through {@code ItemInventoryProvider}. The menu goes through
+ * Create Fly's {@link MenuProvider}, which writes this block entity into the open packet with
+ * {@link #sendToMenu} as upstream did through {@code player.openMenu(be, be::sendToMenu)}.
+ */
 public class ReactorRodInputEntity extends SmartBlockEntity implements MenuProvider {
     protected BlockPos block;
 
     public ReactorRodInputInventory inventory;
-
 
     public ReactorRodInputEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         inventory = new ReactorRodInputInventory(this);
     }
 
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                CNBlockEntityTypes.REACTOR_INPUT.get(),
-                (be, context) -> be.inventory
-        );
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) { }
-
-    @Override
-    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+    protected void read(ValueInput view, boolean clientPacket) {
         if (!clientPacket) {
-            inventory.deserializeNBT(registries, tag.getCompoundOrEmpty("Inventory"));
+            inventory.read(view.childOrEmpty("Inventory"));
         }
-        super.read(tag, registries, clientPacket);
+        super.read(view, clientPacket);
     }
 
     @Override
-    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
+    protected void write(ValueOutput view, boolean clientPacket) {
         if (!clientPacket) {
-            tag.put("Inventory", inventory.serializeNBT(registries));
+            inventory.write(view.child("Inventory"));
         }
-        super.write(tag, registries, clientPacket);
+        super.write(view, clientPacket);
     }
 
-
-    @Nullable
+    /**
+     * Drops the rods. Upstream did this in {@code ReactorRodInput.onRemove}, which 26.2 only calls
+     * after the block entity has been removed.
+     */
     @Override
-    public Level getLevel() {
-        return super.getLevel();
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        if (level != null)
+            Containers.dropContents(level, pos, inventory);
     }
-
 
     @Override
     public Component getDisplayName() {
@@ -73,24 +72,8 @@ public class ReactorRodInputEntity extends SmartBlockEntity implements MenuProvi
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-        return ReactorRodInputMenu.create(i, inventory, this);
+    public MenuBase<?> createMenu(int id, Inventory inventory, Player player, RegistryFriendlyByteBuf extraData) {
+        sendToMenu(extraData);
+        return new ReactorRodInputMenu(id, inventory, this);
     }
-
-    @Override
-    public void tick() {
-        super.tick();
-    }
-
-
-    /*protected boolean isItemHandlerCap(Capability<?> cap) {
-        return cap == ForgeCapabilities.ITEM_HANDLER;
-    }*/
-
-    /*@Override
-    public <T> ResetableLazy<T> getCapability(Capability<T> cap, Direction side) {
-        if (isItemHandlerCap(cap))
-            return inventoryProvider.cast();
-        return super.getCapability(cap, side);
-    }*/
 }
