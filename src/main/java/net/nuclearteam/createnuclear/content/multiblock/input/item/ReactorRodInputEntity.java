@@ -45,7 +45,7 @@ public class ReactorRodInputEntity extends SmartBlockEntity implements MenuProvi
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         if (!clientPacket) {
-            inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
+            inventory.deserializeNBT(registries, tag.getCompoundOrEmpty("Inventory"));
         }
         super.read(tag, registries, clientPacket);
     }

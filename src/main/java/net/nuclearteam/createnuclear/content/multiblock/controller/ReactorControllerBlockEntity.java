@@ -7,7 +7,6 @@ import com.zurrtum.create.foundation.utility.IInteractionChecker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
 import lib.multiblock.SimpleMultiBlockAislePatternBuilder;
-import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,7 +27,11 @@ import net.minecraft.world.level.material.Fluid;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import com.zurrtum.create.infrastructure.fluids.FluidStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraft.world.Container;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.nuclearteam.createnuclear.foundation.utility.NbtViews;
+import com.zurrtum.create.foundation.item.ItemHelper;
 
 import net.nuclearteam.createnuclear.CNDataComponents;
 import net.nuclearteam.createnuclear.CNSoundEvents;
@@ -141,7 +144,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
     /**
      * Current heat stored on the blueprint stack.
      * <p>
-     * Replaces the Forge {@code getConfiguredPatternTag().getDouble("heat")}: the value now
+     * Replaces the Forge {@code getConfiguredPatternTag().getDoubleOr("heat", 0d)}: the value now
      * lives in the {@link CNDataComponents#HEAT} data component, because reading the stack's
      * NBT tag back on NeoForge yields a defensive copy.
      */
@@ -257,7 +260,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
         behaviours.add(advancement = new CNAdvancementBehaviour(this, CNAdvancement.T1_REACTOR, CNAdvancement.T2_REACTOR, CNAdvancement.T3_REACTOR, CNAdvancement.NO_TIME_TO_DIE, CNAdvancement.SILENCE_THE_CORE));
         this.alarmCoordinator = new ReactorAlarmCoordinator(advancement);
     }
@@ -281,8 +284,11 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
     // (If read/write are not implemented, the items stored in this block entity's
     // inventory will be lost when the world is reloaded!)
     @Override
-    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(compound, registries, clientPacket); // Always call first to restore the base coordinates
+    protected void read(ValueInput view, boolean clientPacket) {
+        super.read(view, clientPacket); // Always call first to restore the base coordinates
+        // The managers and the persistence service speak CompoundTag; see NbtViews.
+        CompoundTag compound = NbtViews.readAll(view);
+        HolderLookup.Provider registries = view.lookup();
         // delegate managers and persistence
         this.inputManager.read(compound);
         this.outputManager.read(compound);
@@ -295,13 +301,15 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
 
         this.cycleManager.clear();
         if (compound.contains("cycleManager")) {
-            this.cycleManager.deserializeNBT(compound.getCompound("cycleManager"));
+            this.cycleManager.deserializeNBT(compound.getCompoundOrEmpty("cycleManager"));
         }
     }
 
     @Override
-    protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(compound, registries, clientPacket);
+    protected void write(ValueOutput view, boolean clientPacket) {
+        super.write(view, clientPacket);
+        CompoundTag compound = new CompoundTag();
+        HolderLookup.Provider registries = level != null ? level.registryAccess() : null;
         this.inputManager.write(compound);
         this.outputManager.write(compound);
         this.inputFluidManager.write(compound);
@@ -311,6 +319,19 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
         this.persistenceService.writeBasicState(this, compound, registries, clientPacket);
 
         compound.put("cycleManager", cycleManager.serializeNBT());
+        NbtViews.writeAll(view, compound);
+    }
+
+    /**
+     * Drops the blueprint. Upstream did this at the top of {@code ReactorControllerBlock.onRemove};
+     * 26.2 only calls the block's removal hook after the block entity is gone, and this is the
+     * last point the inventory still exists.
+     */
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState oldState) {
+        super.preRemoveSideEffects(pos, oldState);
+        if (level != null)
+            ItemHelper.dropContents(level, pos, inventory);
     }
 
     public boolean isAssembled() {
@@ -439,7 +460,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
     private void resolveEntitiesIfNeeded() {
         if (!needsToResolveEntities)
             return;
-        List<IItemHandler> handlers = inputManager.getItemHandlers(level);
+        List<? extends Container> handlers = inputManager.getItemHandlers(level);
         CreateNuclear.LOGGER.warn("Resolving inputs after load, handlers found: {}", handlers.size());
         needsToResolveEntities = false;
         this.setChanged();
@@ -567,12 +588,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
             return;
 
         boolean anyNonEmpty = getInputFluidManager().getFuildHandlers(level).stream()
-            .anyMatch(handler -> {
-                for (int t = 0; t < handler.getTanks(); t++)
-                    if (!handler.getFluidInTank(t).isEmpty())
-                        return true;
-                return false;
-            });
+            .anyMatch(handler -> !handler.isEmpty());
 
         if (!anyNonEmpty)
             clearLock();

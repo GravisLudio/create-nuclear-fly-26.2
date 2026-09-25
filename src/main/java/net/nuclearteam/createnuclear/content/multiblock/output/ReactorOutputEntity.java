@@ -71,11 +71,11 @@ public class ReactorOutputEntity extends GeneratingKineticBlockEntity {
         super.read(compound, registries, clientPacket);
 
         // Restore the generated rotation speed
-        generatedSpeed = compound.getFloat("generatedSpeed");
+        generatedSpeed = compound.getFloatOr("generatedSpeed", 0f);
 
         // Restore the output position, if present in the tag
         if (compound.contains("outputPos")) {
-            this.outputPos = BlockPos.of(compound.getLong("outputPos"));
+            this.outputPos = BlockPos.of(compound.getLongOr("outputPos", 0L));
         }
     }
 

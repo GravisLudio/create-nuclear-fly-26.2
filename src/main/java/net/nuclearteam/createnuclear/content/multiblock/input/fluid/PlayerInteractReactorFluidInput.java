@@ -20,9 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import com.zurrtum.create.infrastructure.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 public class PlayerInteractReactorFluidInput {
     public static InteractionResult interact(Level level, BlockPos pos, Player player, InteractionHand hand, ItemStack stack, boolean onClient, BlockHitResult ray) {
@@ -32,10 +30,11 @@ public class PlayerInteractReactorFluidInput {
             return InteractionResult.FAIL;
         }
 
-        IFluidHandler fluidInput = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, null);
-        if (fluidInput == null) return InteractionResult.PASS;
+        // Was the fluid handler capability; Create Fly reaches the same tank through
+        // ReactorFluidInput's FluidInventoryProvider, which FluidHelper uses below.
+        ReactorFluidInputEntity.InputTank fluidInput = be.getTank();
 
-        FluidStack prevFluidInInput = fluidInput.getFluidInTank(0).copy();
+        FluidStack prevFluidInInput = fluidInput.getFluid().copy();
 
         if (FluidHelper.tryEmptyItemIntoBE(level, player, hand, stack, be)) exchange = FluidExchange.ITEM_TO_TANK;
         if (FluidHelper.tryFillItemFromBE(level, player, hand, stack, be)) exchange = FluidExchange.TANK_TO_ITEM;
@@ -47,7 +46,7 @@ public class PlayerInteractReactorFluidInput {
 
         SoundEvent soundEvent = null;
         BlockState fluidState = null;
-        FluidStack fluidInInput = fluidInput.getFluidInTank(0);
+        FluidStack fluidInInput = fluidInput.getFluid();
 
         if (exchange == FluidExchange.ITEM_TO_TANK) {
             if (player.isCreative() && !onClient) {
@@ -86,13 +85,10 @@ public class PlayerInteractReactorFluidInput {
                 if (fluidState != null && onClient) {
                     BlockParticleOption blockParticleData =
                             new BlockParticleOption(ParticleTypes.BLOCK, fluidState);
-                    float flevel = (float) fluidInInput.getAmount() / fluidInput.getTankCapacity(0);
+                    float flevel = (float) fluidInInput.getAmount() / fluidInput.getMaxAmountPerStack();
 
-                    boolean reversed = fluidInInput.getFluid()
-                            .getFluidType()
-                            .isLighterThanAir();
-                    if (reversed)
-                        flevel = 1 - flevel;
+                    // Lighter-than-air fluids flipped the level here; Create Fly has no fluid-type API
+                    // to ask, and stubs the same branch out in its own tank.
 
                     Vec3 vec = ray.getLocation();
                     vec = new Vec3(vec.x, be.getBlockPos()

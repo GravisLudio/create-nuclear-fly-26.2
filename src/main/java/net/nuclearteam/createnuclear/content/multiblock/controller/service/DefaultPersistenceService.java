@@ -12,8 +12,8 @@ import net.nuclearteam.createnuclear.content.multiblock.controller.display.React
 public class DefaultPersistenceService implements IPersistenceService {
     @Override
     public void readBasicState(ReactorControllerBlockEntity owner, CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        owner.setMultiblockSize(compound.getInt("reactorSize"));
-        owner.setMultiblockFacing(Direction.byName(compound.getString("reactorFacing")));
+        owner.setMultiblockSize(compound.getIntOr("reactorSize", 0));
+        owner.setMultiblockFacing(Direction.byName(compound.getStringOr("reactorFacing", "")));
 
         owner.setMultiblockStructure(compound.contains("reactorPose")
             ? BoundingBox.CODEC.parse(NbtOps.INSTANCE, compound.get("reactorPose")).result().orElse(null)
@@ -21,14 +21,17 @@ public class DefaultPersistenceService implements IPersistenceService {
         );
 
         if (!clientPacket) {
-            owner.deserializeInventory(registries, compound.getCompound("pattern"));
+            owner.deserializeInventory(registries, compound.getCompoundOrEmpty("pattern"));
         } else {
             owner.setDisplayState(compound.contains("displayState")
-                    ? ReactorDisplayState.deserializeNBT(registries, compound.getCompound("displayState"))
+                    ? ReactorDisplayState.deserializeNBT(registries, compound.getCompoundOrEmpty("displayState"))
                     : ReactorDisplayState.EMPTY
             );
         }
-        owner.setConfiguredPattern(ItemStack.parse(registries, compound.getCompound("items")).orElse(ItemStack.EMPTY));
+        // ItemStack.parse/saveOptional are gone in 26.2; the optional codec is the route now.
+        owner.setConfiguredPattern(compound.get("items") == null ? ItemStack.EMPTY
+            : ItemStack.OPTIONAL_CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), compound.get("items"))
+                .result().orElse(ItemStack.EMPTY));
 
     }
 
@@ -40,12 +43,19 @@ public class DefaultPersistenceService implements IPersistenceService {
             compound.put("reactorPose", BoundingBox.CODEC.encodeStart(NbtOps.INSTANCE, owner.getMultiblockPos()).getOrThrow());
         }
 
+        // Stacks need registry access to encode; a write without a level (none observed, but
+        // SmartBlockEntity allows it) keeps the plain fields and skips them.
+        if (registries == null)
+            return;
+
         if (!clientPacket) {
             compound.put("pattern", owner.serializeInventory(registries));
         } else {
             compound.put("displayState", owner.getDisplayState().serializeNBT(registries));
         }
-        compound.put("items", owner.getConfiguredPattern().saveOptional(registries));
+        compound.put("items", ItemStack.OPTIONAL_CODEC
+            .encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), owner.getConfiguredPattern())
+            .getOrThrow());
 
     }
 }

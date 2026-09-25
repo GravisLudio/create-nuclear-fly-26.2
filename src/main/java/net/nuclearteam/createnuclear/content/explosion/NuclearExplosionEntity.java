@@ -226,7 +226,7 @@ public class NuclearExplosionEntity extends Entity {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compoundTag) {
-        loadingChunks = compoundTag.getBoolean("WasLoadingChunks");
+        loadingChunks = compoundTag.getBooleanOr("WasLoadingChunks", false);
     }
 
     @Override

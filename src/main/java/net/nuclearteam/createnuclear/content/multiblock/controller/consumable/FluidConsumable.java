@@ -42,8 +42,8 @@ public class FluidConsumable implements IConsumable {
 
     public static FluidConsumable deserializeNBT(CompoundTag tag) {
         return new FluidConsumable(
-                tag.getString("fluidName"),
-                tag.getInt("mbPerCycle"),
-                tag.getInt("baseTicks"));
+                tag.getStringOr("fluidName", ""),
+                tag.getIntOr("mbPerCycle", 0),
+                tag.getIntOr("baseTicks", 0));
     }
 }

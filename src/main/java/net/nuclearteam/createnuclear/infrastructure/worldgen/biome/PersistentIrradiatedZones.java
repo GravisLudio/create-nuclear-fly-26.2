@@ -1,31 +1,55 @@
 package net.nuclearteam.createnuclear.infrastructure.worldgen.biome;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.nuclearteam.createnuclear.CreateNuclear;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+/**
+ * Chunks turned into irradiated biome, so they can be restored later.
+ * <p>
+ * Codec-driven {@link SavedDataType} since 26.2; the layout is upstream's, a {@code chunks} list
+ * of {@code {x, z}}.
+ */
 public class PersistentIrradiatedZones extends SavedData {
-    private static final String DATA = String.join("_", CreateNuclear.MOD_ID, "irradiated", "zones");
+    private record Chunk(int x, int z) {
+        static final Codec<Chunk> CODEC = RecordCodecBuilder.create(i -> i.group(
+            Codec.INT.fieldOf("x").forGetter(Chunk::x),
+            Codec.INT.fieldOf("z").forGetter(Chunk::z)
+        ).apply(i, Chunk::new));
+    }
+
+    private static final Codec<PersistentIrradiatedZones> CODEC = RecordCodecBuilder.create(i -> i.group(
+        Chunk.CODEC.listOf().optionalFieldOf("chunks", List.of()).forGetter(PersistentIrradiatedZones::chunkList)
+    ).apply(i, PersistentIrradiatedZones::new));
+
+    private static final SavedDataType<PersistentIrradiatedZones> TYPE = new SavedDataType<>(
+        CreateNuclear.asResource("irradiated_zones"), PersistentIrradiatedZones::new, CODEC, null);
 
     private final Set<ChunkPos> chunks = new HashSet<>();
 
-    public static PersistentIrradiatedZones get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(factory(), DATA);
+    public PersistentIrradiatedZones() {
     }
 
-    private static SavedData.Factory<PersistentIrradiatedZones> factory() {
-        return new SavedData.Factory<>(PersistentIrradiatedZones::new, PersistentIrradiatedZones::load, DataFixTypes.LEVEL);
+    private PersistentIrradiatedZones(List<Chunk> list) {
+        for (Chunk chunk : list)
+            chunks.add(new ChunkPos(chunk.x(), chunk.z()));
+    }
+
+    private List<Chunk> chunkList() {
+        return chunks.stream().map(pos -> new Chunk(pos.x(), pos.z())).toList();
+    }
+
+    public static PersistentIrradiatedZones get(ServerLevel level) {
+        return level.getDataStorage().computeIfAbsent(TYPE);
     }
 
     public void addChunks(Iterable<ChunkPos> newChunks) {
@@ -47,35 +71,5 @@ public class PersistentIrradiatedZones extends SavedData {
 
     public void removeChunk(ChunkPos pos) {
         if (chunks.remove(pos)) setDirty();
-    }
-
-    public static PersistentIrradiatedZones load(CompoundTag nbt, HolderLookup.Provider registries) {
-        PersistentIrradiatedZones data = new PersistentIrradiatedZones();
-        data.readFrom(nbt);
-
-        return data;
-    }
-
-    public void readFrom(CompoundTag nbt) {
-        chunks.clear();
-        ListTag list = nbt.getList("chunks", Tag.TAG_COMPOUND);
-        list.forEach(tag -> {
-            CompoundTag e = (CompoundTag) tag;
-
-            chunks.add(new ChunkPos(e.getInt("x"), e.getInt("z")));
-        });
-    }
-
-    @Override
-    public @NotNull CompoundTag save(CompoundTag nbt, HolderLookup.@NotNull Provider registries) {
-        ListTag list = new ListTag();
-        chunks.forEach(pos -> {
-            CompoundTag e = new CompoundTag();
-            e.putInt("x", pos.x);
-            e.putInt("z", pos.z);
-            list.add(e);
-        });
-        nbt.put("chunks", list);
-        return nbt;
     }
 }

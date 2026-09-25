@@ -14,11 +14,11 @@ public interface IConsumable {
     CompoundTag serializeNBT();
 
     static IConsumable deserializeNBT(CompoundTag tag) {
-        return switch (tag.getString("type")) {
+        return switch (tag.getStringOr("type", "")) {
             case "item" -> ItemConsumable.deserializeNBT(tag);
             case "fluid" -> FluidConsumable.deserializeNBT(tag);
             default -> throw new IllegalArgumentException(
-                    "Unknown consumable type: " + tag.getString("type"));
+                    "Unknown consumable type: " + tag.getStringOr("type", ""));
         };
     }
 }

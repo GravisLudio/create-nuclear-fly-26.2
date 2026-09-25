@@ -36,7 +36,7 @@ import java.util.Map.Entry;
  *
  * // Reading the client packet:
  * displayState = compound.contains("displayState")
- *         ? ReactorDisplayState.deserializeNBT(registries, compound.getCompound("displayState"))
+ *         ? ReactorDisplayState.deserializeNBT(registries, compound.getCompoundOrEmpty("displayState"))
  *         : ReactorDisplayState.EMPTY;
  * }</pre>
  *
@@ -114,27 +114,27 @@ public record ReactorDisplayState(Map<Item, Integer> items, List<BigFluidStack> 
     public static ReactorDisplayState deserializeNBT(HolderLookup.Provider registries, CompoundTag compound) {
         Map<Item, Integer> items = new HashMap<>();
         if (compound.contains(COMPONENT_CLIENT_DISPLAY_ITEMS)) {
-            ListTag list = compound.getList(COMPONENT_CLIENT_DISPLAY_ITEMS, Tag.TAG_COMPOUND);
+            ListTag list = compound.getListOrEmpty(COMPONENT_CLIENT_DISPLAY_ITEMS);
             for (int i = 0; i < list.size(); i++) {
-                CompoundTag tag = list.getCompound(i);
-                Identifier id = Identifier.tryParse(tag.getString(COMPONENT_ITEM));
+                CompoundTag tag = list.getCompoundOrEmpty(i);
+                Identifier id = Identifier.tryParse(tag.getStringOr(COMPONENT_ITEM, ""));
                 if (id == null) continue;
                 Item item = BuiltInRegistries.ITEM.getOptional(id).orElse(null);
                 if (item != null) {
-                    items.put(item, tag.getInt(COMPONENT_COUNT));
+                    items.put(item, tag.getIntOr(COMPONENT_COUNT, 0));
                 }
             }
         }
 
         List<BigFluidStack> fluids = new ArrayList<>();
         if (compound.contains(COMPONENT_CLIENT_DISPLAY_FLUIDS)) {
-            ListTag list = compound.getList(COMPONENT_CLIENT_DISPLAY_FLUIDS, Tag.TAG_COMPOUND);
+            ListTag list = compound.getListOrEmpty(COMPONENT_CLIENT_DISPLAY_FLUIDS);
             for (int i = 0; i < list.size(); i++) {
-                fluids.add(BigFluidStack.read(registries, list.getCompound(i)));
+                fluids.add(BigFluidStack.read(registries, list.getCompoundOrEmpty(i)));
             }
         }
 
-        long maxFluidCapacity = compound.getLong(COMPONENT_CLIENT_MAX_FLUIDS_CAPACITY);
+        long maxFluidCapacity = compound.getLongOr(COMPONENT_CLIENT_MAX_FLUIDS_CAPACITY, 0L);
 
         return new ReactorDisplayState(items, fluids, maxFluidCapacity);
     }

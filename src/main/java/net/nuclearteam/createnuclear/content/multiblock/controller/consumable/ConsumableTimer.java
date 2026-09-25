@@ -53,10 +53,10 @@ public class ConsumableTimer {
     }
 
     public static ConsumableTimer deserializeNBT(CompoundTag tag) {
-        IConsumable consumable = IConsumable.deserializeNBT(tag.getCompound("consumable"));
+        IConsumable consumable = IConsumable.deserializeNBT(tag.getCompoundOrEmpty("consumable"));
         ConsumableTimer t = new ConsumableTimer(
-                consumable, tag.getInt("maxTicks"), tag.getInt("countInPattern"));
-        t.remainingTicks = tag.getInt("remainingTicks");
+                consumable, tag.getIntOr("maxTicks", 0), tag.getIntOr("countInPattern", 0));
+        t.remainingTicks = tag.getIntOr("remainingTicks", 0);
         return t;
     }
 }

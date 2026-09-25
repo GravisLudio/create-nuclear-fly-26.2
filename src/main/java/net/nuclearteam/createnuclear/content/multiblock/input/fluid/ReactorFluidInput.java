@@ -32,8 +32,17 @@ import net.nuclearteam.createnuclear.foundation.block.MultiDirectionalReactorBlo
 import org.jetbrains.annotations.NotNull;
 
 import org.jetbrains.annotations.Nullable;
+import com.zurrtum.create.infrastructure.fluids.FluidInventory;
+import com.zurrtum.create.infrastructure.fluids.FluidInventoryProvider;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.LevelAccessor;
 
-public class ReactorFluidInput extends MultiDirectionalReactorBlock implements IWrenchable, IBE<ReactorFluidInputEntity> {
+/**
+ * The fluid input block. Upstream registered the block entity's tank as a NeoForge fluid handler
+ * capability; Create Fly finds block inventories through {@link FluidInventoryProvider} on the
+ * block instead, which is what pipes, spouts and {@code FluidHelper} ask.
+ */
+public class ReactorFluidInput extends MultiDirectionalReactorBlock implements IWrenchable, IBE<ReactorFluidInputEntity>, FluidInventoryProvider<ReactorFluidInputEntity> {
 
 	public ReactorFluidInput(Properties properties) {
 		super(properties);
@@ -103,6 +112,11 @@ public class ReactorFluidInput extends MultiDirectionalReactorBlock implements I
 	public void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean isMoving) {
 		super.affectNeighborsAfterRemoval(state, world, pos, isMoving);
 		MultiblockHelpers.handleRemoval(pos, world, ReactorControllerBlockEntity::removeInputFluid);
+	}
+
+	@Override
+	public FluidInventory getFluidInventory(LevelAccessor world, BlockPos pos, BlockState state, ReactorFluidInputEntity blockEntity, Direction context) {
+		return blockEntity.getTank();
 	}
 
 	@Override

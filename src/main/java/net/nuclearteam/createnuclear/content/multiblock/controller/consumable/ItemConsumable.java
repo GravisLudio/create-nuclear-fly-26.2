@@ -39,7 +39,7 @@ public class ItemConsumable implements IConsumable {
     }
 
     public static ItemConsumable deserializeNBT(CompoundTag tag) {
-        String itemName = tag.getString("itemName");
+        String itemName = tag.getStringOr("itemName", "");
         return new ItemConsumable(itemName, null);
     }
 }

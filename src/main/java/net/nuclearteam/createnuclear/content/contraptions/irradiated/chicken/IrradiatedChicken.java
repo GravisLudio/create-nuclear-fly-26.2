@@ -141,13 +141,13 @@ public class IrradiatedChicken extends Animal implements IrradiatedAnimal {
 
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
-        this.isChickenJockey = compound.getBoolean("IsChickenJockey");
+        this.isChickenJockey = compound.getBooleanOr("IsChickenJockey", false);
         if (compound.contains("EggLayTime")) {
-            this.eggTime = compound.getInt("EggLayTime");
+            this.eggTime = compound.getIntOr("EggLayTime", 0);
         }
 
-        if (compound.contains("ConversionTime", Tag.TAG_ANY_NUMERIC) && compound.getInt("ConversionTime") > -1) {
-            this.startConverting(compound.getInt("ConversionTime"));
+        if (compound.contains("ConversionTime", Tag.TAG_ANY_NUMERIC) && compound.getIntOr("ConversionTime", 0) > -1) {
+            this.startConverting(compound.getIntOr("ConversionTime", 0));
         }
     }
 

@@ -3,7 +3,7 @@ package net.nuclearteam.createnuclear.content.multiblock.controller.manager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import com.zurrtum.create.infrastructure.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.nuclearteam.createnuclear.content.multiblock.input.fluid.ReactorFluidInputEntity;
 import org.jetbrains.annotations.Nullable;
 
 public class ReactorFrameDisplayManager implements ReactorFrameDisplayManagerI {
@@ -45,15 +45,13 @@ public class ReactorFrameDisplayManager implements ReactorFrameDisplayManagerI {
         long amount = 0, capacity = 0;
         FluidStack fluid = FluidStack.EMPTY;
 
-        for (IFluidHandler handler : handlers.getFuildHandlers(level)) {
-            int tanks = handler.getTanks();
-            for (int t = 0; t < tanks; t++) {
-                FluidStack stack = handler.getFluidInTank(t);
-                capacity += handler.getTankCapacity(t);
-                amount += stack.getAmount();
+        // Both sums are in droplets; only their ratio is used.
+        for (ReactorFluidInputEntity.InputTank handler : handlers.getFuildHandlers(level)) {
+            FluidStack stack = handler.getFluid();
+            capacity += handler.getMaxAmountPerStack();
+            amount += stack.getAmount();
 
-                if (fluid.isEmpty() && !stack.isEmpty()) fluid = stack.copy();
-            }
+            if (fluid.isEmpty() && !stack.isEmpty()) fluid = stack.copy();
         }
 
         frameFluidCache = fluid;
@@ -117,11 +115,11 @@ public class ReactorFrameDisplayManager implements ReactorFrameDisplayManagerI {
     @Override
     public void read(CompoundTag compound) {
         if (compound.contains(COMPONENT_FRAME_COLUMN_MIN_Y)) {
-            frameColumnMinY = compound.getInt(COMPONENT_FRAME_COLUMN_MIN_Y);
+            frameColumnMinY = compound.getIntOr(COMPONENT_FRAME_COLUMN_MIN_Y, 0);
         }
 
         if (compound.contains(COMPONENT_FRAME_COLUMN_MAX_Y)) {
-            frameColumnMaxY = compound.getInt(COMPONENT_FRAME_COLUMN_MAX_Y);
+            frameColumnMaxY = compound.getIntOr(COMPONENT_FRAME_COLUMN_MAX_Y, 0);
         }
     }
 

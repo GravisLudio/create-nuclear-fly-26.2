@@ -31,10 +31,10 @@ public class ReactorAlarmManager extends AbstractReactorIOManager implements Rea
     public void read(CompoundTag compound) {
         positions.clear();
         if (!compound.contains(NBT_KEY)) return;
-        ListTag list = compound.getList(NBT_KEY, Tag.TAG_COMPOUND);
+        ListTag list = compound.getListOrEmpty(NBT_KEY);
         for (int i = 0; i < list.size(); ++i) {
-            CompoundTag tag = list.getCompound(i);
-            positions.add(new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z")));
+            CompoundTag tag = list.getCompoundOrEmpty(i);
+            positions.add(new BlockPos(tag.getIntOr("x", 0), tag.getIntOr("y", 0), tag.getIntOr("z", 0)));
         }
     }
 

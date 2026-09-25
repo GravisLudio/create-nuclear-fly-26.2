@@ -43,7 +43,7 @@ public final class BiomeIrradiationService {
                 ChunkAccess chunkAccess = serverLevel.getChunk(cx, cz, ChunkStatus.FULL, false);
                 if (chunkAccess != null) {
                     chunkAccess.fillBiomesFromNoise(resolver, serverLevel.getChunkSource().randomState().sampler());
-                    chunkAccess.setUnsaved(true);
+                    chunkAccess.markUnsaved();
                     chunks.add(chunkAccess);
                 }
             }
@@ -61,13 +61,13 @@ public final class BiomeIrradiationService {
         for (ChunkPos target : resolveRestoreTargets(centerChunk)) {
             if (!zones.containsChunk(target)) continue;
 
-            ChunkAccess chunkAccess = serverLevel.getChunk(target.x, target.z, ChunkStatus.FULL, false);
+            ChunkAccess chunkAccess = serverLevel.getChunk(target.x(), target.z(), ChunkStatus.FULL, false);
             if (chunkAccess == null) continue;
 
             BiomeResolver resolver = (x, y, z, sample) -> serverLevel.getChunkSource().getGenerator().getBiomeSource().getNoiseBiome(x, y, z, sample);
 
             chunkAccess.fillBiomesFromNoise(resolver, serverLevel.getChunkSource().randomState().sampler());
-            chunkAccess.setUnsaved(true);
+            chunkAccess.markUnsaved();
             restored.add(chunkAccess);
 
             zones.removeChunk(target);
@@ -90,7 +90,7 @@ public final class BiomeIrradiationService {
         for (int dz = -radius; dz <= radius; dz++) {
             for (int dx = -radius; dx <= radius; dx++) {
                 if (dx * dx + dz * dz <= radius * radius) {
-                    targets.add(new ChunkPos(center.x + dx, center.z + dz));
+                    targets.add(new ChunkPos(center.x() + dx, center.z() + dz));
                 }
             }
         }

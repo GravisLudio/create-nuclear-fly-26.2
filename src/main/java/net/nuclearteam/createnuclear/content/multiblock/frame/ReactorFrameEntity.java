@@ -72,7 +72,7 @@ public class ReactorFrameEntity extends SmartBlockEntity {
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
         if (tag.contains("Controller")) {
-            this.controller = BlockPos.of(tag.getLong("Controller"));
+            this.controller = BlockPos.of(tag.getLongOr("Controller", 0L));
         } else {
             this.controller = null;
         }

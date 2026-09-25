@@ -1,41 +1,63 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.fluid;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.SavedData;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.nuclearteam.createnuclear.CreateNuclear;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Persistent storage for fluid locks associated with multiblock controllers.
+ * Locks are persisted to world saved data so controllers keep their preferred
+ * fluid across server restarts.
+ * <p>
+ * 26.2 saved data is codec-driven ({@link SavedDataType}) instead of a factory reading and writing
+ * a {@code CompoundTag} by hand. The codec keeps upstream's layout -- a {@code locks} list of
+ * {@code {x, y, z, fluid}} -- so the fields line up with what upstream wrote.
+ */
 public class PersistentFluidLocks extends SavedData {
-    private final Map<BlockPos, Fluid> locks = new ConcurrentHashMap<>();
-    private static final String DATA_NAME = "createnuclear_fluid_locks";
+    private record Lock(int x, int y, int z, Fluid fluid) {
+        static final Codec<Lock> CODEC = RecordCodecBuilder.create(i -> i.group(
+            Codec.INT.fieldOf("x").forGetter(Lock::x),
+            Codec.INT.fieldOf("y").forGetter(Lock::y),
+            Codec.INT.fieldOf("z").forGetter(Lock::z),
+            BuiltInRegistries.FLUID.byNameCodec().fieldOf("fluid").forGetter(Lock::fluid)
+        ).apply(i, Lock::new));
+    }
 
-    /**
-     * Persistent storage for fluid locks associated with multiblock controllers.
-     * Locks are persisted to world saved data so controllers keep their preferred
-     * fluid across server restarts.
-     */
-    public static SavedData.Factory<PersistentFluidLocks> factory() {
-        return new SavedData.Factory<>(
-                PersistentFluidLocks::new,
-                (tag, registries) -> {
-                    PersistentFluidLocks d = new PersistentFluidLocks();
-                    d.readFrom(tag);
-                    return d;
-                }
-        );
+    private static final Codec<PersistentFluidLocks> CODEC = RecordCodecBuilder.create(i -> i.group(
+        Lock.CODEC.listOf().optionalFieldOf("locks", List.of()).forGetter(PersistentFluidLocks::lockList)
+    ).apply(i, PersistentFluidLocks::new));
+
+    private static final SavedDataType<PersistentFluidLocks> TYPE = new SavedDataType<>(
+        CreateNuclear.asResource("fluid_locks"), PersistentFluidLocks::new, CODEC, null);
+
+    private final Map<BlockPos, Fluid> locks = new ConcurrentHashMap<>();
+
+    public PersistentFluidLocks() {
+    }
+
+    private PersistentFluidLocks(List<Lock> list) {
+        for (Lock lock : list)
+            locks.put(new BlockPos(lock.x(), lock.y(), lock.z()), lock.fluid());
+    }
+
+    private List<Lock> lockList() {
+        return locks.entrySet().stream()
+            .map(e -> new Lock(e.getKey().getX(), e.getKey().getY(), e.getKey().getZ(), e.getValue()))
+            .toList();
     }
 
     public static PersistentFluidLocks get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(PersistentFluidLocks.factory(), DATA_NAME);
+        return level.getDataStorage().computeIfAbsent(TYPE);
     }
 
    /**
@@ -69,37 +91,5 @@ public class PersistentFluidLocks extends SavedData {
      */
     public void clearLock(BlockPos pos) {
         if (locks.remove(pos) != null) setDirty();
-    }
-
-    public void readFrom(CompoundTag nbt) {
-        locks.clear();
-        ListTag list = nbt.getList("locks", 10);
-        list.forEach(tag -> {
-            CompoundTag e = (CompoundTag) tag;
-            BlockPos pos = new BlockPos(e.getInt("x"), e.getInt("y"), e.getInt("z"));
-            Identifier rl = Identifier.tryParse(e.getString("fluid"));
-            if (rl != null) {
-                Fluid f = BuiltInRegistries.FLUID.get(rl);
-                if (f != null) locks.put(pos, f);
-            }
-        });
-    }
-
-    @Override
-    public @NotNull CompoundTag save(@NotNull CompoundTag nbt, @NotNull HolderLookup.Provider registries) {
-        ListTag list = new ListTag();
-        locks.forEach((pos, fluid) -> {
-            CompoundTag e = new CompoundTag();
-            e.putInt("x", pos.getX());
-            e.putInt("y", pos.getY());
-            e.putInt("z", pos.getZ());
-            Identifier rl = BuiltInRegistries.FLUID.getKey(fluid);
-            if (rl != null) {
-                e.putString("fluid", rl.toString());
-            }
-            list.add(e);
-        });
-        nbt.put("locks", list);
-        return nbt;
     }
 }

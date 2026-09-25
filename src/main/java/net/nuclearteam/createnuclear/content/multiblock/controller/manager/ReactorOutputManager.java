@@ -34,9 +34,9 @@ public class ReactorOutputManager extends AbstractReactorIOManager implements Re
     public void read(CompoundTag compound) {
         positions.clear();
         if (!compound.contains(NBT_KEY)) return;
-        ListTag list = compound.getList(NBT_KEY, 10);
+        ListTag list = compound.getListOrEmpty(NBT_KEY);
         for (int i = 0; i < list.size(); i++) {
-            BlockPos p = BlockPos.of(list.getCompound(i).getLong("p"));
+            BlockPos p = BlockPos.of(list.getCompoundOrEmpty(i).getLongOr("p", 0L));
             positions.add(p);
         }
     }

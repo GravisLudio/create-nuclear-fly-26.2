@@ -107,9 +107,9 @@ public class ConsumptionCycleManager {
 
     public void deserializeNBT(CompoundTag tag) {
         timers.clear();
-        tag.getList("timers", Tag.TAG_COMPOUND)
+        tag.getListOrEmpty("timers")
                 .forEach(t -> timers.add(ConsumableTimer.deserializeNBT((CompoundTag) t)));
-        CompoundTag snap = tag.getCompound("snapshot");
+        CompoundTag snap = tag.getCompoundOrEmpty("snapshot");
         snap.getAllKeys().forEach(k -> patternSnapshot.put(k, snap.getInt(k)));
     }
 
