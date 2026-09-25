@@ -27,7 +27,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.material.Fluid;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import net.nuclearteam.createnuclear.CNDataComponents;
@@ -335,7 +335,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
     }
 
     private void updateReactorStateVisibility() {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
 
         BlockState state = getBlockState();
         if (!(state.getBlock() instanceof ReactorControllerBlock)) return;
@@ -353,7 +353,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
     @Override
     public void tick() {
         super.tick();
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             tickRunningSound();
             return;
         }
@@ -563,7 +563,7 @@ public class ReactorControllerBlockEntity extends SmartBlockEntity
     }
 
     public void clearLockIfAllInputsEmpty() {
-        if (level == null || level.isClientSide)
+        if (level == null || level.isClientSide())
             return;
 
         boolean anyNonEmpty = getInputFluidManager().getFuildHandlers(level).stream()

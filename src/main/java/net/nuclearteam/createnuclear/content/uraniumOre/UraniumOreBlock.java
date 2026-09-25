@@ -1,7 +1,6 @@
 package net.nuclearteam.createnuclear.content.uraniumOre;
 
 import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -9,7 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -26,11 +25,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.joml.Vector3f;
-
-
-
-@MethodsReturnNonnullByDefault
-
 @SuppressWarnings({"unused"})
 public class UraniumOreBlock extends Block {
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
@@ -55,17 +49,17 @@ public class UraniumOreBlock extends Block {
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (level.isClientSide) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.isClientSide()) {
             spawnParticles(level, pos);
         } else {
             interact(state, level, pos);
         }
         ItemStack itemStack = player.getItemInHand(hand);
         if (itemStack.getItem() instanceof BlockItem && new BlockPlaceContext(player, hand, itemStack, hitResult).canPlace()) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     private static void interact(BlockState state, Level level, BlockPos pos) {
@@ -91,7 +85,7 @@ public class UraniumOreBlock extends Block {
     public void spawnAfterBreak(BlockState state, ServerLevel level, BlockPos pos, ItemStack stack, boolean dropExperience) {
         super.spawnAfterBreak(state, level, pos, stack, dropExperience);
        /* if (dropExperience && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, stack) == 0) {
-            int i = 1 + level.random.nextInt(5);
+            int i = 1 + level.getRandom().nextInt(5);
             this.popExperience(level, pos, i);
         }*/
     }
@@ -105,7 +99,7 @@ public class UraniumOreBlock extends Block {
 
     private static void spawnParticles(Level level, BlockPos pos) {
         double d = 0.5625;
-        RandomSource randomSource = level.random;
+        RandomSource randomSource = level.getRandom();
         for (Direction direction : Direction.values()) {
             BlockPos blockPos = pos.relative(direction);
             if (level.getBlockState(blockPos).isSolidRender(level, blockPos)) continue;

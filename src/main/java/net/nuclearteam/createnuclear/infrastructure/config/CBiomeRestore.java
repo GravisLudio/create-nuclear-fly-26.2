@@ -1,10 +1,7 @@
 package net.nuclearteam.createnuclear.infrastructure.config;
 
 import com.zurrtum.create.catnip.config.ConfigBase;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.nuclearteam.createnuclear.CNParticleTypes;
-
-@MethodsReturnNonnullByDefault
 public class CBiomeRestore extends ConfigBase {
     public final ConfigBool restoreInCircle = b(true, "restore_in_circle", Comments.restoreInCircle);
     public final ConfigInt restoreRadiusChunks = i(4, 0, 32, "restore_radius_chunks", Comments.restoreRadiusChunks);

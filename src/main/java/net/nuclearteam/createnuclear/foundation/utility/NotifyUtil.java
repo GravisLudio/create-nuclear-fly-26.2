@@ -46,7 +46,7 @@ public class NotifyUtil {
      * @param warnAll  If {@code true}, all online players receive the message regardless of position
      */
     public static void sendActionBar(Level level, BlockPos pos, MutableComponent message, ChatFormatting color, int radius, boolean warnAll) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
 
         // Build the text component in BOLD with the chosen color
         Component actionBarComp = message.withStyle(color, ChatFormatting.BOLD);
@@ -90,7 +90,7 @@ public class NotifyUtil {
     public static void sendTitle(Level level, BlockPos pos, MutableComponent title, MutableComponent subtitle, ChatFormatting color,
                                  int radius, boolean warnAll, int fadeIn, int stay, int fadeOut) {
 
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
 
         Component titleComp = title.withStyle(color, ChatFormatting.BOLD);
         Component subtitleComp = subtitle.withStyle(ChatFormatting.WHITE);

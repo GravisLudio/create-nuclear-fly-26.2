@@ -1,14 +1,13 @@
 package net.nuclearteam.createnuclear.content.multiblock.bluePrintItem;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
+
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -25,9 +24,6 @@ import org.jetbrains.annotations.Nullable;
 
 
 import java.util.List;
-
-
-@MethodsReturnNonnullByDefault
 public class ReactorBluePrintItem extends Item implements MenuProvider {
 
     public ReactorBluePrintItem(Properties properties) {
@@ -66,18 +62,18 @@ public class ReactorBluePrintItem extends Item implements MenuProvider {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+    public InteractionResult use(Level world, Player player, InteractionHand hand) {
         ItemStack heldItem = player.getItemInHand(hand);
 
         // Plain right-click -> Opens the Blueprint screen
         if (!player.isShiftKeyDown() && hand == InteractionHand.MAIN_HAND) {
-            if (!world.isClientSide && player instanceof ServerPlayer)
+            if (!world.isClientSide() && player instanceof ServerPlayer)
                 player.openMenu(this, buf -> ItemStack.STREAM_CODEC.encode(buf, heldItem));
-            return InteractionResultHolder.success(heldItem);
+            return InteractionResult.SUCCESS;
         }
         // Shift + right-click -> Sends a clickable link in chat!
         else if (player.isShiftKeyDown() && hand == InteractionHand.MAIN_HAND) {
-            if (!world.isClientSide) {
+            if (!world.isClientSide()) {
                 MutableComponent message = Component.translatable("item.createnuclear.reactor_blueprint.chat_info")
                     .withStyle(ChatFormatting.GREEN)
                     .append(" ")
@@ -90,9 +86,9 @@ public class ReactorBluePrintItem extends Item implements MenuProvider {
 
                 player.sendSystemMessage(message);
             }
-            return InteractionResultHolder.success(heldItem);
+            return InteractionResult.SUCCESS;
         }
-        return InteractionResultHolder.pass(heldItem);
+        return InteractionResult.PASS;
     }
 
     public static ItemStackHandler getItemStorage(ItemStack stack) {

@@ -2,7 +2,7 @@ package net.nuclearteam.createnuclear.content.multiblock.input.fluid;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

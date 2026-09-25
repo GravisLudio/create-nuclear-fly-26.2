@@ -14,7 +14,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.nuclearteam.createnuclear.api.CreateNuclearRegistries;
 import net.nuclearteam.createnuclear.api.ReactorFluidTypesValue;
 import net.nuclearteam.createnuclear.content.multiblock.fluid.CNReactorFluidTypes;
@@ -85,8 +85,8 @@ public record ReactorFluidType(Holder<Fluid> fluid, int maxHeat, int efficiency,
                 return fromFluid.isNotEmptyFluid()
                     ? fromFluid
                     : world.registryAccess()
-                        .registryOrThrow(CreateNuclearRegistries.FLUID_TYPE)
-                        .getHolderOrThrow(CreateNuclearRegistries.FALLBACK_FLUID)
+                        .lookupOrThrow(CreateNuclearRegistries.FLUID_TYPE)
+                        .getOrThrow(CreateNuclearRegistries.FALLBACK_FLUID)
                         .value();
             });
     }

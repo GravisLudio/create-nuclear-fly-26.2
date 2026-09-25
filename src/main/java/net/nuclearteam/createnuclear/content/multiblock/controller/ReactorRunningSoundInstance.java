@@ -21,7 +21,7 @@ public class ReactorRunningSoundInstance extends AbstractTickableSoundInstance {
     private final Level level;
 
     public ReactorRunningSoundInstance(Level level, BlockPos pos, SoundEvent sound) {
-        super(sound, SoundSource.BLOCKS, level != null ? level.random : null);
+        super(sound, SoundSource.BLOCKS, level != null ? level.getRandom() : null);
         this.level = level;
         this.pos = pos;
         if (pos != null) {

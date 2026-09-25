@@ -1,6 +1,5 @@
 package net.nuclearteam.createnuclear.content.equipment.armor;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -29,7 +28,6 @@ import java.util.function.UnaryOperator;
  * now part of the attribute component set on the properties.
  */
 @SuppressWarnings("unused")
-@MethodsReturnNonnullByDefault
 public class AntiRadiationArmorItem extends Item {
     public static final double RADIATION_VALUE = 0.25;
 

@@ -3,14 +3,11 @@ package net.nuclearteam.createnuclear.content.multiblock.controller.manager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.nuclearteam.createnuclear.CreateNuclear;
+import net.nuclearteam.createnuclear.content.fluids.FluidUnits;
 import net.nuclearteam.createnuclear.content.multiblock.input.fluid.ReactorFluidInputEntity;
 import net.nuclearteam.createnuclear.content.multiblock.input.fluid.VirtualReactorInputFluid;
 
@@ -34,10 +31,10 @@ public class ReactorInputFluidManager extends AbstractReactorIOManager implement
     public void read(CompoundTag compound) {
         positions.clear();
         if (!compound.contains(NBT_KEY)) return;
-        ListTag list = compound.getList(NBT_KEY, Tag.TAG_COMPOUND);
+        ListTag list = compound.getListOrEmpty(NBT_KEY);
         for (int i = 0; i < list.size(); ++i) {
-            CompoundTag tag = list.getCompound(i);
-            positions.add(new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z")));
+            CompoundTag tag = list.getCompoundOrEmpty(i);
+            positions.add(new BlockPos(tag.getIntOr("x", 0), tag.getIntOr("y", 0), tag.getIntOr("z", 0)));
         }
     }
 
@@ -75,8 +72,7 @@ public class ReactorInputFluidManager extends AbstractReactorIOManager implement
                 continue;
             }
 
-            IFluidHandler cap = level.getCapability(Capabilities.FluidHandler.BLOCK, p, null);
-            if (cap == null) toRemove.add(p);
+            if (!(be instanceof ReactorFluidInputEntity)) toRemove.add(p);
         }
 
         positions.removeAll(toRemove);
@@ -100,15 +96,12 @@ public class ReactorInputFluidManager extends AbstractReactorIOManager implement
     /**
      * Collect and return fluid handler capabilities for all tracked positions.
      */
-    public List<IFluidHandler> getFuildHandlers(Level level) {
-        List<IFluidHandler> handlers = new ArrayList<>();
+    public List<ReactorFluidInputEntity.InputTank> getFuildHandlers(Level level) {
+        List<ReactorFluidInputEntity.InputTank> handlers = new ArrayList<>();
         for (BlockPos p : new ArrayList<>(positions)) {
             if (level == null || !level.isLoaded(p)) continue;
-            BlockEntity be = level.getBlockEntity(p);
-            if (be == null) continue;
-            IFluidHandler cap = level.getCapability(Capabilities.FluidHandler.BLOCK, p, null);
-            if (cap != null) {
-                handlers.add(cap);
+            if (level.getBlockEntity(p) instanceof ReactorFluidInputEntity input) {
+                handlers.add(input.getTank());
             }
         }
 
@@ -121,11 +114,11 @@ public class ReactorInputFluidManager extends AbstractReactorIOManager implement
      */
     public VirtualReactorInputFluid getInventory(Level level) {
         VirtualReactorInputFluid virtualReactorInputFluid = new VirtualReactorInputFluid();
-        List<IFluidHandler> handlers = this.getFuildHandlers(level);
+        List<ReactorFluidInputEntity.InputTank> handlers = this.getFuildHandlers(level);
         if (handlers.isEmpty()) return new VirtualReactorInputFluid();
 
-        for (IFluidHandler h : handlers) {
-            virtualReactorInputFluid.addFluid(h.getFluidInTank(0));
+        for (ReactorFluidInputEntity.InputTank h : handlers) {
+            virtualReactorInputFluid.addFluid(h.getFluid());
         }
 
         return virtualReactorInputFluid;
@@ -145,15 +138,17 @@ public class ReactorInputFluidManager extends AbstractReactorIOManager implement
     @Override
     public boolean extractFluids(Level level, int fluidNeeded) {
         if (level == null || fluidNeeded <= 0) return false;
-        List<IFluidHandler> handlers = getFuildHandlers(level);
+        List<ReactorFluidInputEntity.InputTank> handlers = getFuildHandlers(level);
         if (handlers.isEmpty()) return false;
 
-        int remaining = fluidNeeded;
+        // The request is in millibuckets, as upstream counted; the tanks hold droplets.
+        int needed = FluidUnits.toDroplets(fluidNeeded);
+        int remaining = needed;
 
-        for (IFluidHandler handler : handlers) {
+        for (ReactorFluidInputEntity.InputTank handler : handlers) {
             if (remaining <= 0) break;
 
-            FluidStack stack = handler.getFluidInTank(0);
+            FluidStack stack = handler.getFluid();
             if (stack.isEmpty()) continue;
 
             int toExtract = Math.min(remaining, stack.getAmount());
@@ -161,9 +156,9 @@ public class ReactorInputFluidManager extends AbstractReactorIOManager implement
 
             // Subtract what was actually drained, not what was asked for: a handler is free to
             // hand back less than requested.
-            remaining -= handler.drain(toExtract, FluidAction.EXECUTE).getAmount();
+            remaining -= handler.extract(stack, toExtract);
         }
 
-        return remaining < fluidNeeded;
+        return remaining < needed;
     }
 }

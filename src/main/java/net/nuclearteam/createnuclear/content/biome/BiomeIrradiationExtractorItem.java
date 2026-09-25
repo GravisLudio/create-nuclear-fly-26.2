@@ -1,11 +1,12 @@
 package net.nuclearteam.createnuclear.content.biome;
 
+import net.minecraft.world.InteractionResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -29,20 +30,20 @@ public class BiomeIrradiationExtractorItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+    public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack stack = player.getItemInHand(interactionHand);
 
-        if (level.isClientSide || !(level instanceof ServerLevel serverLevel)) {
-            return InteractionResultHolder.success(stack);
+        if (level.isClientSide() || !(level instanceof ServerLevel serverLevel)) {
+            return InteractionResult.SUCCESS;
         }
 
         if (getCharge(stack) >= getMaxCharge()) {
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         }
 
         boolean restored = BiomeIrradiationService.restoreArea(serverLevel, player.blockPosition());
         if (!restored) {
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         }
 
         ItemStack charged = stack.copyWithCount(1);
@@ -50,13 +51,13 @@ public class BiomeIrradiationExtractorItem extends Item {
 
         stack.shrink(1);
         if (stack.isEmpty()) {
-            return InteractionResultHolder.success(charged);
+            return InteractionResult.SUCCESS;
         }
 
         if (!player.getInventory().add(charged)) {
             player.drop(charged, false);
         }
-        return InteractionResultHolder.success(stack);
+        return InteractionResult.SUCCESS;
     }
 
     @Override

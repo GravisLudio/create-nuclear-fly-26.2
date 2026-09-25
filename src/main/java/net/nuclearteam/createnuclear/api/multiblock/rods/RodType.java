@@ -2,7 +2,6 @@ package net.nuclearteam.createnuclear.api.multiblock.rods;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Holder.Reference;
 import net.minecraft.core.RegistryAccess;
@@ -33,7 +32,6 @@ import java.util.function.Supplier;
  * heat-related values, a timing value, and a {@link TypeRod} indicating the
  * category (fuel, cooler, or mixed).
  */
-@MethodsReturnNonnullByDefault
 public record RodType(Holder<Item> item,
                       Supplier<Integer> baseRodHeat,
                       Supplier<Float> proximityRodHeat,
@@ -98,8 +96,8 @@ public record RodType(Holder<Item> item,
                 return fromItem.isNotEmptyItem()
                     ? fromItem
                     : world.registryAccess()
-                        .registryOrThrow(CreateNuclearRegistries.ROD_TYPE)
-                        .getHolderOrThrow(CreateNuclearRegistries.FALLBACK_ROD)
+                        .lookupOrThrow(CreateNuclearRegistries.ROD_TYPE)
+                        .getOrThrow(CreateNuclearRegistries.FALLBACK_ROD)
                         .value();
             });
     }

@@ -1,9 +1,6 @@
 package net.nuclearteam.createnuclear.infrastructure.config;
 
 import com.zurrtum.create.catnip.config.ConfigBase;
-import net.minecraft.MethodsReturnNonnullByDefault;
-
-@MethodsReturnNonnullByDefault
 public class CRods extends ConfigBase {
     public final ConfigInt uraniumRodLifetime = i(3600, 100, 5000, "uranium_rod_lifetime_ticks", Comments.uraniumRodLifetime, Comments.hintTick);
     public final ConfigInt uraniumProximityBonus = i(32, -70, 70, "uranium_proximity_bonus", Comments.warning, Comments.uraniumProximityBonus);

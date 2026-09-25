@@ -2,17 +2,11 @@ package net.nuclearteam.createnuclear.content.contraptions.irradiated.wolf;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.model.ColorableAgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
-
-
-
-@MethodsReturnNonnullByDefault
-
 @SuppressWarnings("unused")
 public class IrradiatedWolfModel<T extends IrradiatedWolf> extends ColorableAgeableListModel<T> {
 	private final ModelPart head;

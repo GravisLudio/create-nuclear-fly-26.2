@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.alarm;
 
+import net.minecraft.server.level.ServerLevel;
 import com.zurrtum.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,11 +47,9 @@ public class ReactorAlarm extends Block implements IBE<ReactorAlarmEntity> {
 
     // Unregisters this alarm from the multiblock controller on removal (piston, explosion, etc.)
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (!state.is(newState.getBlock())) {
-            MultiblockHelpers.handleRemoval(pos, level, ReactorControllerBlockEntity::removeAlarm);
-            super.onRemove(state, level, pos, newState, isMoving);
-        }
+    public void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
+        MultiblockHelpers.handleRemoval(pos, level, ReactorControllerBlockEntity::removeAlarm);
+        super.affectNeighborsAfterRemoval(state, level, pos, isMoving);
     }
 
     @Override
@@ -60,7 +59,7 @@ public class ReactorAlarm extends Block implements IBE<ReactorAlarmEntity> {
 
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
         boolean poweredNow = level.hasNeighborSignal(pos);
         if (state.getValue(POWERED) != poweredNow) {
             level.setBlock(pos, state.setValue(POWERED, poweredNow), 3);

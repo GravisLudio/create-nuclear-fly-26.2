@@ -1,17 +1,17 @@
 package net.nuclearteam.createnuclear.content.multiblock.controller;
 
+import net.minecraft.world.InteractionResult;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
 import com.zurrtum.create.foundation.item.ItemHelper;
 import net.minecraft.ChatFormatting;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -38,10 +38,6 @@ import net.nuclearteam.createnuclear.foundation.utility.NotifyUtil;
 import net.nuclearteam.createnuclear.infrastructure.config.CNConfigs;
 
 import org.jetbrains.annotations.Nullable;
-
-
-@MethodsReturnNonnullByDefault
-
 @SuppressWarnings("deprecation")
 public class ReactorControllerBlock extends HorizontalDirectionalReactorBlock implements IWrenchable, IBE<ReactorControllerBlockEntity> {
     public static final BooleanProperty ASSEMBLED = BooleanProperty.create("assembled");
@@ -78,7 +74,7 @@ public class ReactorControllerBlock extends HorizontalDirectionalReactorBlock im
     @Override
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
                                 boolean isMoving) {
-        if (worldIn.isClientSide)
+        if (worldIn.isClientSide())
             return;
         // A direct neighbor of the controller has changed. Do NOT blindly disassemble:
         // only do so if the structure is actually broken. Otherwise, placing/replacing a
@@ -90,12 +86,12 @@ public class ReactorControllerBlock extends HorizontalDirectionalReactorBlock im
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (level.isClientSide)
-            return ItemInteractionResult.SUCCESS;
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.isClientSide())
+            return InteractionResult.SUCCESS;
 
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (!(blockEntity instanceof ReactorControllerBlockEntity controllerBlockEntity)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (!(blockEntity instanceof ReactorControllerBlockEntity controllerBlockEntity)) return InteractionResult.TRY_WITH_EMPTY_HAND;
 
         ItemStack heldItem = player.getItemInHand(hand);
         if (heldItem.is(Items.DEBUG_STICK)) {
@@ -117,7 +113,7 @@ public class ReactorControllerBlock extends HorizontalDirectionalReactorBlock im
                 // cue, not the multiblock assembly one (that lives in ReactorAssembler).
                 // One-shot played server-side (null player) so it broadcasts to nearby clients.
                 level.playSound(null, pos, CNSoundEvents.REACTOR_ACTIVATION.getMainEvent(), SoundSource.BLOCKS, 1.0f, 1.0f);
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
 
             }
             else if (heldItem.isEmpty() && !controllerBlockEntity.getInventoryObject().getItem(0).isEmpty()) {
@@ -138,27 +134,24 @@ public class ReactorControllerBlock extends HorizontalDirectionalReactorBlock im
                 // Blueprint removed: the multiblock stays assembled, it just stops producing.
                 level.playSound(null, pos, CNSoundEvents.REACTOR_SHUT_OFF.getMainEvent(), SoundSource.BLOCKS, 1.0f, 1.0f);
                 state.setValue(ASSEMBLED, false);
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
 
             }
             else if (!heldItem.isEmpty() && !controllerBlockEntity.getInventoryObject().getItem(0).isEmpty()) {
-                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                return InteractionResult.TRY_WITH_EMPTY_HAND;
             }
         }
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-        if (!state.hasBlockEntity() || state.getBlock() == newState.getBlock())
-            return;
+    public void affectNeighborsAfterRemoval(BlockState state, ServerLevel worldIn, BlockPos pos, boolean isMoving) {
+        // Was onRemove. Runs only once the controller has really been replaced, after its block
+        // entity is gone; the inventory drop that used to open this method is in
+        // ReactorControllerBlockEntity.preRemoveSideEffects, where the inventory still exists.
+        super.affectNeighborsAfterRemoval(state, worldIn, pos, isMoving);
 
-        withBlockEntityDo(worldIn, pos, be -> ItemHelper.dropContents(worldIn, pos, be.getInventoryObject()));
-        worldIn.removeBlockEntity(pos);
-
-        if (worldIn instanceof ServerLevel serverLevel) {
-            PersistentFluidLocks.get(serverLevel).clearLock(pos);
-        }
+        PersistentFluidLocks.get(worldIn).clearLock(pos);
 
           if (!state.getValue(ASSEMBLED))
             return;

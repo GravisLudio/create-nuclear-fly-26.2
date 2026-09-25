@@ -1,7 +1,6 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.cat;
 
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -57,9 +56,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-
-@MethodsReturnNonnullByDefault
-
 @SuppressWarnings({"unused", "deprecation"})
 public class IrradiatedCat extends TamableAnimal {
     public static final double TEMPT_SPEED_MOD = 0.6;
@@ -296,7 +292,7 @@ public class IrradiatedCat extends TamableAnimal {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         Item item = itemStack.getItem();
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             if (this.isTame() && this.isOwnedBy(player)) {
                 return InteractionResult.SUCCESS;
             } else {

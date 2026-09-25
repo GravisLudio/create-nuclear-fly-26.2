@@ -83,7 +83,7 @@ public class IrradiatedCow extends Animal {
             pPlayer.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
             ItemStack itemstack1 = ItemUtils.createFilledResult(itemstack, pPlayer, Items.MILK_BUCKET.getDefaultInstance());
             pPlayer.setItemInHand(pHand, itemstack1);
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return InteractionResult.sidedSuccess(this.level().isClientSide());
         } else {
             return super.mobInteract(pPlayer, pHand);
         }

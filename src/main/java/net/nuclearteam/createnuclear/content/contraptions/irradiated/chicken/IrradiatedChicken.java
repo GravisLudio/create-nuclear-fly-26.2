@@ -1,6 +1,5 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.chicken;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -31,10 +30,6 @@ import net.nuclearteam.createnuclear.CNTags;
 import net.nuclearteam.createnuclear.content.contraptions.irradiated.IrradiatedAnimal;
 
 import org.jetbrains.annotations.Nullable;
-
-
-@MethodsReturnNonnullByDefault
-
 @SuppressWarnings("unused")
 public class IrradiatedChicken extends Animal implements IrradiatedAnimal {
     private static final EntityDimensions BABY_DIMENSIONS;
@@ -98,7 +93,7 @@ public class IrradiatedChicken extends Animal implements IrradiatedAnimal {
         }
 
         this.flap += this.flapping * 2.0F;
-        if (!this.level().isClientSide && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
+        if (!this.level().isClientSide() && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
             this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
             this.spawnAtLocation(Items.EGG);
             this.gameEvent(GameEvent.ENTITY_PLACE);

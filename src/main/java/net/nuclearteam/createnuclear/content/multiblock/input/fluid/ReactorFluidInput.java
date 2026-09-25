@@ -1,11 +1,12 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.fluid;
 
+import net.minecraft.server.level.ServerLevel;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -78,18 +79,18 @@ public class ReactorFluidInput extends MultiDirectionalReactorBlock implements I
     }
 
 	@Override
-	protected @NotNull ItemInteractionResult useItemOn(ItemStack heldItem, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult ray) {
-		boolean onClient = world.isClientSide;
+	protected @NotNull InteractionResult useItemOn(ItemStack heldItem, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult ray) {
+		boolean onClient = world.isClientSide();
 
 		if (heldItem.isEmpty())
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		if (!player.isCreative())
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.TRY_WITH_EMPTY_HAND;
 
 		InteractionResult result = PlayerInteractReactorFluidInput.interact(world, pos, player, hand, heldItem, onClient, ray);
 
-		// Convertit le vieux InteractionResult en ItemInteractionResult si nécessaire pour NeoForge
-		return result.consumesAction() ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		// Convertit le vieux InteractionResult en InteractionResult si nécessaire pour NeoForge
+		return result.consumesAction() ? InteractionResult.SUCCESS : InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
 	@Override
@@ -99,8 +100,8 @@ public class ReactorFluidInput extends MultiDirectionalReactorBlock implements I
 	}
 
 	@Override
-	public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
-		super.onRemove(state, world, pos, newState, isMoving);
+	public void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean isMoving) {
+		super.affectNeighborsAfterRemoval(state, world, pos, isMoving);
 		MultiblockHelpers.handleRemoval(pos, world, ReactorControllerBlockEntity::removeInputFluid);
 	}
 

@@ -18,7 +18,7 @@ public class EnrichingCampfireBlockEntity extends SmartBlockEntity {
 
     public static void particleTick(Level level, BlockPos pos, BlockState state, EnrichingCampfireBlockEntity blockEntity) {
         int i;
-        RandomSource randomSource = level.random;
+        RandomSource randomSource = level.getRandom();
         if (randomSource.nextFloat() < 0.11f) {
             for (i = 0; i < randomSource.nextInt(2) + 2; ++i) {
                 EnrichingCampfireBlock.makeParticles(level, pos);

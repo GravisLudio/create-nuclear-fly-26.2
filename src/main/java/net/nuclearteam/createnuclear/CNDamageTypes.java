@@ -17,7 +17,7 @@ public class CNDamageTypes {
     public static final ResourceKey<DamageType> FAN_RADIATION = key("fan_radiation");
 
     public static DamageSource radiation(Level level) {
-        return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(RADIATION));
+        return new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(RADIATION));
     }
 
     public static void bootstrap(BootstrapContext<DamageType> ctx) {

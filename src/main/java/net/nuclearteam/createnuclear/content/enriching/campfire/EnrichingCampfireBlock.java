@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.zurrtum.create.foundation.block.IBE;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -13,7 +12,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,11 +45,6 @@ import net.nuclearteam.createnuclear.CNBlockEntityTypes;
 import net.nuclearteam.createnuclear.CNEffects;
 import net.nuclearteam.createnuclear.content.radiation.capability.RadiationCapability;
 import org.jetbrains.annotations.Nullable;
-
-
-
-@MethodsReturnNonnullByDefault
-
 @SuppressWarnings({"deprecation", "unused"})
 public class EnrichingCampfireBlock extends BaseEntityBlock implements SimpleWaterloggedBlock, IBE<EnrichingCampfireBlockEntity> {
     private static final double CAMPFIRE_DOSE = 5.0D;
@@ -81,8 +75,8 @@ public class EnrichingCampfireBlock extends BaseEntityBlock implements SimpleWat
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     @Override
@@ -173,7 +167,7 @@ public class EnrichingCampfireBlock extends BaseEntityBlock implements SimpleWat
     @Override
     public void onProjectileHit(Level level, BlockState state, BlockHitResult hit, Projectile projectile) {
         BlockPos blockPos = hit.getBlockPos();
-        if (!level.isClientSide && projectile.isOnFire() && projectile.mayInteract(level, blockPos) && !state.getValue(LIT) && !state.getValue(WATERLOGGED)) {
+        if (!level.isClientSide() && projectile.isOnFire() && projectile.mayInteract(level, blockPos) && !state.getValue(LIT) && !state.getValue(WATERLOGGED)) {
             level.setBlock(blockPos, state.setValue(BlockStateProperties.LIT, true), 11);
         }
     }
@@ -223,7 +217,7 @@ public class EnrichingCampfireBlock extends BaseEntityBlock implements SimpleWat
 
     @Override
     public <S extends BlockEntity> BlockEntityTicker<S> getTicker(Level level, BlockState state, BlockEntityType<S> blockEntityType) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             if (state.getValue(LIT)) {
                 return EnrichingCampfireBlock.createTickerHelper(blockEntityType, CNBlockEntityTypes.ENRICHING_CAMPFIRE_BLOCK.get(), EnrichingCampfireBlockEntity::particleTick);
             }

@@ -49,7 +49,7 @@ public class NuclearExplosionEntity extends Entity {
         if (!spawnedParticle) {
             spawnedParticle = true;
             int particleY = (int) Math.ceil(this.getY());
-            while (particleY > level().getMinBuildHeight() && particleY > this.getY() - radius / 2F && isDestroyable(level().getBlockState(BlockPos.containing(this.getX(), particleY, this.getZ())))) {
+            while (particleY > level().getMinY() && particleY > this.getY() - radius / 2F && isDestroyable(level().getBlockState(BlockPos.containing(this.getX(), particleY, this.getZ())))) {
                 particleY--;
             }
             level().addAlwaysVisibleParticle(CNParticleRegistry.NUCLEAR_MUSHROOM_CLOUD, true, this.getX(), particleY + 2, this.getZ(), this.getSize(), isIntentionalGameDesign() ? 1.0F : 0.0F, 0);
@@ -57,7 +57,7 @@ public class NuclearExplosionEntity extends Entity {
         if (tickCount > 40 && destroyingChunks.isEmpty()) {
             this.remove(RemovalReason.DISCARDED);
         } else {
-            if (!level().isClientSide && !isNoGriefing()) {
+            if (!level().isClientSide() && !isNoGriefing()) {
                 if (!loadingChunks && !this.isRemoved()) {
                     loadingChunks = true;
                     loadChunksAround(true);
@@ -108,7 +108,7 @@ public class NuclearExplosionEntity extends Entity {
 
     @Override
     public void remove(Entity.RemovalReason removalReason) {
-        if (!level().isClientSide && loadingChunks) {
+        if (!level().isClientSide() && loadingChunks) {
             loadingChunks = false;
             loadChunksAround(false);
         }
@@ -122,7 +122,7 @@ public class NuclearExplosionEntity extends Entity {
 
     private void loadChunksAround(boolean load) {
         if (this.level() instanceof ServerLevel serverLevel) {
-            ChunkPos chunkPos = new ChunkPos(this.blockPosition());
+            ChunkPos chunkPos = ChunkPos.containing(this.blockPosition());
             int dist = Math.max(getChunksAffected(), serverLevel.getServer().getPlayerList().getViewDistance() / 2);
             for (int i = -dist; i <= dist; i++) {
                 for (int j = -dist; j <= dist; j++) {
@@ -153,7 +153,7 @@ public class NuclearExplosionEntity extends Entity {
             for (int z = 0; z < 16; z++) {
                 for (int y = 15; y >= 0; y--) {
                     boolean canSetToFire = false;
-                    carve.set(chunkCorner.getX() + x, Mth.clamp(chunkCorner.getY() + y, level().getMinBuildHeight(), level().getMaxBuildHeight()), chunkCorner.getZ() + z);
+                    carve.set(chunkCorner.getX() + x, Mth.clamp(chunkCorner.getY() + y, level().getMinY(), level().getMaxY() + 1), chunkCorner.getZ() + z);
                     float widthSimplexNoise1 = (Maths.sampleNoise3D((float)carve.getX(), (float)carve.getY(), (float)carve.getZ(), (float)radius) - 0.5F) * 0.45F + 0.55F;
                     double yDist = Maths.smin(0.6F - Math.abs(this.blockPosition().getY() - carve.getY()) / (float) radius, 0.6F, 0.2F);
                     double distToCenter = carve.distToLowCornerSqr(this.blockPosition().getX(), carve.getY() - 1, this.blockPosition().getZ());

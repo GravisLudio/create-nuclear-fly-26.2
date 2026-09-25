@@ -1,11 +1,13 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.item;
 
+import net.minecraft.world.InteractionResult;
+import net.minecraft.server.level.ServerLevel;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
 import com.zurrtum.create.foundation.item.ItemHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -48,18 +50,18 @@ public class ReactorRodInput extends MultiDirectionalReactorBlock implements IWr
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         ItemStack itemInHand = player.getItemInHand(hand);
 
         if (itemInHand.getItem() instanceof BlockItem) {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
 
 
-        if (level.isClientSide()) {return ItemInteractionResult.SUCCESS;}
+        if (level.isClientSide()) {return InteractionResult.SUCCESS;}
 
         withBlockEntityDo(level, pos, be -> player.openMenu(be, be::sendToMenu));
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -76,16 +78,12 @@ public class ReactorRodInput extends MultiDirectionalReactorBlock implements IWr
 
 
     @Override
-    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        // Only act when the block is actually removed/replaced, not on a mere state change
-        // (e.g. a FACING update) — otherwise rotating the block would spill its rods.
-        if (!pState.is(pNewState.getBlock())) {
-            // Drop the contents BEFORE super removes the block entity: super.onRemove()
-            // calls level.removeBlockEntity(pos), after which the inventory is gone.
-            withBlockEntityDo(pLevel, pPos, be -> ItemHelper.dropContents(pLevel, pPos, be.inventory));
-            MultiblockHelpers.handleRemoval(pPos, pLevel, ReactorControllerBlockEntity::removeInput);
-        }
-        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+    public void affectNeighborsAfterRemoval(BlockState pState, ServerLevel pLevel, BlockPos pPos, boolean pIsMoving) {
+        // Was onRemove. This only runs for an actual removal/replacement, never for a FACING
+        // update, and after the block entity is gone -- which is why dropping the rods moved to
+        // ReactorRodInputEntity.preRemoveSideEffects.
+        MultiblockHelpers.handleRemoval(pPos, pLevel, ReactorControllerBlockEntity::removeInput);
+        super.affectNeighborsAfterRemoval(pState, pLevel, pPos, pIsMoving);
     }
 
     @Override

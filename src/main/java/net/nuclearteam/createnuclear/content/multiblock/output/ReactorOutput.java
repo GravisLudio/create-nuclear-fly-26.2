@@ -1,5 +1,7 @@
 package net.nuclearteam.createnuclear.content.multiblock.output;
 
+import net.minecraft.world.InteractionResult;
+import net.minecraft.server.level.ServerLevel;
 
 import com.zurrtum.create.AllBlocks;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
@@ -8,13 +10,12 @@ import com.zurrtum.create.foundation.block.IBE;
 import com.zurrtum.create.catnip.placement.IPlacementHelper;
 import com.zurrtum.create.catnip.placement.PlacementHelpers;
 import com.zurrtum.create.catnip.placement.PlacementOffset;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -38,9 +39,6 @@ import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorContro
 
 
 import java.util.function.Predicate;
-
-
-@MethodsReturnNonnullByDefault
 public class ReactorOutput extends DirectionalKineticBlock implements IWrenchable, IBE<ReactorOutputEntity> {
     public static final IntegerProperty DIR = IntegerProperty.create("dir", 0, 2);
 
@@ -70,8 +68,8 @@ public class ReactorOutput extends DirectionalKineticBlock implements IWrenchabl
     }
 
     @Override
-    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+    public void affectNeighborsAfterRemoval(BlockState pState, ServerLevel pLevel, BlockPos pPos, boolean pIsMoving) {
+        super.affectNeighborsAfterRemoval(pState, pLevel, pPos, pIsMoving);
         MultiblockHelpers.handleRemoval(pPos, pLevel, ReactorControllerBlockEntity::removeOutput);
     }
 
@@ -90,14 +88,14 @@ public class ReactorOutput extends DirectionalKineticBlock implements IWrenchabl
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         ItemStack heldItem = player.getItemInHand(hand);
         IPlacementHelper placementHelper = PlacementHelpers.get(placementHelperId);
         if (!player.isShiftKeyDown() && player.mayBuild()) {
             if (placementHelper.matchesItem(heldItem) && placementHelper.getOffset(player, level, state, pos, hitResult)
                 .placeInWorld(level, (BlockItem) heldItem.getItem(), player, hand, hitResult)
                 .consumesAction())
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
         }
 
         return super.useItemOn(stack, state, level, pos, player, hand, hitResult);

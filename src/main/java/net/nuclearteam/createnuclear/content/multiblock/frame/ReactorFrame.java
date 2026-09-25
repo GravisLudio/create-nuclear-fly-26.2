@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.frame;
 
+import net.minecraft.server.level.ServerLevel;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
@@ -65,7 +66,7 @@ public class ReactorFrame extends Block implements IWrenchable, IBE<ReactorFrame
 
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
 
         Direction.Axis axis = Direction.Axis.Y;
         Part part = getType(state, getRelativeTop(level, pos, axis), getRelativeBottom(level, pos, axis));
@@ -117,14 +118,12 @@ public class ReactorFrame extends Block implements IWrenchable, IBE<ReactorFrame
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        super.onRemove(state, level, pos, newState, movedByPiston);
+    public void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
         // playerDestroy is NOT called in creative mode, so the structure must also be
-        // re-evaluated here. Only react to an actual block removal/replacement (different
-        // block type), not to a simple PART property change (same block, via setBlock).
-        if (!state.is(newState.getBlock())) {
-            pattern.findController(pos, level, false);
-        }
+        // re-evaluated here. This hook only runs for an actual block removal/replacement, never
+        // for a PART property change on the same block, which upstream had to filter out itself.
+        pattern.findController(pos, level, false);
     }
 
     @Override

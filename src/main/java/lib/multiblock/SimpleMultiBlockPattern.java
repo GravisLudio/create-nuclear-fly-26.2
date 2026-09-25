@@ -54,7 +54,7 @@ public record SimpleMultiBlockPattern(List<MultiBlockOffsetPos> multiBlockOffset
 
     @Override
     public void construct(Level level, BlockPos blockPos, BiPredicate<Character, BlockState> stateBiPredicate) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
         if (level.getServer() == null) return;
         for (MultiBlockOffsetPos multiBlockOffsetPos : multiBlockOffsetPosList) {
             char character = multiBlockOffsetPos.character();

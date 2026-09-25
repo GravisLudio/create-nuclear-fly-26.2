@@ -51,9 +51,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.function.Predicate;
-
-
-@MethodsReturnNonnullByDefault
 @SuppressWarnings({"unused", "deprecation"})
 public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
     private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID;
@@ -164,14 +161,14 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
 
     public void aiStep() {
         super.aiStep();
-        if (!this.level().isClientSide && this.isWet && !this.isShaking && !this.isPathFinding() && this.onGround()) {
+        if (!this.level().isClientSide() && this.isWet && !this.isShaking && !this.isPathFinding() && this.onGround()) {
             this.isShaking = true;
             this.shakeAnim = 0.0F;
             this.shakeAnimO = 0.0F;
             this.level().broadcastEntityEvent(this, (byte)8);
         }
 
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             this.updatePersistentAnger((ServerLevel)this.level(), true);
         }
 
@@ -189,7 +186,7 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
 
             if (this.isInWaterRainOrBubble()) {
                 this.isWet = true;
-                if (this.isShaking && !this.level().isClientSide) {
+                if (this.isShaking && !this.level().isClientSide()) {
                     this.level().broadcastEntityEvent(this, (byte)56);
                     this.cancelShake();
                 }
@@ -269,7 +266,7 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
         if (this.isInvulnerableTo(source)) {
             return false;
         } else {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 this.setOrderedToSit(false);
             }
 
@@ -290,7 +287,7 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack itemstack = player.getItemInHand(hand);
         Item item = itemstack.getItem();
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             boolean flag = this.isOwnedBy(player) || this.isTame() || this.isFood(itemstack) && !this.isTame() && !this.isAngry();
             return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
         } else {

@@ -21,7 +21,7 @@ import java.util.List;
 
 public final class BiomeIrradiationService {
     public static void circularArea(ServerLevel serverLevel, BlockPos center, ResourceKey<Biome> defaultTarget, int radius) {
-        Registry<Biome> biomeRegistry = serverLevel.registryAccess().registryOrThrow(Registries.BIOME);
+        Registry<Biome> biomeRegistry = serverLevel.registryAccess().lookupOrThrow(Registries.BIOME);
 
         Holder<Biome> currentAtCenter = serverLevel.getBiome(center);
         ResourceKey<Biome> targetAtCenter = BiomeIrradiationMappings.resolveTarget(currentAtCenter, defaultTarget);
@@ -54,7 +54,7 @@ public final class BiomeIrradiationService {
     }
 
     public static boolean restoreArea(ServerLevel serverLevel, BlockPos pos) {
-        ChunkPos centerChunk = new ChunkPos(pos);
+        ChunkPos centerChunk = ChunkPos.containing(pos);
         PersistentIrradiatedZones zones = PersistentIrradiatedZones.get(serverLevel);
 
         List<ChunkAccess> restored = new ArrayList<>();
@@ -111,7 +111,7 @@ public final class BiomeIrradiationService {
             if ((distX * distX) + (distZ * distZ) <= radiusSq) {
                 ResourceKey<Biome> target = BiomeIrradiationMappings.resolveTarget(current, defaultTarget);
 
-                return biomeRegistry.getHolderOrThrow(target);
+                return biomeRegistry.getOrThrow(target);
             }
 
             return current;

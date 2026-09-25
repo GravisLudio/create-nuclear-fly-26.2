@@ -15,9 +15,6 @@ import net.nuclearteam.createnuclear.content.contraptions.irradiated.CNModelLaye
 
 
 import java.util.List;
-
-
-@MethodsReturnNonnullByDefault
 public class IrradiatedCatRenderer extends MobRenderer<IrradiatedCat, IrradiatedCatModel<IrradiatedCat>> {
     private static final Identifier IRRADIATED_CAT_LOCATION = CreateNuclear.asResource("textures/entity/irradiated_cat.png");
 

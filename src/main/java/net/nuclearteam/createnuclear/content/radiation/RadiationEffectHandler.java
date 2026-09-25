@@ -4,7 +4,7 @@ import com.zurrtum.create.api.effect.OpenPipeEffectHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.nuclearteam.createnuclear.content.radiation.capability.RadiationCapability;
 
 import java.util.List;

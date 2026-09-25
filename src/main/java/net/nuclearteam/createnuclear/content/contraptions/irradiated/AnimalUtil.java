@@ -30,10 +30,10 @@ public class AnimalUtil {
      * taming the mob, this informs the player and consumes the interaction.
      */
     public static InteractionResult blockTamingWip(Player player, Level level) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             player.sendSystemMessage(Component.translatable("irradiated.taming.wip"));
         }
 
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 }

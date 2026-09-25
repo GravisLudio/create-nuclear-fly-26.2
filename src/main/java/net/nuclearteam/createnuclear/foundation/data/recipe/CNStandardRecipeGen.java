@@ -13,7 +13,6 @@ import com.simibubi.create.foundation.mixin.accessor.MappedRegistryAccessor;
 import net.nuclearteam.createnuclear.foundation.registrate.BlockEntry;
 import net.nuclearteam.createnuclear.foundation.registrate.ItemProvider;
 import com.zurrtum.create.catnip.registry.RegisteredObjectsHelper;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -430,9 +429,6 @@ public class CNStandardRecipeGen extends BaseRecipeProvider {
     public CNStandardRecipeGen(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, registries, CreateNuclear.MOD_ID);
     }
-
-    
-    @MethodsReturnNonnullByDefault
     private static class ModdedCookingRecipeOutputShim implements Recipe<RecipeInput> {
 
         private static final Map<RecipeType<?>, ModdedCookingRecipeOutputShim.Serializer> serializers = new ConcurrentHashMap<>();
@@ -530,9 +526,6 @@ public class CNStandardRecipeGen extends BaseRecipeProvider {
             ).apply(instance, ModdedCookingRecipeOutputShim.FakeItemStack::new));
         }
     }
-
-    
-    @MethodsReturnNonnullByDefault
     private record ModdedCookingRecipeOutput(RecipeOutput wrapped, Identifier outputOverride) implements RecipeOutput {
 
         @Override

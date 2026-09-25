@@ -1,8 +1,10 @@
 package net.nuclearteam.createnuclear.content.multiblock.input.fluid;
 
+import net.nuclearteam.createnuclear.content.fluids.FluidUnits;
+
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.nuclearteam.createnuclear.content.logistics.BigFluidStack;
 import org.jetbrains.annotations.NotNull;
@@ -30,13 +32,16 @@ public record VirtualReactorInputFluid(Map<Identifier, Long> fluids) {
     /**
      * Add the contents of the provided FluidStack to this virtual inventory.
      * Empty stacks or non-registered fluids are ignored.
+     * <p>
+     * The stack comes from a tank and is counted in droplets; this inventory keeps millibuckets,
+     * which is what every reader of it (the heat calculation, displays, tooltips) was written for.
      * @param stack the fluid stack to add
      */
     public void addFluid(@NotNull FluidStack stack) {
         if (stack.isEmpty() || stack.getAmount() <= 0) return;
         Identifier id = BuiltInRegistries.FLUID.getKey(stack.getFluid());
         if (id == null) return;
-        fluids.merge(id, (long) stack.getAmount(), Long::sum);
+        fluids.merge(id, FluidUnits.toMillibuckets((long) stack.getAmount()), Long::sum);
     }
 
     /**
@@ -55,7 +60,7 @@ public record VirtualReactorInputFluid(Map<Identifier, Long> fluids) {
         else fluids.put(fluidId, remaining);
 
         int removedInt = (int) Math.min(removed, Integer.MAX_VALUE);
-        return new FluidStack(BuiltInRegistries.FLUID.get(fluidId), removedInt);
+        return new FluidStack(BuiltInRegistries.FLUID.getValue(fluidId), removedInt);
     }
 
     /**
@@ -77,7 +82,7 @@ public record VirtualReactorInputFluid(Map<Identifier, Long> fluids) {
         for (Entry<Identifier, Long> e : map.entrySet()) {
             Identifier id = e.getKey();
             long total = e.getValue();
-            Fluid fluid = BuiltInRegistries.FLUID.get(id);
+            Fluid fluid = BuiltInRegistries.FLUID.getValue(id);
             if (fluid == null || total <= 0) continue;
             int amount = (int) Math.min(total, BigFluidStack.INF);
             list.add(new BigFluidStack(new FluidStack(fluid, amount), amount));

@@ -34,7 +34,7 @@ public class ReactorAlarmEntity extends SmartBlockEntity {
         super.tick();
         if (level == null || !(getBlockState().getBlock() instanceof ReactorAlarm)) return;
 
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             tickAudio(); // DistExecutor is unnecessary here; the level-side check is enough and avoids thread overhead
         } else {
             tickServer();

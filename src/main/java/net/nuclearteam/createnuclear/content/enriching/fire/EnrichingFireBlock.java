@@ -2,7 +2,6 @@ package net.nuclearteam.createnuclear.content.enriching.fire;
 
 import com.mojang.serialization.MapCodec;
 import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
@@ -13,11 +12,6 @@ import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.nuclearteam.createnuclear.CNTags.CNBlockTags;
 import net.nuclearteam.createnuclear.CreateNuclear;
-
-
-
-@MethodsReturnNonnullByDefault
-
 @SuppressWarnings({"deprecation"})
 public class EnrichingFireBlock extends BaseFireBlock {
     public static final MapCodec<EnrichingFireBlock> CODEC = simpleCodec(EnrichingFireBlock::new);

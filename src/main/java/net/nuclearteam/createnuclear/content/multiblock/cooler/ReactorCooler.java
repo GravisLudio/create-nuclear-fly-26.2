@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.cooler;
 
+import net.minecraft.server.level.ServerLevel;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,8 +33,8 @@ public class ReactorCooler extends Block implements IWrenchable {
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        super.onRemove(state, level, pos, newState, movedByPiston);
+    public void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
         pattern.findController(pos, level, false);
     }
 }

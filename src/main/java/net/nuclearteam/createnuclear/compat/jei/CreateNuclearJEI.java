@@ -24,7 +24,6 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -39,7 +38,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.nuclearteam.createnuclear.CNBlocks;
 import net.nuclearteam.createnuclear.CNRecipeTypes;
 import net.nuclearteam.createnuclear.CreateNuclear;
@@ -56,8 +55,6 @@ import java.util.function.Predicate;
 
 @JeiPlugin
 @SuppressWarnings("unused")
-
-@MethodsReturnNonnullByDefault
 public class CreateNuclearJEI implements IModPlugin {
     private static final Identifier ID = CreateNuclear.asResource("jei_plugin");
 

@@ -21,7 +21,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 public class PlayerInteractReactorFluidInput {
@@ -77,11 +77,11 @@ public class PlayerInteractReactorFluidInput {
                     .clamp(1 - (1f * fluidInInput.getAmount() / (FluidTankBlockEntity.getCapacityMultiplier() * 16)), 0, 1);
             pitch /= 1.5f;
             pitch += .5f;
-            pitch += (level.random.nextFloat() - .5f) / 4f;
+            pitch += (level.getRandom().nextFloat() - .5f) / 4f;
             level.playSound(null, pos, soundEvent, SoundSource.BLOCKS, .5f, pitch);
         }
 
-        if (!FluidStack.isSameFluidSameComponents(fluidInInput, prevFluidInInput) || fluidInInput.getAmount() != prevFluidInInput.getAmount()) {
+        if (!FluidStack.areFluidsAndComponentsEqual(fluidInInput, prevFluidInInput) || fluidInInput.getAmount() != prevFluidInInput.getAmount()) {
             if (be instanceof ReactorFluidInputEntity) {
                 if (fluidState != null && onClient) {
                     BlockParticleOption blockParticleData =

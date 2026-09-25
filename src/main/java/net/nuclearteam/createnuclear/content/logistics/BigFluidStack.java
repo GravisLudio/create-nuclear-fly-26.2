@@ -12,7 +12,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.fluids.FluidStack;
+import com.zurrtum.create.infrastructure.fluids.FluidStack;
 import net.nuclearteam.createnuclear.api.ReactorFluidTypesValue;
 import net.nuclearteam.createnuclear.api.multiblock.fluid.ReactorFluidType;
 
@@ -28,7 +28,7 @@ public class BigFluidStack {
     ).apply(i, BigFluidStack::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, BigFluidStack> STREAM_CODEC = StreamCodec.composite(
-        FluidStack.OPTIONAL_STREAM_CODEC, s -> s.stack,
+        FluidStack.OPTIONAL_PACKET_CODEC, s -> s.stack,
         ByteBufCodecs.VAR_INT, s -> s.amount,
         BigFluidStack::new
     );
@@ -62,7 +62,7 @@ public class BigFluidStack {
     }
 
     public static BigFluidStack receive(RegistryFriendlyByteBuf buffer) {
-        return new BigFluidStack(FluidStack.STREAM_CODEC.decode(buffer), buffer.readVarInt());
+        return new BigFluidStack(FluidStack.PACKET_CODEC.decode(buffer), buffer.readVarInt());
     }
 
     public static Comparator<? super BigFluidStack> comparator() {
@@ -74,7 +74,7 @@ public class BigFluidStack {
         if (obj == this)
             return true;
         if (obj instanceof BigFluidStack other)
-            return FluidStack.isSameFluidSameComponents(stack, other.stack) && amount == other.amount;
+            return FluidStack.areFluidsAndComponentsEqual(stack, other.stack) && amount == other.amount;
         return false;
     }
 

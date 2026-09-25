@@ -5,7 +5,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 
 import com.mojang.serialization.Codec;
 import net.nuclearteam.createnuclear.foundation.registrate.ItemEntry;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
@@ -50,8 +49,6 @@ public class ClothItem extends Item {
             return ItemStack.hashItemAndComponents(this.stack);
         }
     }
-
-    @MethodsReturnNonnullByDefault
     public enum Cloths implements StringRepresentable {
         WHITE_CLOTH(DyeColor.WHITE),
         YELLOW_CLOTH(DyeColor.YELLOW),

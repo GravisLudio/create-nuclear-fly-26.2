@@ -80,7 +80,7 @@ public class Maths {
 
     public static Vec3 getGroundBelowPosition(BlockGetter level, Vec3 in) {
         BlockPos pos;
-        for(pos = BlockPos.containing(in); pos.getY() > level.getMinBuildHeight() && level.getBlockState(pos).getCollisionShape(level, pos).isEmpty(); pos = pos.below()) {
+        for(pos = BlockPos.containing(in); pos.getY() > level.getMinY() && level.getBlockState(pos).getCollisionShape(level, pos).isEmpty(); pos = pos.below()) {
         }
 
         BlockState state = level.getBlockState(pos);

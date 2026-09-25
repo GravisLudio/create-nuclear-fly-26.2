@@ -1,11 +1,8 @@
 package net.nuclearteam.createnuclear.infrastructure.config;
 
 import com.zurrtum.create.catnip.config.ConfigBase;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import java.util.Arrays;
 import java.util.List;
-
-@MethodsReturnNonnullByDefault
 public class CRadiation extends ConfigBase {
     public final ConfigBool enabledItemRadiation = b(true, "enabled_item_radiation", Comments.enabled);
     public final ConfigInt radiationLevel1 = i(10, 0, 50, "radiation_level_1", Comments.radiationLevel1);

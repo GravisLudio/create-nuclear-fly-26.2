@@ -1,8 +1,8 @@
 package net.nuclearteam.createnuclear.content.multiblock.casing;
 
+import net.minecraft.server.level.ServerLevel;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
@@ -25,10 +25,6 @@ import net.nuclearteam.createnuclear.content.multiblock.pattern.ReactorPattern;
 import net.nuclearteam.createnuclear.foundation.utility.CreateNuclearLang;
 
 import org.jetbrains.annotations.Nullable;
-
-
-
-@MethodsReturnNonnullByDefault
 @SuppressWarnings({"deprecation", "unused"})
 public class ReactorCasing extends Block implements IWrenchable, IBE<ReactorCasingEntity> {
     private final TypeBlock typeBlock;
@@ -54,8 +50,8 @@ public class ReactorCasing extends Block implements IWrenchable, IBE<ReactorCasi
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        super.onRemove(state, level, pos, newState, movedByPiston);
+    public void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
         pattern.findController(pos, level, false);
     }
 
