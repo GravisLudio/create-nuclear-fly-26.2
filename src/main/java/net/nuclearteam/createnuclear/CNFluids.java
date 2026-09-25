@@ -1,14 +1,11 @@
 package net.nuclearteam.createnuclear;
 
-import com.zurrtum.create.AllFluids;
-import com.tterrag.registrate.builders.FluidBuilder.FluidTypeFactory;
-import com.tterrag.registrate.util.entry.FluidEntry;
-import com.zurrtum.create.catnip.theme.Color;
+import com.zurrtum.create.infrastructure.fluids.FluidInteractionRegistry;
+import com.zurrtum.create.infrastructure.fluids.FluidInteractionRegistry.InteractionInformation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
-import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -18,131 +15,75 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.common.NeoForgeMod;
-import net.neoforged.neoforge.common.SoundActions;
-import net.neoforged.neoforge.event.entity.living.LivingEvent;
-import net.neoforged.neoforge.fluids.BaseFlowingFluid;
-import net.neoforged.neoforge.fluids.FluidInteractionRegistry;
-import net.neoforged.neoforge.fluids.FluidInteractionRegistry.InteractionInformation;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidType;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.AABB;
 import net.nuclearteam.createnuclear.content.decoration.palettes.CNPaletteStoneTypes;
+import net.nuclearteam.createnuclear.content.fluids.NuclearFluidEntry;
+import net.nuclearteam.createnuclear.content.radiation.RadiationBucketItem;
 import net.nuclearteam.createnuclear.content.radiation.capability.RadiationCapability;
 import net.nuclearteam.createnuclear.foundation.advancement.CNAdvancement;
-import org.joml.Vector3f;
-import net.nuclearteam.createnuclear.CNTags.CNFluidTags;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
-
-import net.nuclearteam.createnuclear.content.radiation.RadiationBucketItem;
 
 public class CNFluids {
     private static final double URANIUM_FLUID_DOSE = 5.0D;
 
-    public static final FluidEntry<BaseFlowingFluid.Flowing> URANIUM =
-            CreateNuclear.REGISTRATE.standardFluid("uranium", SolidRenderedPlaceableFluidity.create(0x38FF08, () -> 1f / 32f))
-                    .lang("Liquid Uranium")
-                    .tag(CNFluidTags.URANIUM.tag)
-                    .properties(p -> p.viscosity(2500)
-                            .density(1600)
-                            .canSwim(false)
-                            .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_LAVA)
-                            .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_LAVA)
-                            .canDrown(false)
-                    )
-                    .fluidProperties(f -> f.levelDecreasePerBlock(2)
-                            .tickRate(15)
-                            .slopeFindDistance(6)
-                            .explosionResistance(100f)
-                    )
-                    .source(BaseFlowingFluid.Source::new)
-                    .bucket((s, p) -> new RadiationBucketItem(s instanceof Fluid ? (Fluid) s : ((Supplier<? extends Fluid>) s).get(), p, 20))
-                    .onRegister(CNFluids::registerFluidDispenseBehavior)
-                    .tag(CNTags.forgeItemTag("buckets/uranium"))
-                    .lang("Uranium Bucket")
-                    .build()
-                    .register();
+    // Flow values are upstream's fluidProperties: levelDecreasePerBlock, tickRate, slopeFindDistance.
+    // Fog colour and distance are client-side, in client.CNFluidRenders.
 
-    public static final FluidEntry<BaseFlowingFluid.Flowing> THORIUM =
-            CreateNuclear.REGISTRATE.standardFluid("thorium", SolidRenderedPlaceableFluidity.create(0x38f9ff, () -> 1f / 32f))
-                    .lang("Liquid Thorium")
-                    .tag(CNFluidTags.THORIUM.tag)
-                    .properties(p -> p.viscosity(200)
-                            .density(100)
-                            .canSwim(false)
-                            .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_LAVA)
-                            .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_LAVA)
-                            .canDrown(false)
-                    )
-                    .fluidProperties(f -> f.levelDecreasePerBlock(2)
-                            .tickRate(15)
-                            .slopeFindDistance(6)
-                            .explosionResistance(100f)
-                    )
-                    .source(BaseFlowingFluid.Source::new)
-                    .bucket()
-                    .onRegister(CNFluids::registerFluidDispenseBehavior)
-                    .tag(CNTags.forgeItemTag("buckets/thorium"))
-                    .lang("Thorium Bucket")
-                    .build()
-                    .register();
+    public static final NuclearFluidEntry URANIUM = NuclearFluidEntry.register(
+        CreateNuclear.asResource("uranium"), 2, 15, 6,
+        Optional.of(SoundEvents.BUCKET_FILL_LAVA),
+        p -> p,
+        (fluid, p) -> new RadiationBucketItem(fluid, p, 20));
 
-    public static final FluidEntry<BaseFlowingFluid.Flowing> LIQUID_NITROGEN =
-            CreateNuclear.REGISTRATE.standardFluid("nitrogen", SolidRenderedPlaceableFluidity.create(0x23ECD5, () -> 1f / 16f))
-                    .lang("Liquid Nitrogen")
-                    .tag(CNFluidTags.NITROGEN.tag)
-                    .properties(p -> p.viscosity(1000)
-                            .density(1000)
-                            .canSwim(true)
-                            .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_AXOLOTL)
-                            .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_FISH)
-                            .canDrown(false)
-                    )
-                    .fluidProperties(f -> f.levelDecreasePerBlock(5)
-                            .tickRate(10)
-                            .slopeFindDistance(6)
-                            .explosionResistance(100f)
-                    )
-                    .source(BaseFlowingFluid.Source::new)
-                    //.onRegister(ReactorFluidTypesValue.setReactorFluidTypeInfos(8196, 100))
-                    .bucket()
-                    .onRegister(CNFluids::registerFluidDispenseBehavior)
-                    .lang("Nitrogen Bucket")
-                    .tag(CNTags.forgeItemTag("buckets/nitrogen"))
-                    .build()
-                    .register();
+    public static final NuclearFluidEntry THORIUM = NuclearFluidEntry.register(
+        CreateNuclear.asResource("thorium"), 2, 15, 6,
+        Optional.of(SoundEvents.BUCKET_FILL_LAVA),
+        p -> p,
+        BucketItem::new);
 
+    public static final NuclearFluidEntry LIQUID_NITROGEN = NuclearFluidEntry.register(
+        CreateNuclear.asResource("nitrogen"), 5, 10, 6,
+        Optional.of(SoundEvents.BUCKET_FILL_AXOLOTL),
+        p -> p,
+        BucketItem::new);
 
-    public static void register() {}
+    public static void register() {
+        registerFluidDispenseBehavior(URANIUM.getBucket());
+        registerFluidDispenseBehavior(THORIUM.getBucket());
+        registerFluidDispenseBehavior(LIQUID_NITROGEN.getBucket());
+    }
 
-    public static void handleFluidEffect(LivingEvent.LivingVisibilityEvent  event) {
-        LivingEntity entity = event.getEntity();
+    /**
+     * Was a NeoForge {@code LivingVisibilityEvent} listener, used as a per-tick hook on both sides.
+     * Now called from {@code LivingEntityMixin} at the end of {@code baseTick}.
+     */
+    public static void handleFluidEffect(LivingEntity entity) {
         if (!entity.isAlive() || entity.isSpectator()) return;
 
         Level level = entity.level();
 
         // 1. Uranium: applies radiation contagion
-        if (entity.isInFluidType(URANIUM.getType())) {
+        if (isInFluid(entity, URANIUM)) {
             if (entity.tickCount % 20 == 0) {
                 RadiationCapability.applyContagion(entity, URANIUM_FLUID_DOSE, 100);
             }
         }
 
         // 2. Liquid nitrogen: freezes the entity like powder snow
-        else if (entity.isInFluidType(LIQUID_NITROGEN.getType())) {
+        else if (isInFluid(entity, LIQUID_NITROGEN)) {
             // Extinguish fire immediately on contact
             if (entity.isOnFire()) {
                 entity.clearFire();
             }
 
-            if (entity instanceof  Player player && player.isSwimming()) {
+            if (entity instanceof Player player && player.isSwimming()) {
                 CNAdvancement.CRYOGENIC_BAPTISM.awardTo(player);
             }
 
@@ -150,7 +91,7 @@ public class CNFluids {
             int maxTicks = entity.getTicksRequiredToFreeze();
             int freezeSpeed = 3;
 
-            if (level.isClientSide) {
+            if (level.isClientSide()) {
                 // Target maxTicks + 1 so vanilla's client-side -1 decay settles exactly at maxTicks
                 entity.setTicksFrozen(Math.min(maxTicks + 1, currentTicks + freezeSpeed + 1));
             } else {
@@ -162,85 +103,49 @@ public class CNFluids {
                     entity.hurt(entity.damageSources().freeze(), 2.0F);
                 }
 
-                entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1, true, false, false));
+                entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1, true, false, false));
             }
         }
 
         // 3. Thorium: burns the entity like lava
-        else if (entity.isInFluidType(THORIUM.getType())) {
+        else if (isInFluid(entity, THORIUM)) {
             entity.lavaHurt();
         }
     }
 
-    public static void registerFluidInteractions() {
-        // Supplier for the common BlockState to return (Autunite)
-        Supplier<BlockState> autuniteState = () -> CNPaletteStoneTypes.AUTUNITE.getBaseBlock().get().defaultBlockState();
-
-        // The FluidType that all interactions will target (uranium)
-        FluidType uraniumType = URANIUM.get().getFluidType();
-
-        // List of source FluidTypes we want to register (lava and water)
-        List<FluidType> sourceFluids = List.of(
-                NeoForgeMod.LAVA_TYPE.value(),
-                NeoForgeMod.WATER_TYPE.value()
-        );
-
-        // Loop over each source fluid and register the interaction
-        for (FluidType source : sourceFluids) {
-            FluidInteractionRegistry.addInteraction(source, new InteractionInformation(uraniumType, fs -> autuniteState.get()));
+    /**
+     * Stands in for NeoForge's {@code Entity.isInFluidType(FluidType)}: vanilla only tracks fluid
+     * contact per fluid tag, and these fluids are deliberately in neither water nor lava.
+     */
+    private static boolean isInFluid(LivingEntity entity, NuclearFluidEntry fluid) {
+        AABB box = entity.getBoundingBox().deflate(0.001);
+        Level level = entity.level();
+        for (BlockPos pos : BlockPos.betweenClosed(
+            BlockPos.containing(box.minX, box.minY, box.minZ),
+            BlockPos.containing(box.maxX, box.maxY, box.maxZ))) {
+            if (fluid.is(level.getFluidState(pos).getType()))
+                return true;
         }
+        return false;
     }
 
-    private static class SolidRenderedPlaceableFluidity extends AllFluids.TintedFluidType {
-
-        private Vector3f fogColor;
-        private int fogIntColor;
-        private Supplier<Float> fogDistance;
-
-        public static FluidTypeFactory create(int fogColor, Supplier<Float> fogDistance) {
-            return (p, s, f) -> {
-                SolidRenderedPlaceableFluidity fluidtype = new SolidRenderedPlaceableFluidity(p,s,f);
-                fluidtype.fogColor = new Color(fogColor, false).asVectorF();
-                fluidtype.fogIntColor = fogColor;
-                fluidtype.fogDistance = fogDistance;
-                return fluidtype;
-            };
-        }
-
-
-        private SolidRenderedPlaceableFluidity(Properties properties, Identifier stillTecture, Identifier flowingTexture) {
-            super(properties, stillTecture, flowingTexture);
-        }
-
-        @Override
-        protected int getTintColor(FluidStack stack) {
-            return NO_TINT;
-        }
-
-        @Override
-        protected int getTintColor(FluidState state, BlockAndTintGetter getter, BlockPos pos) {
-            return fogIntColor;
-        }
-
-        @Override
-        protected Vector3f getCustomFogColor() {
-            return fogColor;
-        }
-
-        @Override
-        protected float getFogDistanceModifier() {
-            return fogDistance.get();
+    /** Lava or water touching uranium turns into autunite, as upstream's FluidInteractionRegistry did. */
+    public static void registerFluidInteractions() {
+        Supplier<BlockState> autuniteState = () -> CNPaletteStoneTypes.AUTUNITE.getBaseBlock().get().defaultBlockState();
+        Fluid uranium = URANIUM.get();
+        for (Fluid source : new Fluid[]{Fluids.LAVA, Fluids.WATER}) {
+            FluidInteractionRegistry.addInteraction(source, new InteractionInformation(uranium, fs -> autuniteState.get()));
         }
     }
 
     private static final DispenseItemBehavior DEFAULT = new DefaultDispenseItemBehavior();
-    private static final DispenseItemBehavior DISPENSE_FLUID = new DefaultDispenseItemBehavior(){
+    private static final DispenseItemBehavior DISPENSE_FLUID = new DefaultDispenseItemBehavior() {
         @Override
         protected ItemStack execute(BlockSource pSource, ItemStack pStack) {
             DispensibleContainerItem dispensibleContainerItem = (DispensibleContainerItem) pStack.getItem();
             BlockPos pos = pSource.pos().relative(pSource.state().getValue(DispenserBlock.FACING));
             Level level = pSource.level();
-            if (dispensibleContainerItem.emptyContents(null, level, pos, null, pStack)) {
+            if (dispensibleContainerItem.emptyContents(null, level, pos, null)) {
                 return new ItemStack(Items.BUCKET);
             }
             return DEFAULT.dispense(pSource, pStack);

@@ -2,8 +2,7 @@ package net.nuclearteam.createnuclear.infrastructure.config;
 
 import com.zurrtum.create.catnip.config.ConfigBase;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
+import java.util.Arrays;
 import java.util.List;
 
 @MethodsReturnNonnullByDefault
@@ -39,24 +38,17 @@ public class CRadiation extends ConfigBase {
                         + "- Remove an entry to stop excluding it.\n";
     }
 
+    /**
+     * Catnip's config has no list values, unlike NeoForge's {@code defineListAllowEmpty}, so the
+     * blacklist is one comma-separated string. Same entries and same default as upstream.
+     */
     public static class ConfiguredLists extends ConfigBase {
-        private static ConfigValue<List<? extends String>> ENTITY_BLACKLIST = null;
-
-        @Override
-        public void registerAll(ModConfigSpec.Builder builder) {
-
-            ENTITY_BLACKLIST = builder
-                .comment(Comments.blackListEntity)
-                .defineListAllowEmpty(
-                    List.of("entity_blacklist"),
-                    () -> List.of(
-                        "minecraft:armor_stand",
-                        "minecraft:item_frame",
-                        "minecraft:glow_item_frame"
-                    ),
-                    obj -> obj instanceof String
-                );
-        }
+        public final ConfigString entityBlacklist = s(
+            "minecraft:armor_stand,minecraft:item_frame,minecraft:glow_item_frame",
+            "entity_blacklist",
+            Comments.blackListEntity,
+            "Entries are separated by commas."
+        );
 
         @Override
         public String getName() {
@@ -64,7 +56,10 @@ public class CRadiation extends ConfigBase {
         }
 
         public List<? extends String> getEntityBlackList() {
-            return ENTITY_BLACKLIST.get();
+            return Arrays.stream(entityBlacklist.get().split(","))
+                .map(String::trim)
+                .filter(entry -> !entry.isEmpty())
+                .toList();
         }
     }
 }

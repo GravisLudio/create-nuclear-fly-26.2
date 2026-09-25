@@ -1,36 +1,22 @@
 package net.nuclearteam.createnuclear.impl.registry;
 
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.registries.DataPackRegistryEvent;
-import net.nuclearteam.createnuclear.CreateNuclear;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.nuclearteam.createnuclear.api.CreateNuclearRegistries;
 import net.nuclearteam.createnuclear.api.multiblock.fluid.ReactorFluidType;
 import net.nuclearteam.createnuclear.api.multiblock.rods.RodType;
 import org.jetbrains.annotations.ApiStatus.Internal;
 
 /**
- * Declares the mod's custom datapack registries. Without this, the registries have no codec
- * registered, so datagen cannot clone them ("No cloner for createnuclear:fluids/type") and they
- * would never be loaded from datapacks at runtime.
+ * Declares the mod's custom datapack registries, synced to clients. Upstream did this from
+ * NeoForge's {@code DataPackRegistryEvent.NewRegistry}; Fabric's {@link DynamicRegistries} is the
+ * equivalent and has to be called during mod initialisation.
  */
-@EventBusSubscriber(modid = CreateNuclear.MOD_ID)
 public class CreateNuclearRegistriesImpl {
     private CreateNuclearRegistriesImpl() {}
 
     @Internal
-    @SubscribeEvent
-    public static void registerDatapackRegistries(DataPackRegistryEvent.NewRegistry event) {
-        event.dataPackRegistry(
-            CreateNuclearRegistries.ROD_TYPE,
-            RodType.CODEC,
-            RodType.CODEC
-        );
-
-        event.dataPackRegistry(
-            CreateNuclearRegistries.FLUID_TYPE,
-            ReactorFluidType.CODEC,
-            ReactorFluidType.CODEC
-        );
+    public static void register() {
+        DynamicRegistries.registerSynced(CreateNuclearRegistries.ROD_TYPE, RodType.CODEC, RodType.CODEC);
+        DynamicRegistries.registerSynced(CreateNuclearRegistries.FLUID_TYPE, ReactorFluidType.CODEC, ReactorFluidType.CODEC);
     }
 }

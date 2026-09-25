@@ -2,23 +2,18 @@ package net.nuclearteam.createnuclear;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.util.StringRepresentable;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import net.nuclearteam.createnuclear.content.biome.BiomeIrradiationExtractorItem;
 import net.nuclearteam.createnuclear.content.equipment.cloth.ClothItem.ClothItemStack;
 import net.nuclearteam.createnuclear.content.equipment.cloth.ClothItem.Cloths;
 import net.nuclearteam.createnuclear.content.multiblock.bluePrintItem.ReactorBluePrintData;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.UnaryOperator;
 
 public class CNDataComponents {
-    private static final DeferredRegister.DataComponents DATA_COMPONENTS = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, CreateNuclear.MOD_ID);
-
     /**
      * Reactor heat stored on the blueprint stack, written by the controller on every tick.
      * <p>
@@ -43,7 +38,7 @@ public class CNDataComponents {
 
     public static final DataComponentType<Cloths> CLOTH_COLOR = register(
         "cloth_color",
-        b -> b.persistent(StringRepresentable.fromEnum(Cloths::values)).networkSynchronized(NeoForgeStreamCodecs.enumCodec(Cloths.class))
+        b -> b.persistent(StringRepresentable.fromEnum(Cloths::values)).networkSynchronized(Cloths.STREAM_CODEC)
     );
 
     public static final DataComponentType<ClothItemStack> CLOTH_ITEM = register(
@@ -58,12 +53,10 @@ public class CNDataComponents {
 
     private static <T> DataComponentType<T> register(String name, UnaryOperator<DataComponentType.Builder<T>> builder) {
         DataComponentType<T> type = builder.apply(DataComponentType.builder()).build();
-        DATA_COMPONENTS.register(name, () -> type);
-        return type;
+        return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, CreateNuclear.asResource(name), type);
     }
 
-    @ApiStatus.Internal
-    public static void register(IEventBus modEventBus) {
-        DATA_COMPONENTS.register(modEventBus);
+    /** Forces class loading from the initialiser; the fields above do the registering. */
+    public static void register() {
     }
 }

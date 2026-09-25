@@ -1,69 +1,29 @@
 package net.nuclearteam.createnuclear;
 
-import com.simibubi.create.foundation.particle.ICustomParticleData;
-import com.zurrtum.create.client.catnip.lang.Lang;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.bus.api.IEventBus;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.nuclearteam.createnuclear.content.particles.IrradiatedParticlesData;
 
-import java.util.function.Supplier;
+/**
+ * Particle types with data. Upstream went through Create's {@code ICustomParticleData}, which
+ * bundled the type with its client factory; the factories are client-side now, in
+ * {@code client.CNParticles}. The data-less mushroom cloud types are in {@link CNParticleRegistry}.
+ */
+public class CNParticleTypes {
+    public static final String IRRADIATED_PARTICLES_ID = "irradiated_particles";
 
-public enum CNParticleTypes {
+    public static final ParticleType<IrradiatedParticlesData> IRRADIATED_PARTICLES = register(
+        IRRADIATED_PARTICLES_ID,
+        FabricParticleTypes.complex(IrradiatedParticlesData.CODEC, IrradiatedParticlesData.STREAM_CODEC)
+    );
 
-    IRRADIATED_PARTICLES(IrradiatedParticlesData::new),
-    ;
-
-    private final ParticleEntry<?> entry;
-
-    <D extends ParticleOptions> CNParticleTypes(Supplier<? extends ICustomParticleData<D>> typeFactory) {
-        String name = Lang.asId(name());
-        entry = new ParticleEntry<>(name, typeFactory);
+    private static <T extends ParticleOptions> ParticleType<T> register(String name, ParticleType<T> type) {
+        return Registry.register(BuiltInRegistries.PARTICLE_TYPE, CreateNuclear.asResource(name), type);
     }
 
-    public static void register(IEventBus modEventBus) {
-        ParticleEntry.REGISTER.register(modEventBus);
-    }
-
-    @Environment(EnvType.CLIENT)
-    public static void registerFactories(RegisterParticleProvidersEvent event) {
-        for (CNParticleTypes particle : values())
-            particle.entry.registerFactory(event);
-    }
-
-    public ParticleType<?> get() {
-        return entry.object.get();
-    }
-
-    public String parameter() {
-        return entry.name;
-    }
-
-
-    private static class ParticleEntry<D extends ParticleOptions> {
-        private static final DeferredRegister<ParticleType<?>> REGISTER = DeferredRegister.create(BuiltInRegistries.PARTICLE_TYPE, CreateNuclear.MOD_ID);
-
-        private final String name;
-        private final Supplier<? extends ICustomParticleData<D>> typeFactory;
-        private final DeferredHolder<ParticleType<?>, ParticleType<D>> object;
-
-        public ParticleEntry(String name, Supplier<? extends ICustomParticleData<D>> typeFactory) {
-            this.name = name;
-            this.typeFactory = typeFactory;
-
-            object = REGISTER.register(name, () -> this.typeFactory.get().createType());
-        }
-
-        @Environment(EnvType.CLIENT)
-        public void registerFactory(RegisterParticleProvidersEvent event) {
-            typeFactory.get()
-                    .register(object.get(), event);
-        }
+    public static void register() {
     }
 }

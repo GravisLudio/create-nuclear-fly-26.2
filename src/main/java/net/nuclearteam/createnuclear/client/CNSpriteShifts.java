@@ -1,4 +1,6 @@
-package net.nuclearteam.createnuclear;
+package net.nuclearteam.createnuclear.client;
+
+import net.nuclearteam.createnuclear.CreateNuclear;
 
 import com.zurrtum.create.client.foundation.block.connected.AllCTTypes;
 import com.zurrtum.create.client.foundation.block.connected.CTSpriteShiftEntry;

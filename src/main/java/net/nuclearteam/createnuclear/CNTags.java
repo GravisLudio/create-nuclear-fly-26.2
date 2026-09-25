@@ -1,6 +1,5 @@
 package net.nuclearteam.createnuclear;
 
-import com.zurrtum.create.client.catnip.lang.Lang;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -95,11 +94,11 @@ public class CNTags {
         }
 
         CNBlockTags(NameSpace nameSpace, String path, boolean optional, boolean alwaysDatagenDefault) {
-            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? name().toLowerCase(java.util.Locale.ROOT) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.BLOCK, id);
             } else {
-                tag = BlockTags.create(id);
+                tag = TagKey.create(Registries.BLOCK, id);
             }
             this.alwaysDatagen = alwaysDatagenDefault;
         }
@@ -148,11 +147,11 @@ public class CNTags {
         }
 
         CNItemTags(NameSpace nameSpace, String path, boolean optional, boolean alwaysDatagenDefault) {
-            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? name().toLowerCase(java.util.Locale.ROOT) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.ITEM, id);
             } else {
-                tag = ItemTags.create(id);
+                tag = TagKey.create(Registries.ITEM, id);
             }
             this.alwaysDatagen = alwaysDatagenDefault;
         }
@@ -194,11 +193,11 @@ public class CNTags {
         }
 
         CNFluidTags(NameSpace nameSpace, String path, boolean optional, boolean alwaysDatagenDefault) {
-            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? name().toLowerCase(java.util.Locale.ROOT) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.FLUID, id);
             } else {
-                tag = FluidTags.create(id);
+                tag = TagKey.create(Registries.FLUID, id);
             }
             this.alwaysDatagen = alwaysDatagenDefault;
         }
@@ -238,7 +237,7 @@ public class CNTags {
         }
 
         CNEntityTags(NameSpace nameSpace, String path, boolean optional, boolean alwaysDatagenDefault) {
-            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(nameSpace.id, path == null ? name().toLowerCase(java.util.Locale.ROOT) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.ENTITY_TYPE, id);
             } else {
@@ -248,7 +247,7 @@ public class CNTags {
         }
 
         public boolean matches(EntityType<?> type) {
-            return type.is(tag);
+            return type.builtInRegistryHolder().is(tag);
         }
 
         public boolean matches(Entity entity) {
@@ -282,7 +281,7 @@ public class CNTags {
         }
 
         CNRecipeSerializerTags(NameSpace namespace, String path, boolean optional, boolean alwaysDatagen) {
-            Identifier id = Identifier.fromNamespaceAndPath(namespace.id, path == null ? Lang.asId(name()) : path);
+            Identifier id = Identifier.fromNamespaceAndPath(namespace.id, path == null ? name().toLowerCase(java.util.Locale.ROOT) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.RECIPE_SERIALIZER, id);
             } else {
@@ -292,8 +291,7 @@ public class CNTags {
         }
 
         public boolean matches(RecipeSerializer<?> recipeSerializer) {
-            ResourceKey<RecipeSerializer<?>> key = BuiltInRegistries.RECIPE_SERIALIZER.getResourceKey(recipeSerializer).orElseThrow();
-            return BuiltInRegistries.RECIPE_SERIALIZER.getHolder(key).orElseThrow().is(tag);
+            return BuiltInRegistries.RECIPE_SERIALIZER.wrapAsHolder(recipeSerializer).is(tag);
         }
 
         private static void init() {}

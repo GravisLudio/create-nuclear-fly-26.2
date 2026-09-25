@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear.content.kinetics.fan.processing;
 
 import com.zurrtum.create.AllRecipeTypes;
-import com.simibubi.create.api.registry.CreateBuiltInRegistries;
+import com.zurrtum.create.api.registry.CreateRegistries;
 import com.zurrtum.create.content.kinetics.fan.processing.FanProcessingType;
 import com.zurrtum.create.foundation.recipe.RecipeApplier;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -48,7 +49,7 @@ public class CNFanProcessingTypes {
     }
 
     private static <T extends FanProcessingType> T register(String id, T type) {
-        return Registry.register(CreateBuiltInRegistries.FAN_PROCESSING_TYPE, CreateNuclear.asResource(id), type);
+        return Registry.register(CreateRegistries.FAN_PROCESSING_TYPE, CreateNuclear.asResource(id), type);
     }
 
     @Nullable
@@ -85,29 +86,33 @@ public class CNFanProcessingTypes {
 
         @Override
         public boolean canProcess(ItemStack stack, Level level) {
-            Optional<RecipeHolder<Recipe<SingleRecipeInput>>> recipe = CNRecipeTypes.ENRICHED.find(new SingleRecipeInput(stack), level);
-            return recipe.isPresent();
+            return level.recipeAccess().propertySet(CNRecipeTypes.ENRICHED_SET).test(stack);
         }
 
         @Nullable
         @Override
         public List<ItemStack> process(ItemStack stack, Level level) {
-            return CNRecipeTypes.ENRICHED.find(new SingleRecipeInput(stack), level)
-                    .map(RecipeHolder::value)
-                    .map(r -> RecipeApplier.applyRecipeOn(level, stack, r, true))
-                    .orElse(null);
+            SingleRecipeInput input = new SingleRecipeInput(stack);
+            Optional<RecipeHolder<EnrichedRecipe>> recipe = ((ServerLevel) level).recipeAccess()
+                .getRecipeFor(CNRecipeTypes.ENRICHED, input, level);
+            return recipe.map(entry -> RecipeApplier.applyRecipeOn(
+                level.getRandom(),
+                stack.getCount(),
+                input,
+                entry.value()
+            )).orElse(null);
         }
 
         @Override
         public void spawnProcessingParticles(Level level, Vec3 pos) {
-            if (level.random.nextInt(8) != 0) return;
-            pos = pos.add(VecHelper.offsetRandomly(Vec3.ZERO, level.random, 1)
+            if (level.getRandom().nextInt(8) != 0) return;
+            pos = pos.add(VecHelper.offsetRandomly(Vec3.ZERO, level.getRandom(), 1)
                     .multiply(1, 0.5f, 1)
                     .normalize()
                     .scale(0.15f)
             );
             level.addParticle(ParticleTypes.ANGRY_VILLAGER, pos.x, pos.y + .45f, pos.z, 0.0, 0.0, 0.0);
-            if (level.random.nextInt(2) != 0) level.addParticle(ParticleTypes.FIREWORK, pos.x, pos.y + .25f, pos.z, 0.0, 0.0, 0.0);
+            if (level.getRandom().nextInt(2) != 0) level.addParticle(ParticleTypes.FIREWORK, pos.x, pos.y + .25f, pos.z, 0.0, 0.0, 0.0);
         }
 
         @Override
@@ -142,29 +147,33 @@ public class CNFanProcessingTypes {
 
         @Override
         public boolean canProcess(ItemStack stack, Level level) {
-            Optional<RecipeHolder<Recipe<SingleRecipeInput>>> recipe = CNRecipeTypes.SNOW_POWDER.find(new SingleRecipeInput(stack), level);
-            return recipe.isPresent();
+            return level.recipeAccess().propertySet(CNRecipeTypes.SNOW_POWDER_SET).test(stack);
         }
 
         @Nullable
         @Override
         public List<ItemStack> process(ItemStack stack, Level level) {
-            return CNRecipeTypes.SNOW_POWDER.find(new SingleRecipeInput(stack), level)
-                    .map(RecipeHolder::value)
-                    .map(r -> RecipeApplier.applyRecipeOn(level, stack, r, true))
-                    .orElse(null);
+            SingleRecipeInput input = new SingleRecipeInput(stack);
+            Optional<RecipeHolder<SnowPowderRecipe>> recipe = ((ServerLevel) level).recipeAccess()
+                .getRecipeFor(CNRecipeTypes.SNOW_POWDER, input, level);
+            return recipe.map(entry -> RecipeApplier.applyRecipeOn(
+                level.getRandom(),
+                stack.getCount(),
+                input,
+                entry.value()
+            )).orElse(null);
         }
 
         @Override
         public void spawnProcessingParticles(Level level, Vec3 pos) {
-            if (level.random.nextInt(8) != 0) return;
-            pos = pos.add(VecHelper.offsetRandomly(Vec3.ZERO, level.random, 1)
+            if (level.getRandom().nextInt(8) != 0) return;
+            pos = pos.add(VecHelper.offsetRandomly(Vec3.ZERO, level.getRandom(), 1)
                     .multiply(1, 0.5f, 1)
                     .normalize()
                     .scale(0.15f)
             );
             level.addParticle(ParticleTypes.SNOWFLAKE, pos.x, pos.y + .45f, pos.z, 0.0, 0.0, 0.0);
-            if (level.random.nextInt(2) != 0) level.addParticle(ParticleTypes.SNEEZE, pos.x, pos.y + .25f, pos.z, 0.0, 0.0, 0.0);
+            if (level.getRandom().nextInt(2) != 0) level.addParticle(ParticleTypes.SNEEZE, pos.x, pos.y + .25f, pos.z, 0.0, 0.0, 0.0);
         }
 
         @Override
@@ -178,7 +187,7 @@ public class CNFanProcessingTypes {
         @Override
         public void affectEntity(Entity entity, Level level) {
             if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 0, true, true));
+                livingEntity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 10, 0, true, true));
             }
         }
     }

@@ -1,25 +1,24 @@
 package net.nuclearteam.createnuclear;
 
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.attachment.AttachmentType;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.nuclearteam.createnuclear.content.radiation.capability.RadiationCapability;
 
-import java.util.function.Supplier;
-
+/**
+ * NeoForge attachment types, on Fabric's data attachment API. Upstream synced the radiation data
+ * only to the player carrying it ({@code player.syncData}), hence {@code targetOnly}.
+ */
+@SuppressWarnings("UnstableApiUsage")
 public class CNAttachmentTypes {
-    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, CreateNuclear.MOD_ID);
-
-    public static final Supplier<AttachmentType<RadiationCapability>> RADIATION = ATTACHMENT_TYPES.register("radiation", () -> AttachmentType
-        .builder(RadiationCapability::new)
-        .serialize(RadiationCapability.CODEC)
-        .sync(RadiationCapability.STREAM_CODEC)
-        .build()
+    public static final AttachmentType<RadiationCapability> RADIATION = AttachmentRegistry.create(
+        CreateNuclear.asResource("radiation"),
+        builder -> builder
+            .initializer(RadiationCapability::new)
+            .persistent(RadiationCapability.CODEC)
+            .syncWith(RadiationCapability.STREAM_CODEC, AttachmentSyncPredicate.targetOnly())
     );
 
-    public static void register(IEventBus modEventBus) {
-        ATTACHMENT_TYPES.register(modEventBus);
+    public static void register() {
     }
-
 }

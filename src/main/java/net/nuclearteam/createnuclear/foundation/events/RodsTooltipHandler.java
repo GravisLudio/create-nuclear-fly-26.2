@@ -6,19 +6,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.fabricmc.api.EnvType;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.nuclearteam.createnuclear.CreateNuclear;
 import net.nuclearteam.createnuclear.foundation.item.RodsStats;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import java.util.List;
 
-@EventBusSubscriber(modid = CreateNuclear.MOD_ID, value = Dist.CLIENT)
+/** Was an {@code ItemTooltipEvent} subscriber; registered on Fabric's {@code ItemTooltipCallback} in {@code CreateNuclearClient}. */
 public class RodsTooltipHandler {
-    @SubscribeEvent
-    public static void onItemTooltip(ItemTooltipEvent event) {
-        ItemStack stack = event.getItemStack();
+    public static void onItemTooltip(ItemStack stack, List<Component> tooltip) {
         Item item = stack.getItem();
-        Player player = event.getEntity();
+        Player player = Minecraft.getInstance().player;
 
         if (player == null) return;
 
@@ -30,6 +28,6 @@ public class RodsTooltipHandler {
         if (id != null && CreateNuclear.MOD_ID.equals(id.getNamespace())) return;
 
         RodsStats rodsStats = RodsStats.create(item);
-        rodsStats.modify(event);
+        rodsStats.modify(tooltip, player);
     }
 }

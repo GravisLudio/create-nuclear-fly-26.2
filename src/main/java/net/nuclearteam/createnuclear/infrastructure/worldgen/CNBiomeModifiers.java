@@ -1,52 +1,26 @@
 package net.nuclearteam.createnuclear.infrastructure.worldgen;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderGetter;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstrapContext;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.tags.BiomeTags;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.neoforged.neoforge.common.world.BiomeModifier;
-import net.neoforged.neoforge.common.world.BiomeModifiers.AddFeaturesBiomeModifier;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import net.nuclearteam.createnuclear.CreateNuclear;
 
+/**
+ * Ore placement. Upstream generated NeoForge {@code add_features} biome modifiers targeting
+ * {@code #minecraft:is_overworld}; Fabric does the same from code through {@link BiomeModifications},
+ * and the placed features themselves stay data-driven under {@code worldgen/placed_feature}.
+ */
 public class CNBiomeModifiers {
-    public static final ResourceKey<BiomeModifier>
-        URANIUM_ORE = key("uranium_ore"),
-        LEAD_ORE = key("lead_ore"),
-        THORIUM_ORE = key("thorium_ore"),
-        NITRATE_ORE = key("nitrate_ore"),
-        STRIATED_ORES_OVERWORLD = key("striated_ores_overworld")
-    ;
-
-    private static ResourceKey<BiomeModifier> key(String name) {
-        return ResourceKey.create(NeoForgeRegistries.Keys.BIOME_MODIFIERS, CreateNuclear.asResource(name));
+    public static void register() {
+        addOre(CNPlacedFeatures.URANIUM_ORE);
+        addOre(CNPlacedFeatures.LEAD_ORE);
+        addOre(CNPlacedFeatures.THORIUM_ORE);
+        addOre(CNPlacedFeatures.NITRATE_ORE);
+        addOre(CNPlacedFeatures.STRIATED_ORES_OVERWORLD);
     }
 
-    public static void bootstrap(BootstrapContext<BiomeModifier> ctx) {
-        HolderGetter<Biome> biomeLookup = ctx.lookup(Registries.BIOME);
-        HolderSet<Biome> isOverworld = biomeLookup.getOrThrow(BiomeTags.IS_OVERWORLD);
-
-        HolderGetter<PlacedFeature> featureLookup = ctx.lookup(Registries.PLACED_FEATURE);
-        Holder<PlacedFeature> uraniumOre = featureLookup.getOrThrow(CNPlacedFeatures.URANIUM_ORE);
-        Holder<PlacedFeature> leadOre = featureLookup.getOrThrow(CNPlacedFeatures.LEAD_ORE);
-        Holder<PlacedFeature> thoriumOre = featureLookup.getOrThrow(CNPlacedFeatures.THORIUM_ORE);
-        Holder<PlacedFeature> nitrateOre = featureLookup.getOrThrow(CNPlacedFeatures.NITRATE_ORE);
-        Holder<PlacedFeature> striatedOresOverworld = featureLookup.getOrThrow(CNPlacedFeatures.STRIATED_ORES_OVERWORLD);
-
-        ctx.register(URANIUM_ORE, addOre(isOverworld, uraniumOre));
-        ctx.register(LEAD_ORE, addOre(isOverworld, leadOre));
-        ctx.register(THORIUM_ORE, addOre(isOverworld, thoriumOre));
-        ctx.register(NITRATE_ORE, addOre(isOverworld, nitrateOre));
-        ctx.register(STRIATED_ORES_OVERWORLD, addOre(isOverworld, striatedOresOverworld));
-    }
-
-    private static AddFeaturesBiomeModifier addOre(HolderSet<Biome> biomes, Holder<PlacedFeature> feature) {
-        return new AddFeaturesBiomeModifier(biomes, HolderSet.direct(feature), GenerationStep.Decoration.UNDERGROUND_ORES);
+    private static void addOre(ResourceKey<PlacedFeature> feature) {
+        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Decoration.UNDERGROUND_ORES, feature);
     }
 }

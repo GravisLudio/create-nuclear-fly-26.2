@@ -7,13 +7,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import net.nuclearteam.createnuclear.api.multiblock.rods.RodType;
 import net.nuclearteam.createnuclear.foundation.utility.CreateNuclearLang;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
+@Environment(EnvType.CLIENT)
 public record RodsStats(Item item) implements TooltipModifier {
 
     public static RodsStats create(Item item) {
@@ -21,10 +23,10 @@ public record RodsStats(Item item) implements TooltipModifier {
     }
 
     @Override
-    public void modify(ItemTooltipEvent context) {
-        List<Component> rodTypesStat = getRodTypeStats(item, context.getEntity());
+    public void modify(List<Component> tooltip, Player player) {
+        if (player == null) return;
+        List<Component> rodTypesStat = getRodTypeStats(item, player);
         if (!rodTypesStat.isEmpty()) {
-            List<Component> tooltip = context.getToolTip();
             tooltip.add(CommonComponents.EMPTY);
             tooltip.addAll(rodTypesStat);
         }

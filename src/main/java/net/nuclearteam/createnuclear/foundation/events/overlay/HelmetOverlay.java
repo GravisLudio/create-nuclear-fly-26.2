@@ -2,16 +2,15 @@ package net.nuclearteam.createnuclear.foundation.events.overlay;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.nuclearteam.createnuclear.CNTags.CNItemTags;
 import net.nuclearteam.createnuclear.CreateNuclear;
 import net.nuclearteam.createnuclear.foundation.utility.RenderHelper;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 
 /**
  * HUD overlay for displaying helmet condition based on durability.
@@ -29,28 +28,28 @@ public class HelmetOverlay  implements HudOverlay {
 
     @Override
     public Identifier getAfterOverlay() {
-        return VanillaGuiLayers.CAMERA_OVERLAYS;
+        return VanillaHudElements.MISC_OVERLAYS;
     }
 
     @Override
     public Identifier getOverlayId() {
-        return Identifier.parse("helmet_overlay");
+        return CreateNuclear.asResource("helmet_overlay");
     }
 
     @Override
     public boolean isActive() {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return false;
-        ItemStack helmet = player.getInventory().getArmor(EquipmentSlot.HEAD.getIndex());
+        ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
         return !helmet.isEmpty() && helmet.is(CNItemTags.ANTI_RADIATION_HELMET.tag);
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker) {
         if (!isActive()) return;
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
-        ItemStack helmet = player.getInventory().getArmor(EquipmentSlot.HEAD.getIndex());
+        ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
         if (helmet.isEmpty()) return;
 
         // Calculate durability ratio
@@ -77,16 +76,11 @@ public class HelmetOverlay  implements HudOverlay {
     public int getPriority() {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return BASE_PRIORITY;
-        ItemStack helmet = player.getInventory().getArmor(EquipmentSlot.HEAD.getIndex());
+        ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
         if (helmet.isEmpty()) return BASE_PRIORITY;
 
         float durabilityRatio = (helmet.getMaxDamage() - helmet.getDamageValue())
                 / (float) helmet.getMaxDamage();
         return BASE_PRIORITY + (int) ((1f - durabilityRatio) * 100);
-    }
-
-    @Override
-    public LayeredDraw.Layer getOverlay() {
-        return this::render;
     }
 }

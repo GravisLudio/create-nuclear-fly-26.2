@@ -1,5 +1,8 @@
 package net.nuclearteam.createnuclear.content.equipment.cloth;
 
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+
 import com.mojang.serialization.Codec;
 import net.nuclearteam.createnuclear.foundation.registrate.ItemEntry;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -67,6 +70,10 @@ public class ClothItem extends Item {
         LIME_CLOTH(DyeColor.LIME),
         MAGENTA_CLOTH(DyeColor.MAGENTA),
         DEFAULT(null, "default");
+
+        /** Was NeoForgeStreamCodecs.enumCodec: the constant's ordinal as a var-int. */
+        public static final StreamCodec<ByteBuf, Cloths> STREAM_CODEC =
+            ByteBufCodecs.idMapper(i -> values()[i], Cloths::ordinal);
 
         private static Map<DyeColor, ItemEntry<ClothItem>> clothMap;
 

@@ -17,9 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.nuclearteam.createnuclear.*;
 import net.nuclearteam.createnuclear.CNTags.CNEntityTags;
 import net.nuclearteam.createnuclear.api.radiation.IRadiationSource;
@@ -30,7 +28,6 @@ import net.nuclearteam.createnuclear.infrastructure.config.CNConfigs;
 
 import java.util.*;
 
-@EventBusSubscriber(modid = CreateNuclear.MOD_ID)
 public class RadiationCapability {
    public static final Codec<RadiationCapability> CODEC = RecordCodecBuilder.create(i -> i.group(
        Codec.DOUBLE.optionalFieldOf("radiation", 0D).forGetter(RadiationCapability::getRadiation),
@@ -81,28 +78,25 @@ public class RadiationCapability {
         return cap;
     }
 
-    @SubscribeEvent
-    public static void onEntityTick(EntityTickEvent.Pre event) {
-        if (event.getEntity() instanceof LivingEntity living) {
-            tickRadiation(living);
-        }
-    }
-
     public static void applyContagion(LivingEntity entity, double doseValue, int durationTicks) {
-        RadiationCapability cap = entity.getData(CNAttachmentTypes.RADIATION);
+        RadiationCapability cap = entity.getAttachedOrCreate(CNAttachmentTypes.RADIATION);
         cap.setContagionDose(doseValue);
         cap.setContagionTicks(durationTicks);
     }
 
+    /**
+     * Was an {@code EntityTickEvent.Pre} listener; called from {@code LivingEntityMixin} now, which
+     * is the only per-entity tick hook on Fabric.
+     */
     public static void tickRadiation(LivingEntity entity) {
         Level level = entity.level();
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
 
         // Checked before getData: getData creates and stores the attachment on first access, so
         // guarding first keeps immune/blacklisted entities from accumulating one every tick.
         if (!canBeIrradiated(entity)) return;
 
-        RadiationCapability cap = entity.getData(CNAttachmentTypes.RADIATION);
+        RadiationCapability cap = entity.getAttachedOrCreate(CNAttachmentTypes.RADIATION);
 
         if (entity instanceof Player player) {
             long newHash = InventoryHashUtil.compute(player);
@@ -110,13 +104,15 @@ public class RadiationCapability {
                 cap.setInventoryHash(newHash);
                 cap.setRadiation(Math.max(0, computeItemRadiation(player)));
             }
-            player.syncData(CNAttachmentTypes.RADIATION);
+            // Fabric syncs an attachment when it is set, not when the object is mutated; setting the
+            // same instance again is the equivalent of NeoForge's syncData.
+            player.setAttached(CNAttachmentTypes.RADIATION, cap);
         } else {
             cap.setRadiation(Math.max(0, computeItemRadiation(entity)));
         }
 
         ResourceKey<Biome> biomeKey = level.getBiome(entity.blockPosition()).unwrapKey().orElse(null);
-        Identifier biomeLoc = biomeKey != null ? biomeKey.location() : null;
+        Identifier biomeLoc = biomeKey != null ? biomeKey.identifier() : null;
         if (!Objects.equals(biomeLoc, cap.getLastBiomeLocation())) {
             cap.setLastBiomeLocation(biomeLoc);
         }
@@ -136,16 +132,12 @@ public class RadiationCapability {
 
     private static double computeItemRadiation(Player player) {
         double radiation = 0;
-        for (ItemStack stack : player.getInventory().items) {
-            if (stack.getItem() instanceof IRadiationSource source)
-                radiation += source.getRadiation(stack, player);
-            radiation += RadiationRegistry.getRadiation(stack, player);
+        // Upstream read the main inventory and the offhand, not the armour slots; in 26.2 those two
+        // are the non-equipment list plus the offhand equipment slot.
+        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+            radiation += getStackRadiation(stack, player);
         }
-        for (ItemStack stack : player.getInventory().offhand) {
-            if (stack.getItem() instanceof IRadiationSource source)
-                radiation += source.getRadiation(stack, player);
-            radiation += RadiationRegistry.getRadiation(stack, player);
-        }
+        radiation += getStackRadiation(player.getItemBySlot(EquipmentSlot.OFFHAND), player);
         return radiation;
     }
 
@@ -158,8 +150,9 @@ public class RadiationCapability {
 
     private static double computeItemRadiation(LivingEntity entity) {
         double radiation = 0;
-        for (ItemStack stack : entity.getArmorSlots()) {
-            radiation += getStackRadiation(stack, entity);
+        for (EquipmentSlot slot : EquipmentSlot.VALUES) {
+            if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR)
+                radiation += getStackRadiation(entity.getItemBySlot(slot), entity);
         }
         radiation += getStackRadiation(entity.getMainHandItem(), entity);
         radiation += getStackRadiation(entity.getOffhandItem(), entity);
@@ -173,7 +166,7 @@ public class RadiationCapability {
 
     public static boolean canBeIrradiated(LivingEntity entity) {
         if (entity.isSpectator()) return false;
-        if (entity.getType().is(CNEntityTags.IRRADIATED_IMMUNE.tag)) return false;
+        if (CNEntityTags.IRRADIATED_IMMUNE.matches(entity)) return false;
         if (!CNConfigs.server().radiation.enabledItemRadiation.get()) return false;
         if (getEntityBlacklist().contains(entity.getType())) return false;
         return getRadiationResistance(entity) < 1.0;
@@ -187,7 +180,7 @@ public class RadiationCapability {
         if (source != cachedBlacklistSource) {
             Set<EntityType<?>> resolved = new HashSet<>();
             ConfigValueResolver.loadValuesInSet(source, resolved,
-                    entry -> BuiltInRegistries.ENTITY_TYPE.get(Identifier.tryParse(entry)));
+                    entry -> BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.tryParse(entry)));
             cachedBlacklist = resolved;
             cachedBlacklistSource = source;
         }

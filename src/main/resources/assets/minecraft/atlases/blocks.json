@@ -1,33 +1,28 @@
 {
   "sources": [
     {
-      "type": "single",
-      "resource": "createnuclear:fluid/thorium_flow"
-    },
-    {
-      "type": "single",
-      "resource": "createnuclear:fluid/thorium_still"
-    },
-    {
-      "type": "single",
-      "resource": "createnuclear:fluid/uranium_flow"
-    },
-    {
-      "type": "single",
+      "type": "minecraft:single",
       "resource": "createnuclear:fluid/uranium_still"
     },
     {
-      "type": "single",
-      "resource": "createnuclear:fluid/nitrogen_flow"
+      "type": "minecraft:single",
+      "resource": "createnuclear:fluid/uranium_flow"
     },
     {
-      "type": "single",
+      "type": "minecraft:single",
+      "resource": "createnuclear:fluid/thorium_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "createnuclear:fluid/thorium_flow"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "createnuclear:fluid/nitrogen_still"
     },
     {
-      "type": "directory",
-      "source": "models/armor",
-      "prefix": "models/armor/"
+      "type": "minecraft:single",
+      "resource": "createnuclear:fluid/nitrogen_flow"
     }
   ]
 }

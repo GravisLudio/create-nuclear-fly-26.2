@@ -3,8 +3,6 @@ package net.nuclearteam.createnuclear.content.particles;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.simibubi.create.foundation.particle.ICustomParticleDataWithSprite;
-import net.minecraft.client.particle.ParticleEngine.SpriteParticleRegistration;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,7 +13,7 @@ import net.nuclearteam.createnuclear.CNParticleTypes;
 
 import java.util.Locale;
 
-public class IrradiatedParticlesData implements ParticleOptions, ICustomParticleDataWithSprite<IrradiatedParticlesData> {
+public class IrradiatedParticlesData implements ParticleOptions {
 
     public static final MapCodec<IrradiatedParticlesData> CODEC = RecordCodecBuilder.mapCodec(i ->
         i.group(
@@ -41,8 +39,8 @@ public class IrradiatedParticlesData implements ParticleOptions, ICustomParticle
     }
 
     @Override
-    public ParticleType<?> getType() {
-        return CNParticleTypes.IRRADIATED_PARTICLES.get();
+    public ParticleType<IrradiatedParticlesData> getType() {
+        return CNParticleTypes.IRRADIATED_PARTICLES;
     }
 
     public void writeToNetwork(FriendlyByteBuf buffer) {
@@ -50,19 +48,7 @@ public class IrradiatedParticlesData implements ParticleOptions, ICustomParticle
     }
 
     public String writeToString() {
-        return String.format(Locale.ROOT, "%s %d", CNParticleTypes.IRRADIATED_PARTICLES.parameter(), t);
+        return String.format(Locale.ROOT, "%s %d", CNParticleTypes.IRRADIATED_PARTICLES_ID, t);
     }
 
-    public MapCodec<IrradiatedParticlesData> getCodec(ParticleType<IrradiatedParticlesData> type) {
-        return CODEC;
-    }
-
-    public StreamCodec<RegistryFriendlyByteBuf, IrradiatedParticlesData> getStreamCodec() {
-        return STREAM_CODEC;
-    }
-
-    @Override
-    public SpriteParticleRegistration<IrradiatedParticlesData> getMetaFactory() {
-        return IrradiatedParticles.Provider::new;
-    }
 }

@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear.foundation.mixin.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.nuclearteam.createnuclear.CNEffects;
@@ -10,16 +10,20 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-@Mixin(Gui.class)
+/**
+ * Heart rendering moved from {@code Gui.renderHeart} to {@code Hud.extractHeart} in 26.2, and the
+ * sprite blit gained a leading {@code RenderPipeline}, so the sprite is argument 1 now.
+ */
+@Mixin(Hud.class)
 public class RadiationHeartMixin {
 
     @ModifyArg(
-            method = "renderHeart",
+            method = "extractHeart",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/GuiGraphics;blitSprite(Lnet/minecraft/resources/Identifier;IIII)V"
+                    target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIII)V"
             ),
-            index = 0
+            index = 1
     )
     private Identifier CN$changeHeartTexture(Identifier originalTexture) {
         Player player = Minecraft.getInstance().player;

@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear.foundation.events.overlay;
 
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Abstract HUD overlay with a smooth fade-in/out (ease-in-out) effect.
@@ -11,7 +11,7 @@ public abstract class EasingHudOverlay implements HudOverlay {
     protected float fadeSpeed = 0.01f;
 
     @Override
-    public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker) {
         // Update progress based on the active state
         progress = isActive()
                 ? Math.min(1f, progress + fadeSpeed)
@@ -23,19 +23,13 @@ public abstract class EasingHudOverlay implements HudOverlay {
 
     /**
      * Smoothstep interpolation (ease-in-out).
-     * @param t linear progress [0,1]
-     * @return eased value
      */
     private float ease(float t) {
         return t * t * (3f - 2f * t);
     }
 
     /**
-     * Renders the overlay with a specific alpha.
-     * Subclasses implement the actual drawing here.
-     * @param graphics the GUI graphics context
-     * @param partialTicks frame interpolation value
-     * @param alpha transparency level [0,1]
+     * Renders the overlay with a specific alpha. Subclasses implement the actual drawing here.
      */
-    protected abstract void renderWithAlpha(GuiGraphics graphics, float partialTicks, float alpha);
+    protected abstract void renderWithAlpha(GuiGraphicsExtractor graphics, float partialTicks, float alpha);
 }

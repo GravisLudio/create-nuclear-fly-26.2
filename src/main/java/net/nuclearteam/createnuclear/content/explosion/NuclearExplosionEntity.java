@@ -52,7 +52,7 @@ public class NuclearExplosionEntity extends Entity {
             while (particleY > level().getMinBuildHeight() && particleY > this.getY() - radius / 2F && isDestroyable(level().getBlockState(BlockPos.containing(this.getX(), particleY, this.getZ())))) {
                 particleY--;
             }
-            level().addAlwaysVisibleParticle(CNParticleRegistry.NUCLEAR_MUSHROOM_CLOUD.get(), true, this.getX(), particleY + 2, this.getZ(), this.getSize(), isIntentionalGameDesign() ? 1.0F : 0.0F, 0);
+            level().addAlwaysVisibleParticle(CNParticleRegistry.NUCLEAR_MUSHROOM_CLOUD, true, this.getX(), particleY + 2, this.getZ(), this.getSize(), isIntentionalGameDesign() ? 1.0F : 0.0F, 0);
         }
         if (tickCount > 40 && destroyingChunks.isEmpty()) {
             this.remove(RemovalReason.DISCARDED);

@@ -1,7 +1,5 @@
 package net.nuclearteam.createnuclear;
 
-import com.zurrtum.create.client.AllPartialModels;
-import com.zurrtum.create.client.content.kinetics.base.OrientedRotatingVisual;
 import net.nuclearteam.createnuclear.foundation.registrate.BlockEntityEntry;
 import net.nuclearteam.createnuclear.content.enriching.campfire.EnrichingCampfireBlockEntity;
 import net.nuclearteam.createnuclear.content.multiblock.alarm.ReactorAlarmEntity;
@@ -9,12 +7,13 @@ import net.nuclearteam.createnuclear.content.multiblock.casing.ReactorCasingEnti
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
 import net.nuclearteam.createnuclear.content.multiblock.core.ReactorCoreEntity;
 import net.nuclearteam.createnuclear.content.multiblock.frame.ReactorFrameEntity;
-import net.nuclearteam.createnuclear.content.multiblock.frame.ReactorFrameRenderer;
 import net.nuclearteam.createnuclear.content.multiblock.input.fluid.ReactorFluidInputEntity;
 import net.nuclearteam.createnuclear.content.multiblock.input.item.ReactorRodInputEntity;
 import net.nuclearteam.createnuclear.content.multiblock.output.ReactorOutputEntity;
-import net.nuclearteam.createnuclear.content.multiblock.output.ReactorOutputRenderer;
 
+/**
+ * Renderers and visuals chained here upstream are client-side, in {@code client.CNBlockEntityRenders}.
+ */
 public class CNBlockEntityTypes {
     public static final BlockEntityEntry<EnrichingCampfireBlockEntity> ENRICHING_CAMPFIRE_BLOCK =
             CreateNuclear.REGISTRATE.blockEntity("enriching_campfire_block", EnrichingCampfireBlockEntity::new)
@@ -34,7 +33,6 @@ public class CNBlockEntityTypes {
     public static final BlockEntityEntry<ReactorFrameEntity> REACTOR_FRAME =
             CreateNuclear.REGISTRATE.blockEntity("reactor_frame", ReactorFrameEntity::new)
                     .validBlocks(CNBlocks.REACTOR_FRAME)
-                    .renderer(() -> ReactorFrameRenderer::new)
                     .register();
 
     public static final BlockEntityEntry<ReactorRodInputEntity> REACTOR_INPUT =
@@ -49,9 +47,7 @@ public class CNBlockEntityTypes {
 
     public static final BlockEntityEntry<ReactorOutputEntity> REACTOR_OUTPUT =
             CreateNuclear.REGISTRATE.blockEntity("reactor_output", ReactorOutputEntity::new)
-                    .visual(() -> OrientedRotatingVisual.of(AllPartialModels.SHAFT_HALF), false)
                     .validBlocks(CNBlocks.REACTOR_OUTPUT)
-                    .renderer(() -> ReactorOutputRenderer::new)
                     .register();
 
     public static final BlockEntityEntry<ReactorControllerBlockEntity> REACTOR_CONTROLLER =

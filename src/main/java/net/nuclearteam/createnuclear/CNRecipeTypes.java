@@ -1,122 +1,59 @@
 package net.nuclearteam.createnuclear;
 
-import com.mojang.serialization.Codec;
-import com.simibubi.create.AllTags;
-
-import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
-import com.simibubi.create.content.processing.recipe.StandardProcessingRecipe;
-import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
-import com.zurrtum.create.client.catnip.lang.Lang;
+import com.zurrtum.create.AllRecipeSets;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.item.crafting.*;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipePropertySet;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.nuclearteam.createnuclear.content.kinetics.fan.processing.EnrichedRecipe;
 import net.nuclearteam.createnuclear.content.kinetics.fan.processing.SnowPowderRecipe;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
-@SuppressWarnings({"unused", "unchecked"})
-public enum CNRecipeTypes implements IRecipeTypeInfo, StringRepresentable {
-        ENRICHED(EnrichedRecipe::new),
-        SNOW_POWDER(SnowPowderRecipe::new)
-    ;
+/**
+ * Recipe types and serializers, registered the way Create Fly registers its own
+ * ({@code AllRecipeTypes} / {@code AllRecipeSerializers}); upstream was an enum over NeoForge
+ * deferred registers.
+ * <p>
+ * Each fan type also gets a {@link RecipePropertySet}. Since 1.21.2 the client no longer holds
+ * the recipes, only these ingredient sets, which the server sends; Create Fly's
+ * {@code RecipeManagerMixin} builds and syncs every set listed in {@link AllRecipeSets#ALL}, so
+ * adding ours there is what lets {@code canProcess} answer on both sides.
+ */
+public class CNRecipeTypes {
+    public static final RecipeType<EnrichedRecipe> ENRICHED = registerType("enriched");
+    public static final RecipeType<SnowPowderRecipe> SNOW_POWDER = registerType("snow_powder");
 
-    public static final Predicate<RecipeHolder<?>> CAN_BE_AUTOMATED = r -> !r.id()
-        .getPath()
-        .endsWith("_manual_only");
+    public static final RecipeSerializer<EnrichedRecipe> ENRICHED_SERIALIZER = registerSerializer("enriched", EnrichedRecipe.SERIALIZER);
+    public static final RecipeSerializer<SnowPowderRecipe> SNOW_POWDER_SERIALIZER = registerSerializer("snow_powder", SnowPowderRecipe.SERIALIZER);
 
-    public final Identifier id;
-    public final Supplier<RecipeSerializer<?>> serializerSupplier;
-    private final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<?>> serializerObject;
-    @Nullable
-    private final DeferredHolder<RecipeType<?>, RecipeType<?>> typeObject;
-    private final Supplier<RecipeType<?>> type;
+    public static final ResourceKey<RecipePropertySet> ENRICHED_SET = propertySet("enriched");
+    public static final ResourceKey<RecipePropertySet> SNOW_POWDER_SET = propertySet("snow_powder");
 
-    private boolean isProcessingRecipe;
-
-    public static final Codec<CNRecipeTypes> CODEC = StringRepresentable.fromEnum(CNRecipeTypes::values);
-
-    CNRecipeTypes(Supplier<RecipeSerializer<?>> serializerSupplier, Supplier<RecipeType<?>> typeSupplier, boolean registerType) {
-        String name = Lang.asId(name());
-        id = CreateNuclear.asResource(name);
-        this.serializerSupplier = serializerSupplier;
-        serializerObject = Registers.SERIALIZER_REGISTER.register(name, serializerSupplier);
-        if (registerType) {
-            typeObject = Registers.TYPE_REGISTER.register(name, typeSupplier);
-            type = typeObject;
-        } else {
-            typeObject = null;
-            type = typeSupplier;
-        }
-        isProcessingRecipe = false;
+    private static <T extends Recipe<?>> RecipeType<T> registerType(String name) {
+        Identifier id = CreateNuclear.asResource(name);
+        return Registry.register(BuiltInRegistries.RECIPE_TYPE, id, new RecipeType<T>() {
+            @Override
+            public String toString() {
+                return id.toString();
+            }
+        });
     }
 
-    CNRecipeTypes(Supplier<RecipeSerializer<?>> serializerSupplier) {
-        String name = Lang.asId(name());
-        id = CreateNuclear.asResource(name);
-        this.serializerSupplier = serializerSupplier;
-        serializerObject = Registers.SERIALIZER_REGISTER.register(name, serializerSupplier);
-        typeObject = Registers.TYPE_REGISTER.register(name, () -> RecipeType.simple(id));
-        type = typeObject;
-        isProcessingRecipe = false;
+    private static <T extends Recipe<?>> RecipeSerializer<T> registerSerializer(String name, RecipeSerializer<T> serializer) {
+        return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, CreateNuclear.asResource(name), serializer);
     }
 
-    CNRecipeTypes(StandardProcessingRecipe.Factory<?> processingFactory) {
-        this(() -> new StandardProcessingRecipe.Serializer<>(processingFactory));
-        isProcessingRecipe = true;
+    private static ResourceKey<RecipePropertySet> propertySet(String name) {
+        return ResourceKey.create(RecipePropertySet.TYPE_KEY, CreateNuclear.asResource(name));
     }
 
-    public static void register(IEventBus modEventBus) {
-        ShapedRecipePattern.setCraftingSize(9, 9);
-        Registers.SERIALIZER_REGISTER.register(modEventBus);
-        Registers.TYPE_REGISTER.register(modEventBus);
-    }
-
-    @Override
-    public Identifier getId() {
-        return id;
-    }
-
-    @Override
-    public <T extends RecipeSerializer<?>> T getSerializer() {
-        return (T) serializerObject.get();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <I extends RecipeInput, R extends Recipe<I>> RecipeType<R> getType() {
-        return (RecipeType<R>) type.get();
-    }
-
-    public <I extends RecipeInput, R extends Recipe<I>> Optional<RecipeHolder<R>> find(I inv, Level world) {
-        return world.getRecipeManager()
-                .getRecipeFor(getType(), inv, world);
-    }
-
-    public static boolean shouldIgnoreInAutomation(RecipeHolder<?> recipe) {
-        RecipeSerializer<?> serializer = recipe.value().getSerializer();
-        if (serializer != null && AllTags.AllRecipeSerializerTags.AUTOMATION_IGNORE.matches(serializer))
-            return true;
-        return !CAN_BE_AUTOMATED.test(recipe);
-    }
-
-    @Override
-    public @NotNull String getSerializedName() {
-        return id.toString();
-    }
-
-    private static class Registers {
-        private static final DeferredRegister<RecipeSerializer<?>> SERIALIZER_REGISTER = DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER, CreateNuclear.MOD_ID);
-        private static final DeferredRegister<RecipeType<?>> TYPE_REGISTER = DeferredRegister.create(Registries.RECIPE_TYPE, CreateNuclear.MOD_ID);
+    public static void register() {
+        AllRecipeSets.ALL.put(ENRICHED_SET, recipe -> recipe instanceof EnrichedRecipe r ? Optional.of(r.ingredient()) : Optional.empty());
+        AllRecipeSets.ALL.put(SNOW_POWDER_SET, recipe -> recipe instanceof SnowPowderRecipe r ? Optional.of(r.ingredient()) : Optional.empty());
     }
 }

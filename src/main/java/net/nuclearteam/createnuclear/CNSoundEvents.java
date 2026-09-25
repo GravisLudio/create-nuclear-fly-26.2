@@ -1,160 +1,56 @@
 package net.nuclearteam.createnuclear;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.zurrtum.create.AllSoundEvents;
-import com.zurrtum.create.AllSoundEvents.ConfiguredSoundEvent;
-import com.zurrtum.create.AllSoundEvents.SoundEntry;
-import com.zurrtum.create.Create;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.RegisterEvent;
+import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
-
+/**
+ * Upstream carried a copy of Create's sound registry with the datagen that wrote {@code sounds.json}
+ * and the subtitle lang entries. Both outputs are committed under {@code src/generated/resources},
+ * and registration is eager against vanilla rather than through {@code RegisterEvent}, so the
+ * builder and the data provider are gone. Same approach as the Connected port.
+ */
 public class CNSoundEvents {
 
-    public static final Map<Identifier, SoundEntry> ALL = new HashMap<>();
+    public static final SoundEntry REACTOR_ACTIVATION = register("reacteur/activation", SoundSource.BLOCKS);
+    public static final SoundEntry REACTOR_RUNNING = register("reacteur/running", SoundSource.BLOCKS);
+    public static final SoundEntry REACTOR_SHUT_OFF = register("reacteur/shut_off", SoundSource.BLOCKS);
+    public static final SoundEntry REACTOR_ALARM_ONESHOT = register("alarm/reactor_alarm", SoundSource.BLOCKS);
+    public static final SoundEntry REACTOR_ALARM_LOOP = register("alarm/alarm", SoundSource.BLOCKS);
+    public static final SoundEntry NUCLEAR_EXPLOSION = register("explosion/nuclear_explosion", SoundSource.AMBIENT);
+    public static final SoundEntry NUCLEAR_EXPLOSION_LARGE = register("explosion/large_nuclear_explosion", SoundSource.AMBIENT);
+    public static final SoundEntry NUCLEAR_EXPLOSION_RINGING = register("explosion/ringing", SoundSource.AMBIENT);
+    public static final SoundEntry NUCLEAR_EXPLOSION_RUMBLE = register("explosion/nuclear_explosion_rumble", SoundSource.AMBIENT);
+    public static final SoundEntry MOTOR_ASSEMBLE = register("reacteur/assemble_deassemble/motor_assemble", SoundSource.BLOCKS);
+    public static final SoundEntry MOTOR_DISASSEMBLE = register("reacteur/assemble_deassemble/motor_disassemble", SoundSource.BLOCKS);
+    public static final SoundEntry NUCLEAR_EXPLOSION_RUMBLE_2 = register("explosion/rumble", SoundSource.AMBIENT);
+    public static final SoundEntry NUCLEAR_EXPLOSION_MAIN = register("explosion/main", SoundSource.AMBIENT);
+    public static final SoundEntry NUCLEAR_EXPLOSION_SHOCKWAVE = register("explosion/shockwave", SoundSource.AMBIENT);
+    public static final SoundEntry GEIGER_HIGH = register("geiger/high", SoundSource.AMBIENT);
+    public static final SoundEntry GEIGER_LOW = register("geiger/low", SoundSource.AMBIENT);
+    public static final SoundEntry GEIGER_MEDIUM = register("geiger/medium", SoundSource.AMBIENT);
+    public static final SoundEntry BIOME_WASTELAND = register("biomes/wasteland", SoundSource.AMBIENT);
 
-    public static final SoundEntry
-
-        REACTOR_ACTIVATION = create("reacteur/activation")
-            .subtitle("Reactor Activation")
-            .category(SoundSource.BLOCKS)
-            .build(),
-
-        REACTOR_RUNNING = create("reacteur/running")
-            .subtitle("Reactor Running")
-            .category(SoundSource.BLOCKS)
-            .build(),
-
-        REACTOR_SHUT_OFF = create("reacteur/shut_off")
-            .subtitle("Reactor Shut Off")
-            .category(SoundSource.BLOCKS)
-            .build(),
-
-        REACTOR_ALARM_ONESHOT = create("alarm/reactor", "alarm")
-            .subtitle("Reactor Alarm")
-            .category(SoundSource.BLOCKS)
-            .build(),
-
-        REACTOR_ALARM_LOOP = create("alarm/alarm")
-            .subtitle("Reactor Alarm Loop")
-            .category(SoundSource.BLOCKS)
-            .build(),
-
-        NUCLEAR_EXPLOSION = create("explosion/nuclear_explosion")
-            .subtitle("Nuclear Explosion")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        NUCLEAR_EXPLOSION_LARGE = create("explosion/large_nuclear_explosion")
-            .subtitle("Large Nuclear Explosion")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        NUCLEAR_EXPLOSION_RINGING = create("explosion/ringing")
-            .subtitle("Nuclear Explosion Ringing")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        NUCLEAR_EXPLOSION_RUMBLE = create("explosion/nuclear_explosion_rumble")
-            .subtitle("Nuclear Explosion Rumble")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        MOTOR_ASSEMBLE = create("reacteur/assemble_deassemble/motor_assemble")
-            .subtitle("Motor Assemble")
-            .category(SoundSource.BLOCKS)
-            .build(),
-
-        MOTOR_DISASSEMBLE = create("reacteur/assemble_deassemble/motor_disassemble")
-            .subtitle("Motor Disassemble")
-            .category(SoundSource.BLOCKS)
-            .build(),
-
-        NUCLEAR_EXPLOSION_RUMBLE_2 = create("explosion/rumble")
-            .subtitle("Nuclear Explosion Rumble")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        NUCLEAR_EXPLOSION_MAIN = create("explosion/main")
-            .subtitle("Nuclear Explosion Main")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        NUCLEAR_EXPLOSION_SHOCKWAVE = create("explosion/shockwave")
-            .subtitle("Nuclear Explosion Shockwave")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        GEIGER_HIGH = create("geiger/high")
-            .subtitle("Geiger High")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        GEIGER_LOW = create("geiger/low")
-            .subtitle("Geiger Low")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        GEIGER_MEDIUM = create("geiger/medium")
-            .subtitle("Geiger Medium")
-            .category(SoundSource.AMBIENT)
-            .build(),
-
-        BIOME_WASTELAND = create("biomes/wasteland")
-            .subtitle("Wasteland")
-            .category(SoundSource.AMBIENT)
-            .build()
-        ;
-
-    private static SoundEntryBuilder create(String... pathParts) {
-        String name = String.join("_", pathParts);
-        return create(CreateNuclear.asResource(name));
+    private static SoundEntry register(String name, SoundSource category) {
+        Identifier id = CreateNuclear.asResource(name);
+        Holder.Reference<SoundEvent> holder = Registry.registerForHolder(
+            BuiltInRegistries.SOUND_EVENT,
+            id,
+            SoundEvent.createVariableRangeEvent(id)
+        );
+        return new SoundEntry(id, holder, category);
     }
 
-    private static SoundEntryBuilder create(Identifier id) {
-        return new SoundEntryBuilder(id);
-    }
-
-    public static void prepare() {
-        for (SoundEntry entry : ALL.values()) entry.prepare();
-    }
-
-    public static void register(RegisterEvent event) {
-        event.register(Registries.SOUND_EVENT, helper -> {
-            for (SoundEntry entry : ALL.values()) entry.register(helper);
-        });
-    }
-
-    public static void provideLang(BiConsumer<String, String> consumer) {
-        for (SoundEntry entry : ALL.values())
-            if (entry.hasSubtitle())
-                consumer.accept(entry.getSubtitleKey(), entry.getSubtitle());
-    }
-
-    public static SoundEntryProvider provider(DataGenerator generator) {
-        return new SoundEntryProvider(generator);
+    /** Forces class loading from the initialiser; the fields above do the registering. */
+    public static void register() {
     }
 
     public static void playItemPickup(Player player) {
@@ -164,271 +60,37 @@ public class CNSoundEvents {
             SoundEvents.ITEM_PICKUP,
             SoundSource.PLAYERS,
             .2f,
-            1f + player.level().random.nextFloat()
+            1f + player.level().getRandom().nextFloat()
         );
     }
 
-    public static class SoundEntryProvider implements DataProvider {
-
-        private PackOutput output;
-
-        public SoundEntryProvider(DataGenerator generator) {
-            output = generator.getPackOutput();
+    public record SoundEntry(Identifier id, Holder<SoundEvent> holder, SoundSource category) {
+        public Identifier getId() {
+            return id;
         }
 
-        @Override
-        public CompletableFuture<?> run(CachedOutput cache) {
-            return generate(output.getOutputFolder(), cache);
-        }
-
-        @Override
-        public String getName() {
-            return "CreateNuclear's Custom Sounds";
-        }
-
-        public CompletableFuture<?> generate(Path path, CachedOutput cache) {
-            path = path.resolve("assets/createnuclear");
-            JsonObject json = new JsonObject();
-            ALL.entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .forEach(entry -> {
-                        entry.getValue()
-                                .write(json);
-                    });
-            return DataProvider.saveStable(cache, json, path.resolve("sounds.json"));
-        }
-
-    }
-
-    public static class SoundEntryBuilder {
-
-        protected Identifier id;
-        protected String subtitle = "unregistered";
-        protected SoundSource category = SoundSource.BLOCKS;
-        protected List<ConfiguredSoundEvent> wrappedEvents;
-        protected List<Identifier> variants;
-        protected int attenuationDistance;
-
-        public SoundEntryBuilder(Identifier id) {
-            wrappedEvents = new ArrayList<>();
-            variants = new ArrayList<>();
-            this.id = id;
-        }
-
-        public SoundEntryBuilder subtitle(String subtitle) {
-            this.subtitle = subtitle;
-            return this;
-        }
-
-        public SoundEntryBuilder attenuationDistance(int distance) {
-            this.attenuationDistance = distance;
-            return this;
-        }
-
-        public SoundEntryBuilder noSubtitle() {
-            this.subtitle = null;
-            return this;
-        }
-
-        public SoundEntryBuilder category(SoundSource category) {
-            this.category = category;
-            return this;
-        }
-
-        public SoundEntryBuilder addVariant(String name) {
-            return addVariant(Create.asResource(name));
-        }
-
-        public SoundEntryBuilder addVariant(Identifier id) {
-            variants.add(id);
-            return this;
-        }
-
-        public SoundEntryBuilder playExisting(Supplier<SoundEvent> event, float volume, float pitch) {
-            wrappedEvents.add(new ConfiguredSoundEvent(event, volume, pitch));
-            return this;
-        }
-
-        public SoundEntryBuilder playExisting(SoundEvent event, float volume, float pitch) {
-            return playExisting(() -> event, volume, pitch);
-        }
-
-        public SoundEntryBuilder playExisting(SoundEvent event) {
-            return playExisting(event, 1, 1);
-        }
-
-        public SoundEntryBuilder playExisting(Holder<SoundEvent> event) {
-            return playExisting(event::value, 1, 1);
-        }
-
-        public SoundEntry build() {
-            SoundEntry entry =
-                    wrappedEvents.isEmpty() ? new CustomSoundEntry(id, variants, subtitle, category, attenuationDistance)
-                            : new WrappedSoundEntry(id, subtitle, wrappedEvents, category, attenuationDistance);
-            ALL.put(entry.getId(), entry);
-            return entry;
-        }
-
-    }
-
-    private static class CustomSoundEntry extends SoundEntry {
-
-        protected List<Identifier> variants;
-        protected DeferredHolder<SoundEvent, SoundEvent> event;
-
-        public CustomSoundEntry(Identifier id, List<Identifier> variants, String subtitle,
-                                SoundSource category, int attenuationDistance) {
-            super(id, subtitle, category, attenuationDistance);
-            this.variants = variants;
-        }
-
-        @Override
-        public void prepare() {
-            event = DeferredHolder.create(Registries.SOUND_EVENT, id);
-        }
-
-        @Override
-        public void register(RegisterEvent.RegisterHelper<SoundEvent> helper) {
-            Identifier location = event.getId();
-            helper.register(location, SoundEvent.createVariableRangeEvent(location));
-        }
-
-        @Override
         public Holder<SoundEvent> getMainEventHolder() {
-            return event;
+            return holder;
         }
 
-        @Override
         public SoundEvent getMainEvent() {
-            return event.get();
+            return holder.value();
         }
 
-        @Override
-        public void write(JsonObject json) {
-            JsonObject entry = new JsonObject();
-            JsonArray list = new JsonArray();
-
-            JsonObject s = new JsonObject();
-            s.addProperty("name", id.toString());
-            s.addProperty("type", "file");
-            if (attenuationDistance != 0)
-                s.addProperty("attenuation_distance", attenuationDistance);
-            list.add(s);
-
-            for (Identifier variant : variants) {
-                s = new JsonObject();
-                s.addProperty("name", variant.toString());
-                s.addProperty("type", "file");
-                if (attenuationDistance != 0)
-                    s.addProperty("attenuation_distance", attenuationDistance);
-                list.add(s);
-            }
-
-            entry.add("sounds", list);
-            if (hasSubtitle())
-                entry.addProperty("subtitle", getSubtitleKey());
-            json.add(id.getPath(), entry);
+        public void play(Level world, @Nullable Player entity, double x, double y, double z, float volume, float pitch) {
+            world.playSound(entity, x, y, z, getMainEvent(), category, volume, pitch);
         }
 
-        @Override
-        public void play(Level world, Player entity, double x, double y, double z, float volume, float pitch) {
-            world.playSound(entity, x, y, z, event.get(), category, volume, pitch);
+        public void play(Level world, @Nullable Player entity, Vec3i pos, float volume, float pitch) {
+            play(world, entity, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, volume, pitch);
         }
 
-        @Override
-        public void playAt(Level world, double x, double y, double z, float volume, float pitch, boolean fade) {
-            world.playLocalSound(x, y, z, event.get(), category, volume, pitch, fade);
+        public void playOnServer(Level world, Vec3i pos) {
+            play(world, null, pos, 1, 1);
         }
 
+        public void playOnServer(Level world, Vec3i pos, float volume, float pitch) {
+            play(world, null, pos, volume, pitch);
+        }
     }
-
-    private static class WrappedSoundEntry extends SoundEntry {
-
-        private List<ConfiguredSoundEvent> wrappedEvents;
-        private List<CompiledSoundEvent> compiledEvents;
-
-        public WrappedSoundEntry(Identifier id, String subtitle,
-                                 List<ConfiguredSoundEvent> wrappedEvents, SoundSource category, int attenuationDistance) {
-            super(id, subtitle, category, attenuationDistance);
-            this.wrappedEvents = wrappedEvents;
-            compiledEvents = new ArrayList<>();
-        }
-
-        @Override
-        public void prepare() {
-            for (int i = 0; i < wrappedEvents.size(); i++) {
-                ConfiguredSoundEvent wrapped = wrappedEvents.get(i);
-                Identifier location = getIdOf(i);
-                DeferredHolder<SoundEvent, SoundEvent> event = DeferredHolder.create(Registries.SOUND_EVENT, location);
-                compiledEvents.add(new CompiledSoundEvent(event, wrapped.volume(), wrapped.pitch()));
-            }
-        }
-
-        @Override
-        public void register(RegisterEvent.RegisterHelper<SoundEvent> helper) {
-            for (CompiledSoundEvent compiledEvent : compiledEvents) {
-                Identifier location = compiledEvent.event().getId();
-                helper.register(location, SoundEvent.createVariableRangeEvent(location));
-            }
-        }
-
-        @Override
-        public Holder<SoundEvent> getMainEventHolder() {
-            return compiledEvents.getFirst().event();
-        }
-
-        @Override
-        public SoundEvent getMainEvent() {
-            return compiledEvents.get(0)
-                    .event().get();
-        }
-
-        protected Identifier getIdOf(int i) {
-            return Identifier.fromNamespaceAndPath(id.getNamespace(), i == 0 ? id.getPath() : id.getPath() + "_compounded_" + i);
-        }
-
-        @Override
-        public void write(JsonObject json) {
-            for (int i = 0; i < wrappedEvents.size(); i++) {
-                ConfiguredSoundEvent event = wrappedEvents.get(i);
-                JsonObject entry = new JsonObject();
-                JsonArray list = new JsonArray();
-                JsonObject s = new JsonObject();
-                s.addProperty("name", event.event()
-                        .get()
-                        .getLocation()
-                        .toString());
-                s.addProperty("type", "event");
-                if (attenuationDistance != 0)
-                    s.addProperty("attenuation_distance", attenuationDistance);
-                list.add(s);
-                entry.add("sounds", list);
-                if (i == 0 && hasSubtitle())
-                    entry.addProperty("subtitle", getSubtitleKey());
-                json.add(getIdOf(i).getPath(), entry);
-            }
-        }
-
-        @Override
-        public void play(Level world, Player entity, double x, double y, double z, float volume, float pitch) {
-            for (WrappedSoundEntry.CompiledSoundEvent event : compiledEvents) {
-                world.playSound(entity, x, y, z, event.event().get(), category, event.volume() * volume,
-                        event.pitch() * pitch);
-            }
-        }
-
-        @Override
-        public void playAt(Level world, double x, double y, double z, float volume, float pitch, boolean fade) {
-            for (WrappedSoundEntry.CompiledSoundEvent event : compiledEvents) {
-                world.playLocalSound(x, y, z, event.event().get(), category, event.volume() * volume,
-                        event.pitch() * pitch, fade);
-            }
-        }
-
-        private record CompiledSoundEvent(DeferredHolder<SoundEvent, SoundEvent> event, float volume, float pitch) {
-        }
-
-    }
-
 }

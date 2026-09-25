@@ -4,28 +4,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.fabricmc.api.EnvType;
-import net.neoforged.neoforge.client.event.RenderPlayerEvent;
-import net.neoforged.neoforge.client.event.ViewportEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.minecraft.client.model.PlayerModel;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
 import net.nuclearteam.createnuclear.CNClientProxy;
 import net.nuclearteam.createnuclear.CreateNuclear;
-import net.nuclearteam.createnuclear.content.equipment.armor.AntiRadiationArmorItem;
 import net.nuclearteam.createnuclear.foundation.mixin.client.CameraAccessor;
 import net.nuclearteam.createnuclear.infrastructure.config.CNConfigs;
+import net.minecraft.client.Camera;
 
-@EventBusSubscriber(modid = CreateNuclear.MOD_ID, value = Dist.CLIENT)
+/**
+ * Client handlers that were NeoForge event subscribers. Called from {@code CreateNuclearClient}
+ * (client tick) and {@code CameraMixin} (camera shake).
+ */
 public class ClientEvents {
 
     /**
      * Ticks down the nuke flash/darken timers, once per client tick.
      */
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick(Minecraft minecraft) {
 
             // Store the previous value for smooth interpolation of the flash
             CNClientProxy.prevNukeFlashAmount = CNClientProxy.nukeFlashAmount;
@@ -49,10 +43,8 @@ public class ClientEvents {
     /**
      * Shakes the player's camera while a nuke explosion is active.
      */
-    @SubscribeEvent
-    public static void computeCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+    public static void shakeCamera(Camera camera) {
         Entity player = Minecraft.getInstance().getCameraEntity();
-        float partialTick = Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
 
         // Shake at 1.5F while the sky is darkened (nuke active), otherwise no shake
         float tremorAmount = CNClientProxy.renderNukeSkyDarkFor > 0 ? 1.5F : 0F;
@@ -61,7 +53,7 @@ public class ClientEvents {
             if (tremorAmount > 0) {
                 // Generate random offsets for the shake, once per tick
                 if (CNClientProxy.lastTremorTick != player.tickCount) {
-                    RandomSource rng = player.level().random;
+                    RandomSource rng = player.level().getRandom();
                     CNClientProxy.randomTremorOffsets[0] = rng.nextFloat();
                     CNClientProxy.randomTremorOffsets[1] = rng.nextFloat();
                     CNClientProxy.randomTremorOffsets[2] = rng.nextFloat();
@@ -72,32 +64,13 @@ public class ClientEvents {
                 double intensity = tremorAmount * Minecraft.getInstance().options.screenEffectScale().get();
 
                 // Physically offset the camera
-                ((CameraAccessor) event.getCamera()).callMove(
+                ((CameraAccessor) camera).callMove(
                     (float) (CNClientProxy.randomTremorOffsets[0] * 0.2F * intensity),
                     (float) (CNClientProxy.randomTremorOffsets[1] * 0.2F * intensity),
                     (float) (CNClientProxy.randomTremorOffsets[2] * 0.5F * intensity)
                 );
 
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
-        Player player = event.getEntity();
-        PlayerModel<?> model = event.getRenderer().getModel();
-
-        if (player.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof AntiRadiationArmorItem.Helmet) {
-            model.hat.visible = false;
-        }
-        if (player.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof AntiRadiationArmorItem.Chestplate) {
-            model.jacket.visible = false;
-            model.rightSleeve.visible = false;
-            model.leftSleeve.visible = false;
-        }
-        if (player.getItemBySlot(EquipmentSlot.LEGS).getItem() instanceof AntiRadiationArmorItem.Leggings) {
-            model.rightPants.visible = false;
-            model.leftPants.visible = false;
         }
     }
 }

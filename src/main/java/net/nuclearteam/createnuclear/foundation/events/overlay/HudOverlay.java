@@ -1,15 +1,15 @@
 package net.nuclearteam.createnuclear.foundation.events.overlay;
 
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 
 /**
- * Base interface for all HUD overlays.
+ * Base interface for all HUD overlays. They were NeoForge GUI layers registered above
+ * {@code VanillaGuiLayers.CAMERA_OVERLAYS}; on Fabric they are HUD elements attached after the
+ * equivalent vanilla element, {@code VanillaHudElements.MISC_OVERLAYS}.
  */
-public interface HudOverlay {
+public interface HudOverlay extends HudElement {
     Identifier getAfterOverlay();
 
     Identifier getOverlayId();
@@ -18,15 +18,7 @@ public interface HudOverlay {
 
     int getPriority();
 
-    LayeredDraw.Layer getOverlay();
-
-    void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker);
-
-    default void register(RegisterGuiLayersEvent event) {
-        event.registerAbove(
-                getAfterOverlay(),
-                getOverlayId(),
-                getOverlay()
-        );
+    default void register() {
+        HudElementRegistry.attachElementAfter(getAfterOverlay(), getOverlayId(), this);
     }
 }

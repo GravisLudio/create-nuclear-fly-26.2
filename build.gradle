@@ -30,6 +30,9 @@ sourceSets.main.java {
     exclude 'net/nuclearteam/createnuclear/infrastructure/data/**'
     exclude 'net/nuclearteam/createnuclear/foundation/data/**'
     exclude 'net/nuclearteam/createnuclear/gametest/**'
+    exclude 'net/nuclearteam/createnuclear/api/data/**'
+    // Generadores de blockstate de Registrate: sin referencias una vez quitado .blockstate(...).
+    exclude 'net/nuclearteam/createnuclear/content/multiblock/**/*Generator.java'
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -74,6 +77,13 @@ dependencies {
     implementation fabricApi.module("fabric-item-api-v1", fabric_version)
     implementation fabricApi.module("fabric-command-api-v2", fabric_version)
     implementation fabricApi.module("fabric-registry-sync-v0", fabric_version)
+    implementation fabricApi.module("fabric-particles-v1", fabric_version)
+    implementation fabricApi.module("fabric-menu-api-v1", fabric_version)
+    implementation fabricApi.module("fabric-convention-tags-v2", fabric_version)
+    implementation fabricApi.module("fabric-loot-api-v3", fabric_version)
+    implementation fabricApi.module("fabric-resource-loader-v1", fabric_version)
+    implementation fabricApi.module("fabric-key-mapping-api-v1", fabric_version)
+    implementation fabricApi.module("fabric-content-registries-v0", fabric_version)
     runtimeOnly "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
     // Create Fly: trae Flywheel, Ponder y Catnip embebidos. `implementation` y no
@@ -125,5 +135,16 @@ idea {
     module {
         downloadSources = true
         downloadJavadoc = true
+    }
+}
+
+// Escribe el classpath de compilacion en build/cp.txt para tools/jp.sh (javap contra los jars
+// exactos que usa el build, no contra lo que haya en la cache).
+tasks.register('writeClasspath') {
+    def out = layout.buildDirectory.file('cp.txt')
+    def cp = sourceSets.main.compileClasspath
+    outputs.file(out)
+    doLast {
+        out.get().asFile.text = cp.files.collect { it.absolutePath }.join(File.pathSeparator)
     }
 }

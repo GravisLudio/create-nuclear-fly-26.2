@@ -12,32 +12,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
 
+    // Was darkenWorldAmount in 1.21.1.
     @Shadow
-    private float darkenWorldAmount;
+    private float bossOverlayWorldDarkening;
 
     // Handles darkening the sky/world during a nuclear explosion
     @Inject(
-            method = {"Lnet/minecraft/client/renderer/GameRenderer;tick()V"},
-            remap = true,
+            method = "tick",
             at = @At(value = "TAIL")
     )
     public void CN$tick(CallbackInfo ci) {
-        if (CNClientProxy.renderNukeSkyDarkFor > 0 && darkenWorldAmount < 1.0F) {
-            darkenWorldAmount = Math.min(darkenWorldAmount + 0.3F, 1.0F);
+        if (CNClientProxy.renderNukeSkyDarkFor > 0 && bossOverlayWorldDarkening < 1.0F) {
+            bossOverlayWorldDarkening = Math.min(bossOverlayWorldDarkening + 0.3F, 1.0F);
         }
-    }
-
-    // Triggers the white flash render (preScreenRender)
-    @Inject(
-            method = {"Lnet/minecraft/client/renderer/GameRenderer;render(Lnet/minecraft/client/DeltaTracker;Z)V"},
-            remap = true,
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lcom/mojang/blaze3d/platform/Lighting;setupFor3DItems()V",
-                    shift = At.Shift.AFTER
-            )
-    )
-    public void CN$render(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
-        CNClientProxy.preScreenRender(deltaTracker.getGameTimeDeltaPartialTick(false));
     }
 }
