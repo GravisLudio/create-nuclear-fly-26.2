@@ -1,18 +1,16 @@
 package net.nuclearteam.createnuclear.content.multiblock.bluePrintItem;
 
+import net.minecraft.world.inventory.Slot;
+import com.zurrtum.create.infrastructure.items.ItemStackHandler;
 import com.zurrtum.create.foundation.gui.menu.GhostItemMenu;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
 import net.nuclearteam.createnuclear.*;
 import net.nuclearteam.createnuclear.api.multiblock.rods.RodType.TypeRodPredicate;
 
@@ -40,16 +38,8 @@ public class ReactorBluePrintMenu extends GhostItemMenu<ItemStack> {
 
     private ReactorBluePrintData reactorBluePrintData;
 
-    public ReactorBluePrintMenu(MenuType<?> type, int id, Inventory inv, RegistryFriendlyByteBuf extraData) {
-        super(type, id, inv, extraData);
-    }
-
-    public ReactorBluePrintMenu(MenuType<?> type, int id, Inventory inv, ItemStack contentHolder) {
-        super(type, id, inv, contentHolder);
-    }
-
-    public static ReactorBluePrintMenu create(int id, Inventory inv, ItemStack stack) {
-        return new ReactorBluePrintMenu(CNMenus.REACTOR_BLUEPRINT_MENU.get(), id, inv, stack);
+    public ReactorBluePrintMenu(int id, Inventory inv, ItemStack contentHolder) {
+        super(CNMenus.REACTOR_BLUEPRINT_MENU, id, inv, contentHolder);
     }
 
     public ReactorBluePrintData getReactorBluePrintData() {
@@ -83,19 +73,13 @@ public class ReactorBluePrintMenu extends GhostItemMenu<ItemStack> {
         for (int i = 0; i < POSITIONS.length; i++) {
             ItemStack stack = pattern[i].stack();
             boolean isRod = TypeRodPredicate.isFuel(stack, level) || TypeRodPredicate.isCooled(stack, level);
-            ghostInventory.setStackInSlot(i, isRod ? stack : ItemStack.EMPTY);
+            ghostInventory.setItem(i, isRod ? stack : ItemStack.EMPTY);
         }
     }
 
     @Override
     protected ItemStackHandler createGhostInventory() {
         return getItemStorage(contentHolder);
-    }
-
-    @Override
-    @Environment(EnvType.CLIENT)
-    protected ItemStack createOnClient(RegistryFriendlyByteBuf extraData) {
-        return ItemStack.STREAM_CODEC.decode(extraData);
     }
 
     @Override
@@ -111,7 +95,7 @@ public class ReactorBluePrintMenu extends GhostItemMenu<ItemStack> {
 
         for (int i = 0; i < POSITIONS.length; i++) {
             int[] pos = POSITIONS[i];
-            this.addSlot(new SlotItemHandler(ghostInventory, i, startWidth + incr * pos[0], startHeight + incr * pos[1]));
+            this.addSlot(new Slot(ghostInventory, i, startWidth + incr * pos[0], startHeight + incr * pos[1]));
         }
     }
 
@@ -129,7 +113,7 @@ public class ReactorBluePrintMenu extends GhostItemMenu<ItemStack> {
         int countUraniumRod = 0;
 
         for (int i = 0; i < POSITIONS.length; i++) {
-            ItemStack stack = ghostInventory.getStackInSlot(i);
+            ItemStack stack = ghostInventory.getItem(i);
 
             if (stack.isEmpty() || stack.getCount() < 1 || stack.getCount() > 99) {
                 pattern[i] = new PatternData(i, glassPane);
@@ -163,10 +147,10 @@ public class ReactorBluePrintMenu extends GhostItemMenu<ItemStack> {
     }
 
     @Override
-    public void clicked(int slotId, int dragType, ClickType clickTypeIn, Player player) {
-        if (clickTypeIn == ClickType.THROW) {
+    public void clicked(int slotId, int dragType, ContainerInput clickTypeIn, Player player) {
+        if (clickTypeIn == ContainerInput.THROW) {
             if (slotId >= 0 && slotId < 9) {
-                clickTypeIn = ClickType.PICKUP;
+                clickTypeIn = ContainerInput.PICKUP;
                 super.clicked(slotId, dragType, clickTypeIn, player);
             }
             return;

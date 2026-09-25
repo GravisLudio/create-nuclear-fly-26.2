@@ -1,5 +1,12 @@
 package net.nuclearteam.createnuclear.content.multiblock.bluePrintItem;
 
+import java.net.URI;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.zurrtum.create.infrastructure.items.ItemStackHandler;
+import com.zurrtum.create.foundation.gui.menu.MenuBase;
+import com.zurrtum.create.foundation.gui.menu.MenuProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -8,16 +15,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.ItemStackHandler;
 import net.nuclearteam.createnuclear.CNDataComponents;
 import net.nuclearteam.createnuclear.CNItems;
 import org.jetbrains.annotations.Nullable;
@@ -32,14 +36,14 @@ public class ReactorBluePrintItem extends Item implements MenuProvider {
 
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, display, tooltipComponents, tooltipFlag);
 
-        tooltipComponents.add(Component.translatable("item.createnuclear.reactor_blueprint.tooltip")
+        tooltipComponents.accept(Component.translatable("item.createnuclear.reactor_blueprint.tooltip")
                 .withStyle(ChatFormatting.GRAY));
 
         // Adjust the tooltip text to hint at the available action
-        tooltipComponents.add(Component.translatable("item.createnuclear.reactor_blueprint.tooltip_hint")
+        tooltipComponents.accept(Component.translatable("item.createnuclear.reactor_blueprint.tooltip_hint")
                 .withStyle(ChatFormatting.DARK_GRAY));
     }
 
@@ -48,17 +52,22 @@ public class ReactorBluePrintItem extends Item implements MenuProvider {
         return Component.translatable("reactor.item.gui.name");
     }
 
+    /**
+     * Create Fly's menu providers write the holder into the open packet themselves; upstream
+     * passed the same encoder to {@code player.openMenu}.
+     */
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
+    public MenuBase<?> createMenu(int id, Inventory inv, Player player, RegistryFriendlyByteBuf extraData) {
         ItemStack heldItem = player.getMainHandItem();
-        return ReactorBluePrintMenu.create(id, inv, heldItem);
+        ItemStack.STREAM_CODEC.encode(extraData, heldItem);
+        return new ReactorBluePrintMenu(id, inv, heldItem);
     }
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
         if (context.getPlayer() == null) return InteractionResult.PASS;
-        return use(context.getLevel(), context.getPlayer(), context.getHand()).getResult();
+        return use(context.getLevel(), context.getPlayer(), context.getHand());
     }
 
     @Override
@@ -67,8 +76,8 @@ public class ReactorBluePrintItem extends Item implements MenuProvider {
 
         // Plain right-click -> Opens the Blueprint screen
         if (!player.isShiftKeyDown() && hand == InteractionHand.MAIN_HAND) {
-            if (!world.isClientSide() && player instanceof ServerPlayer)
-                player.openMenu(this, buf -> ItemStack.STREAM_CODEC.encode(buf, heldItem));
+            if (!world.isClientSide() && player instanceof ServerPlayer serverPlayer)
+                openHandledScreen(serverPlayer);
             return InteractionResult.SUCCESS;
         }
         // Shift + right-click -> Sends a clickable link in chat!
@@ -81,7 +90,7 @@ public class ReactorBluePrintItem extends Item implements MenuProvider {
                     .withStyle(style -> style
                         .withColor(ChatFormatting.AQUA)
                         .withUnderlined(true)
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://wiki.createnuclear.net/"))
+                        .withClickEvent(new ClickEvent.OpenUrl(URI.create("https://wiki.createnuclear.net/")))
                     ));
 
                 player.sendSystemMessage(message);
@@ -106,7 +115,7 @@ public class ReactorBluePrintItem extends Item implements MenuProvider {
 
         PatternData[] pattern = data.pattern();
         for (int i = 0; i < slotCount; i++) {
-            inventory.setStackInSlot(i, pattern[i].stack());
+            inventory.setItem(i, pattern[i].stack());
         }
 
         return inventory;

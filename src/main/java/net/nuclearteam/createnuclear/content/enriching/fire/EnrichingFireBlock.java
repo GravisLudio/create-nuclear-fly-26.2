@@ -1,7 +1,9 @@
 package net.nuclearteam.createnuclear.content.enriching.fire;
 
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ScheduledTickAccess;
 import com.mojang.serialization.MapCodec;
-import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
+import java.util.function.UnaryOperator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
@@ -35,7 +37,7 @@ public class EnrichingFireBlock extends BaseFireBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState pState, Direction pFacing, BlockState pFacingState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pFacingPos) {
+    public BlockState updateShape(BlockState pState, LevelReader pLevel, ScheduledTickAccess ticks, BlockPos pCurrentPos, Direction pFacing, BlockPos pFacingPos, BlockState pFacingState, RandomSource random) {
         return this.canSurvive(pState, pLevel, pCurrentPos)
                 ? this.getStateForPlacement()
                 : Blocks.AIR.defaultBlockState();
@@ -55,7 +57,7 @@ public class EnrichingFireBlock extends BaseFireBlock {
         return pState.is(CNBlockTags.ENRICHING_FIRE_BASE_BLOCKS.tag);
     }
 
-    public static NonNullUnaryOperator<Properties> getLight() {
+    public static UnaryOperator<Properties> getLight() {
         return p -> p.lightLevel(a -> 15);
     }
 }

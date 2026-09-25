@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.frame;
 
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.server.level.ServerLevel;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
@@ -65,7 +66,7 @@ public class ReactorFrame extends Block implements IWrenchable, IBE<ReactorFrame
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, @Nullable Orientation orientation, boolean movedByPiston) {
         if (level.isClientSide()) return;
 
         Direction.Axis axis = Direction.Axis.Y;
@@ -96,8 +97,8 @@ public class ReactorFrame extends Block implements IWrenchable, IBE<ReactorFrame
     }
 
     @Override
-    public BlockState rotate(BlockState state, LevelAccessor level, BlockPos pos, Rotation direction) {
-        return super.rotate(state, level, pos, direction);
+    public BlockState rotate(BlockState state, Rotation direction) {
+        return super.rotate(state, direction);
     }
 
     @Override

@@ -1,22 +1,39 @@
 package net.nuclearteam.createnuclear.content.multiblock.frame;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
-import net.createmod.catnip.platform.CatnipServices;
 import com.zurrtum.create.client.catnip.render.FluidRenderHelper;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import com.zurrtum.create.client.catnip.render.FluidRenderHelper.FluidRenderState;
 import com.zurrtum.create.infrastructure.fluids.FluidStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
 import net.nuclearteam.createnuclear.content.multiblock.controller.manager.ReactorFrameDisplayManagerI;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Renders the reactor fluid dynamically inside the {@link ReactorFrame} window.
  * The fluid (texture + tint) is resolved from the owning reactor controller, so
  * the visible liquid reflects whichever fluid the reactor actually uses
  * (water, liquid nitrogen, ...) instead of a texture baked into the model.
+ * <p>
+ * 26.2 splits block entity rendering into extracting a render state and submitting it later. The
+ * geometry is upstream's; the fluid box itself is Create Fly's {@link FluidRenderHelper}, which
+ * resolves texture and tint from the fluid stack as upstream's {@code CatnipServices.FLUID_RENDERER}
+ * did.
  */
-public class ReactorFrameRenderer extends SafeBlockEntityRenderer<ReactorFrameEntity> {
+@Environment(EnvType.CLIENT)
+public class ReactorFrameRenderer implements BlockEntityRenderer<ReactorFrameEntity, ReactorFrameRenderer.FrameRenderState> {
 
     // Horizontal interior of the window (1..15 px on a 16 px block).
     private static final float X_MIN = 1f / 16f;
@@ -24,11 +41,20 @@ public class ReactorFrameRenderer extends SafeBlockEntityRenderer<ReactorFrameEn
     private static final float Z_MIN = 1f / 16f;
     private static final float Z_MAX = 15f / 16f;
 
-    public ReactorFrameRenderer(BlockEntityRendererProvider.Context context) { }
+    public ReactorFrameRenderer(BlockEntityRendererProvider.Context context) {
+    }
 
     @Override
-    protected void renderSafe(ReactorFrameEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer,
-                              int light, int overlay) {
+    public FrameRenderState createRenderState() {
+        return new FrameRenderState();
+    }
+
+    @Override
+    public void extractRenderState(ReactorFrameEntity be, FrameRenderState state, float partialTicks, Vec3 cameraPos,
+                                   @Nullable CrumblingOverlay crumblingOverlay) {
+        BlockEntityRenderState.extractBase(be, state, crumblingOverlay);
+        state.fluid = null;
+
         ReactorControllerBlockEntity controller = be.getControllerEntity();
         if (controller == null) return;
 
@@ -65,19 +91,30 @@ public class ReactorFrameRenderer extends SafeBlockEntityRenderer<ReactorFrameEn
             yMax = (float) Math.min(boxYMax, localSurface);
         }
 
-        // Last arg (invertGasses) must be false: liquid nitrogen has density 0, so
-        // it counts as "lighter than air" and would otherwise be flipped 180°,
-        // hiding the top surface. We always fill bottom-to-top here.
-        // Must pass the FluidStack, not fluid.getFluid().defaultFluidState(): the FluidState
-        // overload resolves the texture and tint from the fluid's block state, which loses the
-        // stack's tint and renders water almost black in the frame windows.
-        // CatnipServices.FLUID_RENDERER is declared as FluidRenderHelper<?>, so the platform
-        // type has to be reintroduced by hand — on NeoForge it is neoforge's FluidStack.
-        @SuppressWarnings("unchecked")
-        FluidRenderHelper<FluidStack> fluidRenderer = (FluidRenderHelper<FluidStack>) CatnipServices.FLUID_RENDERER;
+        Level level = be.getLevel();
+        int light = level != null ? LightCoordsUtil.getLightCoords(level, be.getBlockPos()) : LightCoordsUtil.FULL_BRIGHT;
 
-        fluidRenderer.renderFluidBox(fluid,
-                X_MIN, boxYMin, Z_MIN, X_MAX, yMax, Z_MAX,
-                buffer, ms, light, false, false);
+        // Last arg (invertGasses) must be false: we always fill bottom-to-top here.
+        // The stack, not a bare fluid state, is what carries the tint -- without it water
+        // renders almost black in the frame windows.
+        state.fluid = FluidRenderHelper.extractFluidRenderState(
+            level instanceof BlockAndTintGetter getter ? getter : null,
+            be.getBlockPos(),
+            Minecraft.getInstance().getModelManager().getFluidStateModelSet(),
+            fluid.getFluid(),
+            fluid.getComponentChanges(),
+            X_MIN, boxYMin, Z_MIN, X_MAX, yMax, Z_MAX,
+            light, false, false);
+    }
+
+    @Override
+    public void submit(FrameRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
+        if (state.fluid != null)
+            state.fluid.submit(poseStack, collector);
+    }
+
+    public static class FrameRenderState extends BlockEntityRenderState {
+        @Nullable
+        FluidRenderState fluid;
     }
 }

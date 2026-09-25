@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.wolf;
 
-import com.mojang.math.MethodsReturnNonnullByDefault;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;

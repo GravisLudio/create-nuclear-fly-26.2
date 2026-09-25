@@ -63,7 +63,7 @@ public class DefaultHeatCalculator implements IHeatCalculator {
     public double computeHeat(BigFluidStack bigFluidStack, ReactorFluidType type, ReactorControllerInventory inventory, double overHeat, ReactorDisplayState displayState, Level level) {
         double heat = 0;
 
-        ItemStackHandler pattern = ReactorBluePrintItem.getItemStorage(inventory.getStackInSlot(0));
+        ItemStackHandler pattern = ReactorBluePrintItem.getItemStorage(inventory.getItem(0));
 
         Map<Item, Integer> availableItems = displayState != null && displayState.items() != null
                 ? new HashMap<>(displayState.items())
@@ -72,7 +72,7 @@ public class DefaultHeatCalculator implements IHeatCalculator {
         Map<Integer, ItemStack> actualRods = new HashMap<>();
 
         for (int slot = 0; slot < pattern.getSlots(); slot++) {
-            ItemStack currentStack = pattern.getStackInSlot(slot);
+            ItemStack currentStack = pattern.getItem(slot);
             if (currentStack.isEmpty()) continue;
 
             Item rodItem = currentStack.getItem();

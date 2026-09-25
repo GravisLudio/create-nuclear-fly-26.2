@@ -1,15 +1,16 @@
 package net.nuclearteam.createnuclear.foundation.block;
 
-import com.mojang.math.MethodsReturnNonnullByDefault;
+
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.core.Direction;
 @SuppressWarnings("deprecation")
 public abstract class MultiDirectionalReactorBlock extends Block {
-    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
 
     public MultiDirectionalReactorBlock(Properties properties) {
         super(properties);

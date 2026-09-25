@@ -2,13 +2,13 @@ package net.nuclearteam.createnuclear.infrastructure.worldgen;
 
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
 import com.zurrtum.create.infrastructure.worldgen.LayerPattern;
-import com.tterrag.registrate.util.nullness.NonNullSupplier;
+import java.util.function.Supplier;
 import net.minecraft.world.level.block.Blocks;
 import net.nuclearteam.createnuclear.CNBlocks;
 import net.nuclearteam.createnuclear.content.decoration.palettes.CNPaletteStoneTypes;
 
 public class CNLayerPatterns {
-    public static final NonNullSupplier<LayerPattern>
+    public static final Supplier<LayerPattern>
         AUTUNITE = () -> LayerPattern.builder()
             .layer(l -> l.weight(2)
                 .block(CNPaletteStoneTypes.AUTUNITE.getBaseBlock())

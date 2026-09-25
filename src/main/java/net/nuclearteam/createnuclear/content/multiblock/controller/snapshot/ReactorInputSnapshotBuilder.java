@@ -24,7 +24,7 @@ public class ReactorInputSnapshotBuilder {
         List<IItemHandler> itemHandlers = inputManager.getItemHandlers(level);
         for (IItemHandler h : itemHandlers) {
             for (int s = 0; s < h.getSlots(); s++) {
-                ItemStack st = h.getStackInSlot(s);
+                ItemStack st = h.getItem(s);
                 if (!st.isEmpty()) {
                     items.merge(st.getItem(), st.getCount(), Integer::sum);
                 }

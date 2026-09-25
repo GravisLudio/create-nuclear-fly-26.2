@@ -1,5 +1,7 @@
 package net.nuclearteam.createnuclear.content.enriching.campfire;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.LevelReader;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -33,7 +35,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -59,7 +61,7 @@ public class EnrichingCampfireBlock extends BaseEntityBlock implements SimpleWat
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 7.0, 16.0);
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     private final boolean spawnParticles;
     private final int fireDamage;
 
@@ -97,11 +99,11 @@ public class EnrichingCampfireBlock extends BaseEntityBlock implements SimpleWat
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
         if (state.getValue(WATERLOGGED)) {
-            level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+            ticks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
-        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override

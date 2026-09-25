@@ -68,7 +68,7 @@ public class DefaultHeatCalculatorGameTest {
      * {@code ReactorBluePrintItem.getItemStorage} bails out on a shorter array.
      */
     private static void loadPattern(ReactorControllerInventory inventory, Map<Integer, Item> rodsBySlot) {
-        inventory.setStackInSlot(0, buildBlueprint(rodsBySlot));
+        inventory.setItem(0, buildBlueprint(rodsBySlot));
     }
 
     /** Builds the blueprint {@link #loadPattern} loads, without touching an inventory. */

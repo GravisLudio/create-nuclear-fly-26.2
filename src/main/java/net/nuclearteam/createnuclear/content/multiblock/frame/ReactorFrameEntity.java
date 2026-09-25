@@ -3,8 +3,8 @@ package net.nuclearteam.createnuclear.content.multiblock.frame;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
@@ -61,20 +61,16 @@ public class ReactorFrameEntity extends SmartBlockEntity {
     }
 
     @Override
-    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(tag, registries, clientPacket);
+    protected void write(ValueOutput view, boolean clientPacket) {
+        super.write(view, clientPacket);
         if (controller != null) {
-            tag.putLong("Controller", controller.asLong());
+            view.putLong("Controller", controller.asLong());
         }
     }
 
     @Override
-    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(tag, registries, clientPacket);
-        if (tag.contains("Controller")) {
-            this.controller = BlockPos.of(tag.getLongOr("Controller", 0L));
-        } else {
-            this.controller = null;
-        }
+    protected void read(ValueInput view, boolean clientPacket) {
+        super.read(view, clientPacket);
+        this.controller = view.getLong("Controller").map(BlockPos::of).orElse(null);
     }
 }

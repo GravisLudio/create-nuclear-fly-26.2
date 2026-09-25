@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.content.uraniumOre;
 
-import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
+import java.util.function.UnaryOperator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -102,12 +102,12 @@ public class UraniumOreBlock extends Block {
         RandomSource randomSource = level.getRandom();
         for (Direction direction : Direction.values()) {
             BlockPos blockPos = pos.relative(direction);
-            if (level.getBlockState(blockPos).isSolidRender(level, blockPos)) continue;
+            if (level.getBlockState(blockPos).isSolidRender()) continue;
             Direction.Axis axis = direction.getAxis();
             double e = axis == Direction.Axis.X ? 0.5 + 0.5625 * (double)direction.getStepX() : (double)randomSource.nextFloat();
             double f = axis == Direction.Axis.Y ? 0.5 + 0.5625 * (double)direction.getStepY() : (double)randomSource.nextFloat();
             double g = axis == Direction.Axis.Z ? 0.5 + 0.5625 * (double)direction.getStepZ() : (double)randomSource.nextFloat();
-            level.addParticle(new DustParticleOptions(new Vector3f(57f / 255f, 191f / 255f, 82f / 255f), 1f), (double)pos.getX() + e, (double)pos.getY() + f, (double)pos.getZ() + g, 0.0, 0.0, 0.0);
+            level.addParticle(new DustParticleOptions(0x39BF52, 1f), (double)pos.getX() + e, (double)pos.getY() + f, (double)pos.getZ() + g, 0.0, 0.0, 0.0);
         }
     }
 
@@ -116,7 +116,7 @@ public class UraniumOreBlock extends Block {
         builder.add(LIT);
     }
 
-    public static NonNullUnaryOperator<Properties> litBlockEmission() {
+    public static UnaryOperator<Properties> litBlockEmission() {
         return p -> p.lightLevel(state -> state.getValue(LIT) ? 9 : 0);
     }
 }

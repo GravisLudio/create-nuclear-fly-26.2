@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.alarm;
 
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.server.level.ServerLevel;
 import com.zurrtum.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
@@ -58,7 +59,7 @@ public class ReactorAlarm extends Block implements IBE<ReactorAlarmEntity> {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean isMoving) {
         if (level.isClientSide()) return;
         boolean poweredNow = level.hasNeighborSignal(pos);
         if (state.getValue(POWERED) != poweredNow) {

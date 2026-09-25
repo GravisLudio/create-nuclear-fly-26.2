@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.controller;
 
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.InteractionResult;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
@@ -72,7 +73,7 @@ public class ReactorControllerBlock extends HorizontalDirectionalReactorBlock im
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos,
+    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, @Nullable Orientation orientation,
                                 boolean isMoving) {
         if (worldIn.isClientSide())
             return;
@@ -104,7 +105,7 @@ public class ReactorControllerBlock extends HorizontalDirectionalReactorBlock im
             if (heldItem.is(CNItems.REACTOR_BLUEPRINT.get()) && controllerBlockEntity.getInventoryObject().getItem(0).isEmpty()
                     && heldItem.getOrDefault(CNDataComponents.REACTOR_BLUE_PRINT_DATA, ReactorBluePrintData.EMPTY) != ReactorBluePrintData.EMPTY){
                 withBlockEntityDo(level, pos, be -> {
-                    be.getInventoryObject().setStackInSlot(0, heldItem);
+                    be.getInventoryObject().setItem(0, heldItem);
                     be.setConfiguredPattern(heldItem);
 
                     player.setItemInHand(hand, ItemStack.EMPTY);
@@ -125,7 +126,7 @@ public class ReactorControllerBlock extends HorizontalDirectionalReactorBlock im
                         be.getAdvancement().awardPlayer(CNAdvancement.NO_TIME_TO_DIE);
                     }
                     player.setItemInHand(hand, blueprint);
-                    be.getInventoryObject().setStackInSlot(0, ItemStack.EMPTY);
+                    be.getInventoryObject().setItem(0, ItemStack.EMPTY);
                     be.setConfiguredPattern(ItemStack.EMPTY);
                     //be.clearTimers(); // uncomment if the timer should reset when the reactor stops
                     be.getOutputManager().rotateOutputs(be.getLevel(), be.getAssembled(), 0);

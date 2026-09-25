@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.client;
 
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.nuclearteam.createnuclear.CNEntityType;
@@ -25,11 +25,11 @@ public final class CNEntityRenderers {
     }
 
     public static void register() {
-        EntityModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_CAT, IrradiatedCatModel::createBodyLayer);
-        EntityModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_CHICKEN, IrradiatedChickenModel::createBodyLayer);
-        EntityModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_WOLF, IrradiatedWolfModel::createBodyLayer);
-        EntityModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_COW, IrradiatedCowModel::createBodyLayer);
-        EntityModelLayerRegistry.registerModelLayer(CNModelLayers.ANTI_RADIATION_ARMOR, AntiRadiationArmorModel::createBodyLayer);
+        ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_CAT, IrradiatedCatModel::createBodyLayer);
+        ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_CHICKEN, IrradiatedChickenModel::createBodyLayer);
+        ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_WOLF, IrradiatedWolfModel::createBodyLayer);
+        ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_COW, IrradiatedCowModel::createBodyLayer);
+        ModelLayerRegistry.registerModelLayer(CNModelLayers.ANTI_RADIATION_ARMOR, AntiRadiationArmorModel::createBodyLayer);
 
         EntityRenderers.register(CNEntityType.NUCLEAR_EXPLOSION.get(), NoopRenderer::new);
         EntityRenderers.register(CNEntityType.IRRADIATED_CAT.get(), IrradiatedCatRenderer::new);
