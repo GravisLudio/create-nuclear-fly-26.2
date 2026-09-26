@@ -58,6 +58,47 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
         "uranium_ore", "thorium_ore", "lead_ore", "nitrate_ore", "autunite", "steel_block",
         "lead_block", "reinforced_glass", "enriched_soul_soil", "enriching_campfire");
 
+    // The reactor patterns of CNMultiblock (which only match; construct needs block providers).
+    private static final String[][] REACTOR_5 = {
+        {"OOOOO", "OAAAO", "OAAAO", "OAAAO", "OOOOO"},
+        {"OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO"},
+        {"OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO"},
+        {"OABAO", "ADDDA", "BDCDB", "ADDDA", "OA*AO"},
+        {"OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO"},
+        {"OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO"},
+        {"OOOOO", "OAAAO", "OAAAO", "OAAAO", "OOOOO"}};
+    private static final String[][] REACTOR_7 = {
+        {"OOOOOOO", "OAAAAAO", "OAAAAAO", "OAAAAAO", "OAAAAAO", "OAAAAAO", "OOOOOOO"},
+        {"OABABAO", "ADDDDDA", "BDCDCDB", "ADDDDDA", "BDCDCDB", "ADDDDDA", "OABABAO"},
+        {"OABABAO", "ADDDDDA", "BDCDCDB", "ADDDDDA", "BDCDCDB", "ADDDDDA", "OABABAO"},
+        {"OABABAO", "ADDDDDA", "BDCDCDB", "ADDDDDA", "BDCDCDB", "ADDDDDA", "OABABAO"},
+        {"OABABAO", "ADDDDDA", "BDCDCDB", "ADDDDDA", "BDCDCDB", "ADDDDDA", "OAB*BAO"},
+        {"OABABAO", "ADDDDDA", "BDCDCDB", "ADDDDDA", "BDCDCDB", "ADDDDDA", "OABABAO"},
+        {"OABABAO", "ADDDDDA", "BDCDCDB", "ADDDDDA", "BDCDCDB", "ADDDDDA", "OABABAO"},
+        {"OABABAO", "ADDDDDA", "BDCDCDB", "ADDDDDA", "BDCDCDB", "ADDDDDA", "OABABAO"},
+        {"OOOOOOO", "OAAAAAO", "OAAAAAO", "OAAAAAO", "OAAAAAO", "OAAAAAO", "OOOOOOO"}};
+    private static final String[] R9_CAP = {"OOOOOOOOO", "OAAAAAAAO", "OAAAAAAAO", "OAAAAAAAO", "OAAAAAAAO", "OAAAAAAAO", "OAAAAAAAO", "OAAAAAAAO", "OOOOOOOOO"};
+    private static final String[] R9_MID = {"OBAABAABO", "BDDDDDDDB", "ADCDCDCDA", "ADDDDDDDA", "BDCDCDCDB", "ADDDDDDDA", "ADCDCDCDA", "BDDDDDDDB", "OBAABAABO"};
+    private static final String[] R9_CTRL = {"OBAABAABO", "BDDDDDDDB", "ADCDCDCDA", "ADDDDDDDA", "BDCDCDCDB", "ADDDDDDDA", "ADCDCDCDA", "BDDDDDDDB", "OBAA*AABO"};
+    private static final String[][] REACTOR_9 = {R9_CAP, R9_MID, R9_MID, R9_MID, R9_MID, R9_CTRL, R9_MID, R9_MID, R9_MID, R9_MID, R9_CAP};
+
+    private static IMultiBlockPattern reactorPattern(String[][] aisles) {
+        SimpleMultiBlockAislePatternBuilder builder = SimpleMultiBlockAislePatternBuilder.start();
+        for (String[] aisle : aisles) {
+            builder.aisle(aisle);
+        }
+        return builder
+            .where('A', b -> true).where('B', b -> true).where('C', b -> true)
+            .where('D', b -> true).where('O', b -> true).where('*', b -> true)
+            .block('A', () -> CNBlocks.REACTOR_CASING.getDefaultState())
+            .block('B', () -> CNBlocks.REACTOR_FRAME.getDefaultState())
+            .block('C', () -> CNBlocks.REACTOR_CORE.getDefaultState())
+            .block('D', () -> CNBlocks.REACTOR_COOLER.getDefaultState())
+            .block('O', () -> CNBlocks.REACTOR_CASING.getDefaultState())
+            .block('*', () -> CNBlocks.REACTOR_CONTROLLER.getDefaultState())
+            .build();
+    }
+
     @Override
     public void runTest(ClientGameTestContext context) {
         try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
@@ -123,23 +164,7 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
             server.runCommand("gamemode creative @p");
             server.runCommand("fill -8 100 -8 12 110 16 minecraft:air");
             BlockPos controller = new BlockPos(2, 103, 6);
-            IMultiBlockPattern reactor = SimpleMultiBlockAislePatternBuilder.start()
-                .aisle("OOOOO", "OAAAO", "OAAAO", "OAAAO", "OOOOO")
-                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO")
-                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO")
-                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OA*AO")
-                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO")
-                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO")
-                .aisle("OOOOO", "OAAAO", "OAAAO", "OAAAO", "OOOOO")
-                .where('A', b -> true).where('B', b -> true).where('C', b -> true)
-                .where('D', b -> true).where('O', b -> true).where('*', b -> true)
-                .block('A', () -> CNBlocks.REACTOR_CASING.getDefaultState())
-                .block('B', () -> CNBlocks.REACTOR_FRAME.getDefaultState())
-                .block('C', () -> CNBlocks.REACTOR_CORE.getDefaultState())
-                .block('D', () -> CNBlocks.REACTOR_COOLER.getDefaultState())
-                .block('O', () -> CNBlocks.REACTOR_CASING.getDefaultState())
-                .block('*', () -> CNBlocks.REACTOR_CONTROLLER.getDefaultState())
-                .build();
+            IMultiBlockPattern reactor = reactorPattern(REACTOR_5);
             server.runOnServer(s -> reactor.construct(s.overworld(), controller, (c, st) -> true));
             context.waitTicks(10);
             // The two casings beside the controller ('A' in "OA*AO") become a rod input and a fluid
@@ -192,6 +217,27 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
             }
             if (!assembled) {
                 throw new AssertionError("The 5x5 reactor built from its own pattern did not assemble");
+            }
+
+            // 5b. The 7x7 and 9x9 reactors, away from the rest: they must assemble with the right size.
+            for (int size : new int[] {7, 9}) {
+                BlockPos big = new BlockPos(-30, 110, size == 7 ? -25 : 25);
+                IMultiBlockPattern bigPattern = reactorPattern(size == 7 ? REACTOR_7 : REACTOR_9);
+                server.runOnServer(s -> bigPattern.construct(s.overworld(), big, (c, st) -> true));
+                context.waitTicks(10);
+                int bigSize = server.computeOnServer(s -> {
+                    ReactorAssembler.assemble(big, s.overworld());
+                    return s.overworld().getBlockEntity(big) instanceof ReactorControllerBlockEntity be && be.isAssembled()
+                        ? be.getMultiblockSize() : -1;
+                });
+                System.out.println("[createnuclear-gametest] " + size + "x" + size + " reactor assembled with size " + bigSize);
+                server.runCommand("tp @p " + (big.getX() + 16) + " " + (big.getY() + 10) + " " + (big.getZ() - 16)
+                    + " facing " + big.getX() + " " + big.getY() + " " + big.getZ());
+                context.waitTicks(20);
+                context.takeScreenshot("createnuclear-reactor-" + size);
+                if (bigSize != size) {
+                    throw new AssertionError("The " + size + "x" + size + " reactor did not assemble (size " + bigSize + ")");
+                }
             }
 
             // 6. Run it: uranium rods and water go in through Fabric's transfer API (CNTransfer), the

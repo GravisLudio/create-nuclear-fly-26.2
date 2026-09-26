@@ -29,7 +29,9 @@ threshold) and the **meltdown**: with `size5Danger` lowered below the heat, the 
 ends in the controller destroying itself, a `nuclear_explosion`, the mushroom cloud and the biome
 around turning `createnuclear:irradiated_land`. Configs are restored by the test.
 
-Not yet exercised in game: the 7x7 and 9x9 reactors, the JEI categories, the Flywheel-off path, a dedicated server.
+The 7x7 and 9x9 reactors assemble with their size (step 5b).
+
+Not yet exercised in game: the 7x7 and 9x9 reactors running, the JEI categories, the Flywheel-off path, a dedicated server.
 
 What this session changed, beyond the compile fixes listed below:
 
@@ -272,7 +274,8 @@ widgets; config.
 
 ## Next steps, in order
 
-1. **Play-test the reactor further**: the 7x7 and 9x9 sizes; the blueprint menu by hand. (Rod
+1. **Play-test the reactor further**: the 7x7 and 9x9 sizes running (they assemble, step 5b); the
+   blueprint menu by hand. (Rod
    consumption, output, alarm and meltdown are covered by steps 6b and 8 of `src/gametest`.)
    Note for the test: the controller reads the blueprint from **both** inventory slot 0 and
    `configuredPattern` (same stack, as `ReactorControllerBlock.useItemOn` does); setting only the
