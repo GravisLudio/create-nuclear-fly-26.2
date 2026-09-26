@@ -240,6 +240,28 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
             if (!running.startsWith("active=true")) {
                 throw new AssertionError("Reactor with fuel, water and a blueprint is not running: " + running);
             }
+
+            // 7. The nuclear explosion (ServerExplosion + onExplosionHit in 26.2) and its mushroom cloud,
+            //    away from the reactor. A failure here crashes the integrated server and the test.
+            server.runCommand("item replace entity @p armor.head with minecraft:air");
+            server.runCommand("gamemode spectator @p");
+            server.runCommand("fill 40 90 40 60 99 60 minecraft:stone");
+            server.runCommand("tp @p 50 118 20 facing 50 100 50");
+            context.waitTicks(10);
+            server.runCommand("summon " + NS + ":nuclear_explosion 50 100 50");
+            context.waitTicks(40);
+            context.takeScreenshot("createnuclear-explosion");
+            int craterAir = server.computeOnServer(sv -> {
+                int air = 0;
+                for (int x = 45; x <= 55; x++)
+                    for (int z = 45; z <= 55; z++)
+                        if (sv.overworld().getBlockState(new BlockPos(x, 97, z)).isAir()) air++;
+                return air;
+            });
+            System.out.println("[createnuclear-gametest] explosion crater: " + craterAir + "/121 air blocks at y=97");
+            if (craterAir == 0) {
+                throw new AssertionError("The nuclear explosion destroyed nothing");
+            }
         }
     }
 }

@@ -18,11 +18,12 @@ the four irradiated mobs (adults and babies), the mod's blocks, the anti-radiati
 player (dyed), item icons, and a 5x5 reactor built from its own pattern, which **assembles**
 ("Reactor has been assembled") and **runs**: with uranium rods and water inserted through Fabric's
 transfer API and a one-rod blueprint, the controller turns `ACTIVE` and reaches heat 67 after
-100 ticks (all asserted in the test). The headless datapack check
+100 ticks (all asserted in the test). A summoned `nuclear_explosion` carves its crater and draws
+the mushroom cloud and the flash. The headless datapack check
 (`gradlew runGametest`) loads 3716 recipes and 3044 advancements with **zero errors**.
 
 Not yet exercised in game: rod consumption over time, the output shaft, the alarm, overheating and
-meltdown, the 7x7 and 9x9 reactors, the JEI categories, the Flywheel-off path, a dedicated server.
+meltdown triggered by the reactor itself, the 7x7 and 9x9 reactors, the JEI categories, the Flywheel-off path, a dedicated server.
 
 What this session changed, beyond the compile fixes listed below:
 
