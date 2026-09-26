@@ -1,6 +1,7 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.cat;
 
 
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -253,7 +254,7 @@ public class IrradiatedCat extends TamableAnimal {
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
-        Cat cat = EntityType.CAT.create(level);
+        Cat cat = EntityTypes.CAT.create(level);
         if (cat != null && otherParent instanceof Cat cat2) {
 
             if (this.isTame()) {

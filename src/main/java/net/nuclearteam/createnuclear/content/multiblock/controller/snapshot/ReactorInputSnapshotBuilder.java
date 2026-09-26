@@ -1,10 +1,11 @@
 package net.nuclearteam.createnuclear.content.multiblock.controller.snapshot;
 
+import net.nuclearteam.createnuclear.content.multiblock.input.fluid.ReactorFluidInputEntity;
+import net.nuclearteam.createnuclear.content.fluids.FluidUnits;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.nuclearteam.createnuclear.content.logistics.BigFluidStack;
 import net.nuclearteam.createnuclear.content.multiblock.controller.manager.ReactorInputFluidManagerI;
 import net.nuclearteam.createnuclear.content.multiblock.controller.manager.ReactorInputManagerI;
@@ -21,9 +22,9 @@ public class ReactorInputSnapshotBuilder {
     public static ReactorInputSnapshot build(Level level, ReactorInputManagerI inputManager, ReactorInputFluidManagerI inputFluidManager) {
         // Populate display fields for client sync
         Map<Item, Integer> items = new HashMap<>();
-        List<IItemHandler> itemHandlers = inputManager.getItemHandlers(level);
-        for (IItemHandler h : itemHandlers) {
-            for (int s = 0; s < h.getSlots(); s++) {
+        List<Container> itemHandlers = inputManager.getItemHandlers(level);
+        for (Container h : itemHandlers) {
+            for (int s = 0; s < h.getContainerSize(); s++) {
                 ItemStack st = h.getItem(s);
                 if (!st.isEmpty()) {
                     items.merge(st.getItem(), st.getCount(), Integer::sum);
@@ -32,10 +33,9 @@ public class ReactorInputSnapshotBuilder {
         }
 
         long maxFluidCapacity = 0;
-        for (IFluidHandler h : inputFluidManager.getFuildHandlers(level)) {
-            if (h.getTanks() > 0) {
-                maxFluidCapacity += h.getTankCapacity(0);
-            }
+        // Millibuckets, like the virtual fluid inventory it is shown against; the tanks count droplets.
+        for (ReactorFluidInputEntity.InputTank h : inputFluidManager.getFuildHandlers(level)) {
+            maxFluidCapacity += FluidUnits.toMillibuckets((long) h.getMaxAmountPerStack());
         }
 
         VirtualReactorInputsItem virtualItems = inputManager.getInventory(level);

@@ -48,6 +48,6 @@ public class CNClientProxy {
     }
 
     public static boolean isFarFromCamera(double x, double y, double z) {
-        return Minecraft.getInstance().gameRenderer.getMainCamera().position().distanceToSqr(x, y, z) >= 256.0D;
+        return Minecraft.getInstance().gameRenderer.mainCamera().position().distanceToSqr(x, y, z) >= 256.0D;
     }
 }

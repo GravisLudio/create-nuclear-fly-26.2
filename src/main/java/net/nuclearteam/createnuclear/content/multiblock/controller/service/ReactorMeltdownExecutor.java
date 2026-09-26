@@ -1,10 +1,10 @@
 package net.nuclearteam.createnuclear.content.multiblock.controller.service;
 
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.GameRules;
 import net.nuclearteam.createnuclear.CNEntityType;
 import net.nuclearteam.createnuclear.content.explosion.NuclearExplosionEntity;
 import net.nuclearteam.createnuclear.foundation.utility.CreateNuclearLang;
@@ -28,7 +28,7 @@ public class ReactorMeltdownExecutor implements IExplosionService {
         NuclearExplosionEntity explosion = new NuclearExplosionEntity(CNEntityType.NUCLEAR_EXPLOSION.get(), level);
         explosion.setPos(explosionPos.getX() + 0.5D, explosionPos.getY() + 10.0D, explosionPos.getZ() - 2.0D);
         explosion.setSize(size);
-        explosion.setNoGriefing(!level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING));
+        explosion.setNoGriefing(!level.getGameRules().get(GameRules.MOB_GRIEFING));
         level.addFreshEntity(explosion);
 
         level.destroyBlock(controllerPos, false);

@@ -1,6 +1,7 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.wolf;
 
 
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -437,7 +438,7 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
         DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(IrradiatedWolf.class, EntityDataSerializers.INT);
         PREY_SELECTOR = (p_348295_) -> {
             EntityType<?> entitytype = p_348295_.getType();
-            return entitytype == EntityType.SHEEP || entitytype == EntityType.RABBIT || entitytype == EntityType.FOX || entitytype == CNEntityType.IRRADIATED_CAT.get();
+            return entitytype == EntityTypes.SHEEP || entitytype == EntityTypes.RABBIT || entitytype == EntityTypes.FOX || entitytype == CNEntityType.IRRADIATED_CAT.get();
         };
         PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     }

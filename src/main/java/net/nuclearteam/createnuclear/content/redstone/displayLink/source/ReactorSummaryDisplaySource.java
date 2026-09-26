@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  * {@code List<List<MutableComponent>>} format at the last moment via
  * {@link ReactorSummary#toRows()}, right before returning it to the caller.
  */
-public class ReactorSummaryDisplaySource extends DisplaySource {
+public class ReactorSummaryDisplaySource extends DisplaySource implements ConfigurableDisplaySource {
 
     /** Fallback line shown when only a single display row is available. */
     public static final List<MutableComponent> notEnoughSpaceSingle =
@@ -152,7 +152,7 @@ public class ReactorSummaryDisplaySource extends DisplaySource {
             return Optional.empty();
         }
 
-        int mode = context.sourceConfig().getInt("display_mode");
+        int mode = context.sourceConfig().getIntOr("display_mode", 0);
 
         // Divergence assumee vs Forge, qui lit getConfiguredPattern().getOrCreateTag().getDouble("heat") :
         // en 1.21 la chaleur vit dans le data component CNDataComponents.HEAT, et relire le tag NBT de la
@@ -228,7 +228,7 @@ public class ReactorSummaryDisplaySource extends DisplaySource {
         return CreateNuclearLang.translateDirect("display_source.reactor." + label);
     }
 
-    @Override
+    /** Called from {@code client.CNDisplaySourceRenders}; Create Fly keeps widgets in a client-side render. */
     @Environment(EnvType.CLIENT)
     public void initConfigurationWidgets(DisplayLinkContext context, ModularGuiLineBuilder builder, boolean isFirstLine) {
         if (isFirstLine) return;

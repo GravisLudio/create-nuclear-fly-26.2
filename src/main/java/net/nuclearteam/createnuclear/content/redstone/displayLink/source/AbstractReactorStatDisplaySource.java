@@ -13,7 +13,7 @@ import net.nuclearteam.createnuclear.content.multiblock.MultiblockHelpers;
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
 import net.nuclearteam.createnuclear.foundation.utility.CreateNuclearLang;
 
-public abstract class AbstractReactorStatDisplaySource extends NumericSingleLineDisplaySource {
+public abstract class AbstractReactorStatDisplaySource extends NumericSingleLineDisplaySource implements ConfigurableDisplaySource {
     protected abstract String getLabelKey();
     protected abstract int getMax();
     protected abstract int computeValue(ReactorControllerBlockEntity controller, DisplayLinkContext context);
@@ -26,7 +26,7 @@ public abstract class AbstractReactorStatDisplaySource extends NumericSingleLine
         if (controller == null || controller.isRemoved()) return ZERO.copy();
 
         MutableComponent label = CreateNuclearLang.translateDirect(getLabelKey()).append(" ");
-        int mode = context.sourceConfig().getInt("display_mode");
+        int mode = context.sourceConfig().getIntOr("display_mode", 0);
         int value = computeValue(controller, context);
         int max = getMax();
         ChatFormatting color = getColor(value, controller);
@@ -42,7 +42,7 @@ public abstract class AbstractReactorStatDisplaySource extends NumericSingleLine
         });
     }
 
-    @Override
+    /** Called from {@code client.CNDisplaySourceRenders}; Create Fly keeps widgets in a client-side render. */
     @Environment(EnvType.CLIENT)
     public void initConfigurationWidgets(DisplayLinkContext context, ModularGuiLineBuilder builder, boolean isFirstLine) {
         if (isFirstLine) return;
@@ -50,5 +50,5 @@ public abstract class AbstractReactorStatDisplaySource extends NumericSingleLine
                 .forOptions(CreateNuclearLang.translatedOptions("display_source.reactor.mode", "value", "percent", "gauge")), "display_mode");
     }
 
-    @Override protected boolean allowsLabeling(DisplayLinkContext context) { return true; }
+    @Override public boolean allowsLabeling(DisplayLinkContext context) { return true; }
 }

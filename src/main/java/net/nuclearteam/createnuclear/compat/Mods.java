@@ -1,13 +1,12 @@
 package net.nuclearteam.createnuclear.compat;
 
-import com.zurrtum.create.client.catnip.lang.Lang;
+import net.fabricmc.loader.api.FabricLoader;
 import com.zurrtum.create.catnip.registry.RegisteredObjectsHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.fml.loading.LoadingModList;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -20,13 +19,13 @@ public enum Mods {
     private final boolean isLoaded;
 
     Mods(String name) {
-        id = Lang.asId(name);
-        isLoaded = LoadingModList.get().getModFileById(id) != null;
+        id = name.toLowerCase(java.util.Locale.ROOT);
+        isLoaded = FabricLoader.getInstance().isModLoaded(id);
     }
 
     Mods() {
-        id = Lang.asId(name());
-        isLoaded = LoadingModList.get().getModFileById(id) != null;
+        id = name().toLowerCase(java.util.Locale.ROOT);
+        isLoaded = FabricLoader.getInstance().isModLoaded(id);
     }
 
     public String id() {
@@ -38,11 +37,11 @@ public enum Mods {
     }
 
     public Block getBlock(String id) {
-        return BuiltInRegistries.BLOCK.get(rl(id));
+        return BuiltInRegistries.BLOCK.getValue(rl(id));
     }
 
     public Item getItem(String id) {
-        return BuiltInRegistries.ITEM.get(rl(id));
+        return BuiltInRegistries.ITEM.getValue(rl(id));
     }
 
     public boolean contains(ItemLike entry) {

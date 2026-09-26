@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear;
 
+import net.minecraft.world.entity.EntityTypes;
 import com.mojang.logging.LogUtils;
 import com.zurrtum.create.content.equipment.goggles.GogglesItem;
 import net.fabricmc.api.ModInitializer;
@@ -82,7 +83,7 @@ public class CreateNuclear implements ModInitializer {
         CNFluids.registerFluidInteractions();
         CNRadiationValues.register();
         CNOpenPipeEffectHandlers.registerDefaults();
-        IrradiatedAnimal.VANILLA_TO_IRRADIATED.put(EntityType.CHICKEN, CNEntityType.IRRADIATED_CHICKEN.get());
+        IrradiatedAnimal.VANILLA_TO_IRRADIATED.put(EntityTypes.CHICKEN, CNEntityType.IRRADIATED_CHICKEN.get());
     }
 
     public static Identifier asResource(String path) {

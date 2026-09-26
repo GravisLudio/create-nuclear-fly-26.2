@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.chicken;
 
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -180,7 +181,7 @@ public class IrradiatedChicken extends Animal implements IrradiatedAnimal {
 
     @Override
     public EntityType<? extends Animal> getNormalVariant() {
-        return EntityType.CHICKEN;
+        return EntityTypes.CHICKEN;
     }
 
     @Override

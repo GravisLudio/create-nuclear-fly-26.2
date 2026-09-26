@@ -1,7 +1,6 @@
 package net.nuclearteam.createnuclear.foundation.ponder;
 
 import net.nuclearteam.createnuclear.foundation.registrate.ItemProvider;
-import com.tterrag.registrate.util.entry.RegistryEntry;
 import com.zurrtum.create.client.ponder.api.registration.PonderSceneRegistrationHelper;
 import net.minecraft.resources.Identifier;
 import net.nuclearteam.createnuclear.CNBlocks;
@@ -11,7 +10,7 @@ import net.nuclearteam.createnuclear.infrastructure.ponder.scenes.CNPonderReacto
 public class CNPonderIndex {
 
     public static void register(PonderSceneRegistrationHelper<Identifier> helper) {
-        PonderSceneRegistrationHelper<ItemProvider> HELPER = helper.withKeyFunction(RegistryEntry::getId);
+        PonderSceneRegistrationHelper<ItemProvider> HELPER = helper.withKeyFunction(ItemProvider::getId);
 
         // Reactor - Storyboards pour chaque taille
         HELPER.forComponents(CNBlocks.REACTOR_CONTROLLER)

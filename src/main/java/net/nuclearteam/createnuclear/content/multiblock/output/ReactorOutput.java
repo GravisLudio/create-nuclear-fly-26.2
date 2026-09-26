@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.content.multiblock.output;
 
+import com.zurrtum.create.AllItems;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.server.level.ServerLevel;
 
@@ -93,7 +94,7 @@ public class ReactorOutput extends DirectionalKineticBlock implements IWrenchabl
         IPlacementHelper placementHelper = PlacementHelpers.get(placementHelperId);
         if (!player.isShiftKeyDown() && player.mayBuild()) {
             if (placementHelper.matchesItem(heldItem) && placementHelper.getOffset(player, level, state, pos, hitResult)
-                .placeInWorld(level, (BlockItem) heldItem.getItem(), player, hand, hitResult)
+                .placeInWorld(level, (BlockItem) heldItem.getItem(), player, hand)
                 .consumesAction())
                 return InteractionResult.SUCCESS;
         }
@@ -138,7 +139,7 @@ public class ReactorOutput extends DirectionalKineticBlock implements IWrenchabl
 
         @Override
         public Predicate<ItemStack> getItemPredicate() {
-            return AllBlocks.SHAFT::isIn;
+            return stack -> stack.is(AllItems.SHAFT);
         }
 
         @Override

@@ -1,6 +1,6 @@
 package net.nuclearteam.createnuclear.infrastructure.ponder;
 
-import com.tterrag.registrate.util.entry.RegistryEntry;
+import net.nuclearteam.createnuclear.foundation.registrate.ItemProvider;
 import com.zurrtum.create.catnip.registry.RegisteredObjectsHelper;
 import com.zurrtum.create.client.ponder.api.registration.PonderTagRegistrationHelper;
 import net.minecraft.resources.Identifier;
@@ -18,7 +18,7 @@ public class CNCreateNuclearPonderTags {
     }
 
     public static void register(PonderTagRegistrationHelper<Identifier> helper) {
-        PonderTagRegistrationHelper<RegistryEntry<?, ?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
+        PonderTagRegistrationHelper<ItemProvider> HELPER = helper.withKeyFunction(ItemProvider::getId);
         PonderTagRegistrationHelper<ItemLike> itemHelper = helper.withKeyFunction(
                 RegisteredObjectsHelper::getKeyOrThrow);
 

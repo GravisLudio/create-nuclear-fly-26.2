@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear.api;
 
+import java.util.function.Consumer;
 import com.zurrtum.create.api.registry.SimpleRegistry;
-import com.tterrag.registrate.util.nullness.NonNullConsumer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.nuclearteam.createnuclear.api.multiblock.rods.RodType;
@@ -39,7 +39,7 @@ public class ItemRodTypesValue {
      * @return a non-null consumer that registers the mapping
      * @throws NullPointerException if {@code type} is null
      */
-    public static NonNullConsumer<Item> setRodTypeInfos(RodType.Builder type) {
+    public static Consumer<Item> setRodTypeInfos(RodType.Builder type) {
         return item -> ROD_TYPE.register(item, type.item(item).build());
     }
 
@@ -59,7 +59,7 @@ public class ItemRodTypesValue {
      * @return a non-null consumer that registers the built RodType
      * @throws NullPointerException if {@code type} is null
      */
-    public static NonNullConsumer<Item> setRodTypeInfos(int baseRodHeat, int proximityRodHeat, int rodTimer, RodType.TypeRod type) {
+    public static Consumer<Item> setRodTypeInfos(int baseRodHeat, int proximityRodHeat, int rodTimer, RodType.TypeRod type) {
         RodType.Builder builder = new RodType.Builder()
                 .baseRodHeat(baseRodHeat)
                 .proximityRodHeat(proximityRodHeat)

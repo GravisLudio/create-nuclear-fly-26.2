@@ -1,5 +1,7 @@
 package net.nuclearteam.createnuclear.content.enriching.campfire;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.LevelReader;
 import com.mojang.serialization.Codec;
@@ -82,11 +84,11 @@ public class EnrichingCampfireBlock extends BaseEntityBlock implements SimpleWat
     }
 
     @Override
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean intersects) {
         if (state.getValue(LIT) && entity instanceof LivingEntity livingEntity) {
             RadiationCapability.applyContagion(livingEntity, CAMPFIRE_DOSE, 100);
         }
-        super.entityInside(state, level, pos, entity);
+        super.entityInside(state, level, pos, entity, effectApplier, intersects);
     }
 
     @Nullable
@@ -169,7 +171,7 @@ public class EnrichingCampfireBlock extends BaseEntityBlock implements SimpleWat
     @Override
     public void onProjectileHit(Level level, BlockState state, BlockHitResult hit, Projectile projectile) {
         BlockPos blockPos = hit.getBlockPos();
-        if (!level.isClientSide() && projectile.isOnFire() && projectile.mayInteract(level, blockPos) && !state.getValue(LIT) && !state.getValue(WATERLOGGED)) {
+        if (level instanceof ServerLevel serverLevel && projectile.isOnFire() && projectile.mayInteract(serverLevel, blockPos) && !state.getValue(LIT) && !state.getValue(WATERLOGGED)) {
             level.setBlock(blockPos, state.setValue(BlockStateProperties.LIT, true), 11);
         }
     }

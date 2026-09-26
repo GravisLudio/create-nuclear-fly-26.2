@@ -13,7 +13,7 @@ import net.nuclearteam.createnuclear.content.multiblock.MultiblockHelpers;
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
 import net.nuclearteam.createnuclear.foundation.utility.CreateNuclearLang;
 
-public class ReactorSizeDisplaySource extends NumericSingleLineDisplaySource {
+public class ReactorSizeDisplaySource extends NumericSingleLineDisplaySource implements ConfigurableDisplaySource {
 
     @Override
     protected MutableComponent provideLine(DisplayLinkContext context, DisplayTargetStats stats) {
@@ -23,7 +23,7 @@ public class ReactorSizeDisplaySource extends NumericSingleLineDisplaySource {
         // Label + trailing space
         MutableComponent label = CreateNuclearLang.translateDirect("display_source.reactor.size").append(" ");
 
-        int mode = context.sourceConfig().getInt("display_mode");
+        int mode = context.sourceConfig().getIntOr("display_mode", 0);
         int size = controller.getMultiblockSize();
         int tier = size <= 5 ? 1 : size <= 7 ? 2 : 3;
 
@@ -42,7 +42,7 @@ public class ReactorSizeDisplaySource extends NumericSingleLineDisplaySource {
 
     @Override protected String getTranslationKey() { return "size"; }
 
-    @Override
+    /** Called from {@code client.CNDisplaySourceRenders}; Create Fly keeps widgets in a client-side render. */
     @Environment(EnvType.CLIENT)
     public void initConfigurationWidgets(DisplayLinkContext context, ModularGuiLineBuilder builder, boolean isFirstLine) {
         if (isFirstLine) return;
@@ -50,5 +50,5 @@ public class ReactorSizeDisplaySource extends NumericSingleLineDisplaySource {
                 .forOptions(CreateNuclearLang.translatedOptions("display_source.reactor.mode", "value", "percent", "gauge")), "display_mode");
     }
 
-    @Override protected boolean allowsLabeling(DisplayLinkContext context) { return true; }
+    @Override public boolean allowsLabeling(DisplayLinkContext context) { return true; }
 }

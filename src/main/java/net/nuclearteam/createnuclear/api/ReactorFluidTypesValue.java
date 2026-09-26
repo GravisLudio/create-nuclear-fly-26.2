@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear.api;
 
+import java.util.function.Consumer;
 import com.zurrtum.create.api.registry.SimpleRegistry;
-import com.tterrag.registrate.util.nullness.NonNullConsumer;
 import net.minecraft.core.HolderSet;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -53,7 +53,7 @@ public class ReactorFluidTypesValue {
      * @param type the reactor fluid type builder to register (must not be null)
      * @return a non-null consumer that registers the mapping
      */
-    public static NonNullConsumer<Fluid> setReactorFluidTypeInfos(ReactorFluidType.Builder type) {
+    public static Consumer<Fluid> setReactorFluidTypeInfos(ReactorFluidType.Builder type) {
         return fluid -> REACTOR_FLUID_TYPE.register(fluid, type.fluid(fluid).build());
     }
 
@@ -71,7 +71,7 @@ public class ReactorFluidTypesValue {
      * @param efficiency efficiency value to apply to the built type
      * @return a non-null consumer that registers the built {@link ReactorFluidType}
      */
-    public static NonNullConsumer<Fluid> setReactorFluidTypeInfos(int maxHeat, int efficiency) {
+    public static Consumer<Fluid> setReactorFluidTypeInfos(int maxHeat, int efficiency) {
         ReactorFluidType.Builder builder = new ReactorFluidType.Builder()
                 .maxHeat(maxHeat)
                 .efficiency(efficiency);

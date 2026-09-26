@@ -173,7 +173,7 @@ public class CNBlocks {
         .block("enriching_fire", properties -> new EnrichingFireBlock(properties, 3.0f))
         .initialProperties(() -> Blocks.FIRE)
         .properties(Properties::replaceable)
-        .properties(Properties::noCollission)
+        .properties(Properties::noCollision)
         .properties(Properties::noOcclusion)
         .properties(EnrichingFireBlock.getLight())
 

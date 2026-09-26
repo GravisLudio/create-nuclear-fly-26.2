@@ -1,9 +1,9 @@
 package net.nuclearteam.createnuclear.content.multiblock.reactorLogic;
 
+import com.zurrtum.create.infrastructure.items.ItemStackHandler;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.ItemStackHandler;
 import net.nuclearteam.createnuclear.api.multiblock.fluid.ReactorFluidType;
 import net.nuclearteam.createnuclear.api.multiblock.rods.RodType;
 import net.nuclearteam.createnuclear.api.multiblock.rods.RodType.TypeRod;
@@ -71,7 +71,7 @@ public class DefaultHeatCalculator implements IHeatCalculator {
 
         Map<Integer, ItemStack> actualRods = new HashMap<>();
 
-        for (int slot = 0; slot < pattern.getSlots(); slot++) {
+        for (int slot = 0; slot < pattern.getContainerSize(); slot++) {
             ItemStack currentStack = pattern.getItem(slot);
             if (currentStack.isEmpty()) continue;
 
