@@ -11,6 +11,7 @@ import net.nuclearteam.createnuclear.content.decoration.palettes.CNPaletteBlocks
 import net.nuclearteam.createnuclear.content.equipment.armor.AntiRadiationArmorItem;
 import net.nuclearteam.createnuclear.content.kinetics.fan.processing.CNFanProcessingTypes;
 import net.nuclearteam.createnuclear.content.radiation.CNRadiationValues;
+import net.nuclearteam.createnuclear.foundation.transfer.CNTransfer;
 import net.nuclearteam.createnuclear.foundation.advancement.CNAdvancement;
 import net.nuclearteam.createnuclear.foundation.advancement.CNTriggers;
 import net.nuclearteam.createnuclear.foundation.registrate.CNRegistrate;
@@ -83,6 +84,7 @@ public class CreateNuclear implements ModInitializer {
         CNFluids.registerFluidInteractions();
         CNRadiationValues.register();
         CNOpenPipeEffectHandlers.registerDefaults();
+        CNTransfer.register();
         IrradiatedAnimal.VANILLA_TO_IRRADIATED.put(EntityTypes.CHICKEN, CNEntityType.IRRADIATED_CHICKEN.get());
     }
 
