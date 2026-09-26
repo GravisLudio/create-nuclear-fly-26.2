@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "E": {
-      "item": "createnuclear:enriched_soul_soil"
-    },
-    "L": {
-      "tag": "minecraft:logs"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    }
+    "E": "createnuclear:enriched_soul_soil",
+    "L": "#minecraft:logs",
+    "S": "#c:rods/wooden"
   },
   "pattern": [
     " S ",

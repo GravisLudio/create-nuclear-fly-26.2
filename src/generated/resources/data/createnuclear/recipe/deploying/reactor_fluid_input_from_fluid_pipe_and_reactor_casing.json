@@ -1,16 +1,10 @@
 {
   "type": "create:deploying",
-  "ingredients": [
-    {
-      "item": "createnuclear:reactor_casing"
-    },
-    {
-      "item": "create:fluid_pipe"
-    }
-  ],
   "results": [
     {
       "id": "createnuclear:reactor_fluid_input"
     }
-  ]
+  ],
+  "target": "createnuclear:reactor_casing",
+  "ingredient": "create:fluid_pipe"
 }

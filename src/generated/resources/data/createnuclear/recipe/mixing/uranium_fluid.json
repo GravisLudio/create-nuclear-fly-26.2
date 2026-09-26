@@ -1,13 +1,11 @@
 {
   "type": "create:mixing",
   "ingredients": [
-    {
-      "tag": "c:dusts/uranium"
-    }
+    "#c:dusts/uranium"
   ],
-  "results": [
+  "fluid_results": [
     {
-      "amount": 25,
+      "amount": 2025,
       "id": "createnuclear:uranium"
     }
   ]

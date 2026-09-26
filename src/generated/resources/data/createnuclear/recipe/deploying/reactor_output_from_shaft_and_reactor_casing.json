@@ -1,16 +1,10 @@
 {
   "type": "create:deploying",
-  "ingredients": [
-    {
-      "item": "createnuclear:reactor_casing"
-    },
-    {
-      "item": "create:shaft"
-    }
-  ],
   "results": [
     {
       "id": "createnuclear:reactor_output"
     }
-  ]
+  ],
+  "target": "createnuclear:reactor_casing",
+  "ingredient": "create:shaft"
 }

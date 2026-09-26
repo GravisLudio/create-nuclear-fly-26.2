@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "R": {
-      "tag": "c:raw_materials/thorium"
-    }
+    "R": "#c:raw_materials/thorium"
   },
   "pattern": [
     "RRR",

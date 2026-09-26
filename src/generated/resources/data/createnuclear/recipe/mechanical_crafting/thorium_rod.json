@@ -3,9 +3,7 @@
   "accept_mirrored": true,
   "category": "misc",
   "key": {
-    "U": {
-      "item": "createnuclear:thorium_ingot"
-    }
+    "U": "createnuclear:thorium_ingot"
   },
   "pattern": [
     "U    ",

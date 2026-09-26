@@ -1,10 +1,5 @@
 {
   "type": "create:crushing",
-  "ingredients": [
-    {
-      "item": "createnuclear:raw_thorium_block"
-    }
-  ],
   "processing_time": 250,
   "results": [
     {
@@ -16,5 +11,6 @@
       "count": 72,
       "id": "createnuclear:thorium_dust"
     }
-  ]
+  ],
+  "ingredient": "createnuclear:raw_thorium_block"
 }

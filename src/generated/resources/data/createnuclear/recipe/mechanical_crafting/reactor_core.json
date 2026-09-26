@@ -3,18 +3,10 @@
   "accept_mirrored": true,
   "category": "misc",
   "key": {
-    "B": {
-      "item": "createnuclear:uranium_bucket"
-    },
-    "C": {
-      "item": "createnuclear:reactor_casing"
-    },
-    "P": {
-      "item": "create:precision_mechanism"
-    },
-    "S": {
-      "tag": "c:ingots/steel"
-    }
+    "B": "createnuclear:uranium_bucket",
+    "C": "createnuclear:reactor_casing",
+    "P": "create:precision_mechanism",
+    "S": "#c:ingots/steel"
   },
   "pattern": [
     "CCCCC",

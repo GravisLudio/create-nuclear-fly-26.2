@@ -3,18 +3,10 @@
   "accept_mirrored": true,
   "category": "misc",
   "key": {
-    "B": {
-      "item": "minecraft:bucket"
-    },
-    "C": {
-      "item": "createnuclear:reactor_casing"
-    },
-    "G": {
-      "item": "createnuclear:reinforced_glass"
-    },
-    "S": {
-      "tag": "c:ingots/steel"
-    }
+    "B": "minecraft:bucket",
+    "C": "createnuclear:reactor_casing",
+    "G": "createnuclear:reinforced_glass",
+    "S": "#c:ingots/steel"
   },
   "pattern": [
     "CCCCC",

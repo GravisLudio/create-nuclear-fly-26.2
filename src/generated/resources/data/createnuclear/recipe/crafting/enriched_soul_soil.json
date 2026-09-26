@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "N": {
-      "item": "minecraft:nether_star"
-    },
-    "O": {
-      "item": "minecraft:obsidian"
-    },
-    "S": {
-      "item": "minecraft:soul_soil"
-    }
+    "N": "minecraft:nether_star",
+    "O": "minecraft:obsidian",
+    "S": "minecraft:soul_soil"
   },
   "pattern": [
     "SOS",

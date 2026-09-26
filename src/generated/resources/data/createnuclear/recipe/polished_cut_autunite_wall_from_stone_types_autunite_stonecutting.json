@@ -1,8 +1,6 @@
 {
   "type": "minecraft:stonecutting",
-  "ingredient": {
-    "tag": "createnuclear:stone_types/autunite"
-  },
+  "ingredient": "#createnuclear:stone_types/autunite",
   "result": {
     "count": 1,
     "id": "createnuclear:polished_cut_autunite_wall"

@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "tag": "c:storage_blocks/lead"
-    }
+    "#c:storage_blocks/lead"
   ],
   "result": {
     "count": 9,

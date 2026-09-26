@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.nuclearteam.createnuclear.client.CNBlockEntityBehaviours;
 import net.nuclearteam.createnuclear.client.CNBlockEntityRenders;
 import net.nuclearteam.createnuclear.client.CNConnectedTextures;
+import net.nuclearteam.createnuclear.client.CNItemModelProperties;
 import net.nuclearteam.createnuclear.client.CNDisplaySourceRenders;
 import net.nuclearteam.createnuclear.client.CNEntityRenderers;
 import net.nuclearteam.createnuclear.client.CNFluidRenders;
@@ -37,6 +38,7 @@ public class CreateNuclearClient implements ClientModInitializer {
         CNBlockEntityBehaviours.register();
         CNConnectedTextures.register();
         CNFluidRenders.register();
+        CNItemModelProperties.register();
         CNItemTooltips.register();
         CNDisplaySourceRenders.register();
 

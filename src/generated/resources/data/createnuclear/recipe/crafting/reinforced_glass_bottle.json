@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "G": {
-      "item": "createnuclear:reinforced_glass"
-    }
+    "G": "createnuclear:reinforced_glass"
   },
   "pattern": [
     "G G",

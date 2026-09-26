@@ -3,9 +3,7 @@
   "accept_mirrored": true,
   "category": "misc",
   "key": {
-    "U": {
-      "item": "createnuclear:enriched_yellowcake"
-    }
+    "U": "createnuclear:enriched_yellowcake"
   },
   "pattern": [
     "    U",

@@ -1,10 +1,10 @@
 {
   "type": "create:compacting",
-  "ingredients": [
+  "fluid_ingredients": [
     {
-      "type": "neoforge:tag",
-      "amount": 100,
-      "tag": "createnuclear:uranium"
+      "type": "fluid_tag",
+      "amount": 8100,
+      "fluid_tag": "#createnuclear:uranium"
     }
   ],
   "results": [

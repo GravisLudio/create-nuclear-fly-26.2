@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "R": {
-      "tag": "c:raw_materials/uranium"
-    }
+    "R": "#c:raw_materials/uranium"
   },
   "pattern": [
     "RRR",

@@ -1,7 +1,7 @@
 package net.nuclearteam.createnuclear.foundation.mixin;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.nuclearteam.createnuclear.CNTags;
@@ -18,13 +18,14 @@ public class SmithingTransformRecipeMixin {
 
     @Shadow
     @Final
-    ItemStack result;
+    ItemStackTemplate result;
 
     @Inject(at = @At("HEAD"), method = "assemble", cancellable = true)
-    public void CN$assemble(SmithingRecipeInput pInput, HolderLookup.Provider pRegistries, CallbackInfoReturnable<ItemStack> cir) {
+    // 26.2: assemble lost its registry argument and the result is an ItemStackTemplate.
+    public void CN$assemble(SmithingRecipeInput pInput, CallbackInfoReturnable<ItemStack> cir) {
         ItemStack baseItem = pInput.base();
         if (baseItem.is(CNTags.CNItemTags.ANTI_RADIATION_ARMOR.tag)) {
-            ItemStack resultItem = this.result.copy();
+            ItemStack resultItem = this.result.create();
             ItemStack additionItem = pInput.addition();
 
             ClothTagHelper.initClothTagsForResult(resultItem, baseItem, additionItem);

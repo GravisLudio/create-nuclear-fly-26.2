@@ -38,7 +38,8 @@ public final class CNFluidRenders {
         Material still = new Material(entry.id.withPath("fluid/" + name + "_still"));
         Material flow = new Material(entry.id.withPath("fluid/" + name + "_flow"));
         FluidModel.Unbaked model = new FluidModel.Unbaked(still, flow, null, null);
+        // Only the source fluid: Create Fly's FluidStateModelSetMixin adds fluid.getFlowing() itself,
+        // and a second entry for it throws "Multiple entries with same key" while baking.
         AllFluidConfigs.MODEL.put(entry.still, model);
-        AllFluidConfigs.MODEL.put(entry.flowing, model);
     }
 }

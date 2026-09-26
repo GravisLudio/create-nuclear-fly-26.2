@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "B": {
-      "item": "createnuclear:reinforced_glass_bottle"
-    },
-    "S": {
-      "item": "minecraft:nether_star"
-    }
+    "B": "createnuclear:reinforced_glass_bottle",
+    "S": "minecraft:nether_star"
   },
   "pattern": [
     "BBB",

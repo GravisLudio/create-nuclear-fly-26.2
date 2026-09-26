@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "G": {
-      "tag": "c:glass_blocks"
-    },
-    "S": {
-      "tag": "c:ingots/lead"
-    }
+    "G": "#c:glass_blocks",
+    "S": "#c:ingots/lead"
   },
   "pattern": [
     "SGS",

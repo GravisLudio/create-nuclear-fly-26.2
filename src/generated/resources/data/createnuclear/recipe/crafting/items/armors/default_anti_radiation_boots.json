@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "key": {
-    "X": {
-      "tag": "c:ingots/lead"
-    },
-    "Y": {
-      "tag": "c:ingots/brass"
-    }
+    "X": "#c:ingots/lead",
+    "Y": "#c:ingots/brass"
   },
   "pattern": [
     "Y Y",

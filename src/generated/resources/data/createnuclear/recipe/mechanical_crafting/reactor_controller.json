@@ -3,24 +3,12 @@
   "accept_mirrored": true,
   "category": "misc",
   "key": {
-    "C": {
-      "item": "createnuclear:reactor_casing"
-    },
-    "N": {
-      "item": "minecraft:netherite_ingot"
-    },
-    "O": {
-      "item": "create:content_observer"
-    },
-    "T": {
-      "item": "create:electron_tube"
-    },
-    "V": {
-      "item": "create:item_vault"
-    },
-    "X": {
-      "item": "minecraft:nether_star"
-    }
+    "C": "createnuclear:reactor_casing",
+    "N": "minecraft:netherite_ingot",
+    "O": "create:content_observer",
+    "T": "create:electron_tube",
+    "V": "create:item_vault",
+    "X": "minecraft:nether_star"
   },
   "pattern": [
     "CCCCC",

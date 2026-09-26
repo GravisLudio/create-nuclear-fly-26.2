@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "ingredients": [
-    {
-      "item": "createnuclear:small_autunite_brick_slab"
-    },
-    {
-      "item": "createnuclear:small_autunite_brick_slab"
-    }
+    "createnuclear:small_autunite_brick_slab",
+    "createnuclear:small_autunite_brick_slab"
   ],
   "result": {
     "count": 1,

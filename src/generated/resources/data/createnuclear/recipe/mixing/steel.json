@@ -1,12 +1,8 @@
 {
   "type": "create:mixing",
   "ingredients": [
-    {
-      "tag": "c:dusts/coal"
-    },
-    {
-      "tag": "c:ingots/iron"
-    }
+    "#c:dusts/coal",
+    "#c:ingots/iron"
   ],
   "results": [
     {

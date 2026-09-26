@@ -20,6 +20,17 @@ loom {
             sourceSet sourceSets.main
         }
     }
+
+    runs {
+        // Headless server that loads every datapack (recipes, loot, advancements, worldgen) and exits:
+        // the quickest check that the committed data parses on 26.2. `gradlew runGametest`.
+        gametest {
+            server()
+            name "Game Test"
+            vmArg "-Dfabric-api.gametest"
+            runDir "build/gametest"
+        }
+    }
 }
 
 sourceSets.main.java {

@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "createnuclear:biome_restore",
+    "entries": [
+      {
+        "threshold": 0.25,
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/biome_irradiation_extractor/quarter"
+        }
+      },
+      {
+        "threshold": 0.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/biome_irradiation_extractor/half"
+        }
+      },
+      {
+        "threshold": 0.75,
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/biome_irradiation_extractor/three_quarters"
+        }
+      },
+      {
+        "threshold": 1.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/biome_irradiation_extractor/full"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "createnuclear:item/biome_irradiation_extractor"
+    }
+  }
+}

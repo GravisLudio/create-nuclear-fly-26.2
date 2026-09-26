@@ -1,14 +1,9 @@
 {
   "type": "minecraft:smithing_transform",
-  "addition": {
-    "item": "createnuclear:magenta_cloth"
-  },
-  "base": {
-    "item": "createnuclear:default_anti_radiation_helmet"
-  },
+  "addition": "createnuclear:magenta_cloth",
+  "base": "createnuclear:default_anti_radiation_helmet",
   "result": {
     "count": 1,
     "id": "createnuclear:default_anti_radiation_helmet"
-  },
-  "template": []
+  }
 }

@@ -3,9 +3,7 @@
   "category": "misc",
   "cookingtime": 200,
   "experience": 0.1,
-  "ingredient": {
-    "tag": "c:ores/lead"
-  },
+  "ingredient": "#c:ores/lead",
   "result": {
     "count": 1,
     "id": "createnuclear:lead_ingot"

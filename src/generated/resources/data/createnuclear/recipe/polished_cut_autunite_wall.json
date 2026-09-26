@@ -2,9 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "X": {
-      "item": "createnuclear:polished_cut_autunite"
-    }
+    "X": "createnuclear:polished_cut_autunite"
   },
   "pattern": [
     "XXX",

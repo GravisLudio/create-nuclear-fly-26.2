@@ -1,8 +1,6 @@
 {
   "type": "minecraft:stonecutting",
-  "ingredient": {
-    "tag": "createnuclear:stone_types/autunite"
-  },
+  "ingredient": "#createnuclear:stone_types/autunite",
   "result": {
     "count": 2,
     "id": "createnuclear:cut_autunite_brick_slab"

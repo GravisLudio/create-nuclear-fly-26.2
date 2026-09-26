@@ -1,0 +1,125 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "createnuclear:cloth_color",
+    "cases": [
+      {
+        "when": "white",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/white_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "orange",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/orange_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "magenta",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/magenta_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "light_blue",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/light_blue_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "yellow",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/yellow_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "lime",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/lime_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "pink",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/pink_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "gray",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/gray_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "light_gray",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/light_gray_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "cyan",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/cyan_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "purple",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/purple_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "blue",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/blue_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "brown",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/brown_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "green",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/green_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "red",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/red_anti_radiation_leggings"
+        }
+      },
+      {
+        "when": "black",
+        "model": {
+          "type": "minecraft:model",
+          "model": "createnuclear:item/colored/black_anti_radiation_leggings"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "createnuclear:item/default_anti_radiation_leggings"
+    }
+  }
+}

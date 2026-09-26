@@ -3,12 +3,8 @@
   "accept_mirrored": true,
   "category": "misc",
   "key": {
-    "G": {
-      "item": "createnuclear:graphene"
-    },
-    "S": {
-      "tag": "c:ingots/steel"
-    }
+    "G": "createnuclear:graphene",
+    "S": "#c:ingots/steel"
   },
   "pattern": [
     "SGS",

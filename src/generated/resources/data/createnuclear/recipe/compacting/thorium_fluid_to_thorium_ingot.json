@@ -1,10 +1,10 @@
 {
   "type": "create:compacting",
-  "ingredients": [
+  "fluid_ingredients": [
     {
-      "type": "neoforge:tag",
-      "amount": 200,
-      "tag": "createnuclear:thorium"
+      "type": "fluid_tag",
+      "amount": 16200,
+      "fluid_tag": "#createnuclear:thorium"
     }
   ],
   "results": [

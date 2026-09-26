@@ -3,18 +3,10 @@
   "accept_mirrored": true,
   "category": "misc",
   "key": {
-    "C": {
-      "item": "createnuclear:reactor_casing"
-    },
-    "L": {
-      "item": "minecraft:clock"
-    },
-    "N": {
-      "item": "minecraft:note_block"
-    },
-    "R": {
-      "item": "minecraft:repeater"
-    }
+    "C": "createnuclear:reactor_casing",
+    "L": "minecraft:clock",
+    "N": "minecraft:note_block",
+    "R": "minecraft:repeater"
   },
   "pattern": [
     "CCCCC",
