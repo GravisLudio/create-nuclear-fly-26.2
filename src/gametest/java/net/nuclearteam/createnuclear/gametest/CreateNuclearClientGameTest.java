@@ -35,6 +35,12 @@ import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.nuclearteam.createnuclear.content.multiblock.ReactorAssembler;
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.nuclearteam.createnuclear.CNEntityType;
+import net.nuclearteam.createnuclear.content.multiblock.alarm.ReactorAlarm;
+import net.nuclearteam.createnuclear.content.multiblock.output.ReactorOutputEntity;
+import net.nuclearteam.createnuclear.infrastructure.config.CNConfigs;
 
 import java.util.List;
 
@@ -190,6 +196,12 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
 
             // 6. Run it: uranium rods and water go in through Fabric's transfer API (CNTransfer), the
             //    controller gets a blueprint with one fuel rod, and it must turn ACTIVE and heat up.
+            //    Rod lifetime at its minimum (100 ticks) so consumption shows within the test.
+            int rodLifetime = server.computeOnServer(s -> {
+                int old = CNConfigs.server().rods.uraniumRodLifetime.get();
+                CNConfigs.server().rods.uraniumRodLifetime.set(100);
+                return old;
+            });
             long[] inserted = server.computeOnServer(s -> {
                 ServerLevel level = s.overworld();
                 long rods, water;
@@ -241,6 +253,49 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
                 throw new AssertionError("Reactor with fuel, water and a blueprint is not running: " + running);
             }
 
+            // 6b. An output and an alarm on the top face ('A' cells of the first aisle), placed on the
+            //     running reactor: they must register themselves (MultiblockHelpers.handleOnPlace), the
+            //     output must turn at heat / RPM_DIVIDER, and the rod input must lose rods over time.
+            BlockPos[] topParts = server.computeOnServer(s -> {
+                ServerLevel level = s.overworld();
+                ReactorControllerBlockEntity be = (ReactorControllerBlockEntity) level.getBlockEntity(controller);
+                var box = be.getMultiblockPos();
+                BlockPos output = new BlockPos((box.minX() + box.maxX()) / 2, box.maxY(), (box.minZ() + box.maxZ()) / 2);
+                BlockPos alarm = output.east().getX() < box.maxX() ? output.east() : output.north();
+                level.setBlockAndUpdate(output, CNBlocks.REACTOR_OUTPUT.getDefaultState().setValue(BlockStateProperties.FACING, Direction.UP));
+                level.setBlockAndUpdate(output.above(), com.zurrtum.create.AllBlocks.SHAFT.defaultBlockState()
+                    .setValue(BlockStateProperties.AXIS, Direction.Axis.Y));
+                level.setBlockAndUpdate(alarm, CNBlocks.REACTOR_ALARM.getDefaultState());
+                return new BlockPos[] {output, alarm};
+            });
+            context.waitTicks(150);
+            String outputState = server.computeOnServer(s -> {
+                ServerLevel level = s.overworld();
+                ReactorControllerBlockEntity be = (ReactorControllerBlockEntity) level.getBlockEntity(controller);
+                boolean registered = be.getOutputManager().getBlocksPosition(level).contains(topParts[0]);
+                float speed = level.getBlockEntity(topParts[0]) instanceof ReactorOutputEntity out ? out.getGeneratedSpeed() : -1;
+                long rods = 0;
+                Storage<ItemVariant> rodStorage = ItemStorage.SIDED.find(level, rodInput, null);
+                if (rodStorage != null) {
+                    for (StorageView<ItemVariant> view : rodStorage) {
+                        if (view.getResource().isOf(CNItems.URANIUM_ROD.get())) rods += view.getAmount();
+                    }
+                }
+                return registered + " " + speed + " " + rods + " heat=" + be.getConfiguredPatternHeat();
+            });
+            System.out.println("[createnuclear-gametest] output registered/speed, rods left: " + outputState);
+            server.runCommand("tp @p " + (topParts[0].getX() + 4) + " " + (topParts[0].getY() + 2) + " " + (topParts[0].getZ() + 4)
+                + " facing " + topParts[0].getX() + " " + topParts[0].getY() + " " + topParts[0].getZ());
+            context.waitTicks(10);
+            context.takeScreenshot("createnuclear-reactor-output");
+            String[] out = outputState.split(" ");
+            if (!out[0].equals("true") || Float.parseFloat(out[1]) <= 0) {
+                throw new AssertionError("Reactor output not registered or not turning: " + outputState);
+            }
+            if (Long.parseLong(out[2]) >= inserted[0]) {
+                throw new AssertionError("No rod consumed after 250 ticks at a 100-tick lifetime: " + outputState);
+            }
+
             // 7. The nuclear explosion (ServerExplosion + onExplosionHit in 26.2) and its mushroom cloud,
             //    away from the reactor. A failure here crashes the integrated server and the test.
             server.runCommand("item replace entity @p armor.head with minecraft:air");
@@ -261,6 +316,41 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
             System.out.println("[createnuclear-gametest] explosion crater: " + craterAir + "/121 air blocks at y=97");
             if (craterAir == 0) {
                 throw new AssertionError("The nuclear explosion destroyed nothing");
+            }
+
+            // 8. Meltdown of the running reactor: the danger threshold is dropped below its heat, so the
+            //    alarm must power, and after the 300-tick countdown the controller must blow itself up.
+            int danger = server.computeOnServer(s -> {
+                int old = CNConfigs.server().reactorHeat.size5Danger.get();
+                CNConfigs.server().reactorHeat.size5Danger.set(10);
+                CNConfigs.server().rods.uraniumRodLifetime.set(rodLifetime);
+                return old;
+            });
+            server.runCommand("tp @p " + (controller.getX() - 30) + " " + (controller.getY() + 20) + " " + (controller.getZ() - 30)
+                + " facing " + controller.getX() + " " + controller.getY() + " " + controller.getZ());
+            context.waitTicks(20);
+            boolean alarmOn = server.computeOnServer(s -> {
+                var state = s.overworld().getBlockState(topParts[1]);
+                return state.is(CNBlocks.REACTOR_ALARM.get()) && state.getValue(ReactorAlarm.POWERED);
+            });
+            context.takeScreenshot("createnuclear-meltdown-alarm");
+            context.waitTicks(300);
+            context.takeScreenshot("createnuclear-meltdown");
+            String meltdown = server.computeOnServer(s -> {
+                ServerLevel level = s.overworld();
+                CNConfigs.server().reactorHeat.size5Danger.set(danger);
+                boolean controllerGone = !level.getBlockState(controller).is(CNBlocks.REACTOR_CONTROLLER.get());
+                long explosions = level.getEntities(CNEntityType.NUCLEAR_EXPLOSION.get(), e -> true).size();
+                return controllerGone + " " + explosions + " biome=" + level.getBiome(controller.above(5)).getRegisteredName();
+            });
+            System.out.println("[createnuclear-gametest] alarm=" + alarmOn + " meltdown (controller gone, explosions, biome): " + meltdown);
+            context.waitTicks(60);
+            context.takeScreenshot("createnuclear-meltdown-after");
+            if (!alarmOn) {
+                throw new AssertionError("Reactor alarm not powered while the reactor is in danger");
+            }
+            if (!meltdown.startsWith("true")) {
+                throw new AssertionError("Reactor in danger for 300 ticks did not melt down: " + meltdown);
             }
         }
     }

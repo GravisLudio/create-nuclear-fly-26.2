@@ -22,8 +22,14 @@ transfer API and a one-rod blueprint, the controller turns `ACTIVE` and reaches 
 the mushroom cloud and the flash. The headless datapack check
 (`gradlew runGametest`) loads 3716 recipes and 3044 advancements with **zero errors**.
 
-Not yet exercised in game: rod consumption over time, the output shaft, the alarm, overheating and
-meltdown triggered by the reactor itself, the 7x7 and 9x9 reactors, the JEI categories, the Flywheel-off path, a dedicated server.
+Third session (2026-09-26): the test now also covers **rod consumption** (lifetime set to 100 ticks:
+64 → 62 rods in 250 ticks), a **reactor output** placed on the running reactor (registers itself,
+turns at heat / 32 = 2 RPM, shaft on top), a **reactor alarm** (powers when heat passes the danger
+threshold) and the **meltdown**: with `size5Danger` lowered below the heat, the 300-tick countdown
+ends in the controller destroying itself, a `nuclear_explosion`, the mushroom cloud and the biome
+around turning `createnuclear:irradiated_land`. Configs are restored by the test.
+
+Not yet exercised in game: the 7x7 and 9x9 reactors, the JEI categories, the Flywheel-off path, a dedicated server.
 
 What this session changed, beyond the compile fixes listed below:
 
@@ -266,9 +272,8 @@ widgets; config.
 
 ## Next steps, in order
 
-1. **Play-test the reactor further**: rod consumption, the output shaft (attach a reactor output),
-   the alarm, overheating and meltdown / nuclear explosion; the 7x7 and 9x9 sizes; the blueprint
-   menu by hand. Extend step 6 of `src/gametest` (it already runs a fuelled 5x5).
+1. **Play-test the reactor further**: the 7x7 and 9x9 sizes; the blueprint menu by hand. (Rod
+   consumption, output, alarm and meltdown are covered by steps 6b and 8 of `src/gametest`.)
    Note for the test: the controller reads the blueprint from **both** inventory slot 0 and
    `configuredPattern` (same stack, as `ReactorControllerBlock.useItemOn` does); setting only the
    pattern crashes the server in `DefaultHeatCalculator.computeHeat`.
