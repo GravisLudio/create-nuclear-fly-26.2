@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "createnuclear-gametest",
+  "version": "1.0.0",
+  "name": "Create Nuclear game tests",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "net.nuclearteam.createnuclear.gametest.CreateNuclearClientGameTest"
+    ]
+  },
+  "depends": {
+    "createnuclear": "*"
+  }
+}

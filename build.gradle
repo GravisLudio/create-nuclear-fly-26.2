@@ -80,7 +80,21 @@ repositories {
     }
 }
 
+fabricApi {
+    // src/gametest: a client game test that creates a world, spawns the mod's content and takes
+    // screenshots (build/run/clientGameTest/screenshots). Not packaged with the mod.
+    // `gradlew runClientGameTest`. Server game tests stay off: runGametest covers the datapack load.
+    configureTests {
+        createSourceSet = true
+        modId = "createnuclear-gametest"
+        enableGameTests = false
+        enableClientGameTests = true
+        eula = false
+    }
+}
+
 dependencies {
+    gametestImplementation fabricApi.module("fabric-client-gametest-api-v1", fabric_version)
     minecraft "com.mojang:minecraft:${minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${loader_version}"
 
