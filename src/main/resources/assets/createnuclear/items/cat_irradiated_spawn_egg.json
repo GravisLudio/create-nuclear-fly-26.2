@@ -1,6 +1,12 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "createnuclear:item/cat_irradiated_spawn_egg"
+    "model": "createnuclear:item/cat_irradiated_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -5701748
+      }
+    ]
   }
 }
