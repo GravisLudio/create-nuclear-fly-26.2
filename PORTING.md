@@ -16,11 +16,13 @@ paid for there. Read its *Traps* and *The launch phase* sections before the firs
 client game test (`gradlew runClientGameTest`, see *Testing*) builds a scene and screenshots it:
 the four irradiated mobs (adults and babies), the mod's blocks, the anti-radiation suit on the
 player (dyed), item icons, and a 5x5 reactor built from its own pattern, which **assembles**
-("Reactor has been assembled", assertion in the test). The headless datapack check
+("Reactor has been assembled") and **runs**: with uranium rods and water inserted through Fabric's
+transfer API and a one-rod blueprint, the controller turns `ACTIVE` and reaches heat 67 after
+100 ticks (all asserted in the test). The headless datapack check
 (`gradlew runGametest`) loads 3716 recipes and 3044 advancements with **zero errors**.
 
-Not yet exercised in game: the reactor actually running (rods, fluids, heat, output, meltdown),
-the 7x7 and 9x9 reactors, the JEI categories, the Flywheel-off path, a dedicated server.
+Not yet exercised in game: rod consumption over time, the output shaft, the alarm, overheating and
+meltdown, the 7x7 and 9x9 reactors, the JEI categories, the Flywheel-off path, a dedicated server.
 
 What this session changed, beyond the compile fixes listed below:
 
@@ -254,16 +256,21 @@ widgets; config.
   Grep its log for `ERROR` / `Couldn't parse`. No EULA needed.
 - `gradlew runClientGameTest`: Fabric client game test in `src/gametest` (own source set, not
   packaged). Opens a window, creates a world, builds the scene, writes screenshots to
-  `build/run/clientGameTest/screenshots/`, and fails on: the 5x5 reactor not assembling, or a
-  connected-texture sprite missing from the atlas. Look at the screenshots: models, textures and
+  `build/run/clientGameTest/screenshots/`, and fails on: the 5x5 reactor not assembling, a
+  connected-texture sprite missing from the atlas, the transfer API refusing rods or water, or the
+  fuelled reactor not turning `ACTIVE`. The last screenshot does not frame the controller yet (its
+  open side depends on the pattern's orientation). Look at the screenshots: models, textures and
   poses are not asserted. It ends with a harmless shutdown-watchdog crash report (see *Known*).
 - `gradlew runClient`: the normal dev client (`run/`).
 
 ## Next steps, in order
 
-1. **Play-test the reactor**: rods in the rod input, fluids through the fluid input (pipes and a
-   bucket), heat, the output shaft, alarm, overheating and meltdown / nuclear explosion; then the
-   7x7 and 9x9 sizes. Extend `src/gametest` where it can be automated.
+1. **Play-test the reactor further**: rod consumption, the output shaft (attach a reactor output),
+   the alarm, overheating and meltdown / nuclear explosion; the 7x7 and 9x9 sizes; the blueprint
+   menu by hand. Extend step 6 of `src/gametest` (it already runs a fuelled 5x5).
+   Note for the test: the controller reads the blueprint from **both** inventory slot 0 and
+   `configuredPattern` (same stack, as `ReactorControllerBlock.useItemOn` does); setting only the
+   pattern crashes the server in `DefaultHeatCalculator.computeHeat`.
 2. JEI categories (enriched / snow powder) with JEI installed; Ponder scenes; goggles tooltips;
    display link sources; blueprint menu.
 3. Dedicated server launch (`runServer` needs `eula.txt` accepted by you): check no client class

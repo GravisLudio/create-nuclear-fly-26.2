@@ -9,7 +9,24 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import lib.multiblock.SimpleMultiBlockAislePatternBuilder;
 import lib.multiblock.impl.IMultiBlockPattern;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluids;
+import net.nuclearteam.createnuclear.CNDataComponents;
+import net.nuclearteam.createnuclear.CNItems;
+import net.nuclearteam.createnuclear.content.multiblock.bluePrintItem.PatternData;
+import net.nuclearteam.createnuclear.content.multiblock.bluePrintItem.ReactorBluePrintData;
+import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlock;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.nuclearteam.createnuclear.CNBlocks;
 import net.nuclearteam.createnuclear.client.CNSpriteShifts;
@@ -119,6 +136,22 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
                 .build();
             server.runOnServer(s -> reactor.construct(s.overworld(), controller, (c, st) -> true));
             context.waitTicks(10);
+            // The two casings beside the controller ('A' in "OA*AO") become a rod input and a fluid
+            // input, so the assembled reactor registers them (findAndRegisterSpecialBlocks).
+            List<BlockPos> inputs = server.computeOnServer(s -> Direction.Plane.HORIZONTAL.stream()
+                .map(controller::relative)
+                .filter(pos -> s.overworld().getBlockState(pos).is(CNBlocks.REACTOR_CASING.get()))
+                .toList());
+            if (inputs.size() != 2) {
+                throw new AssertionError("Expected two casings beside the controller, found " + inputs);
+            }
+            BlockPos rodInput = inputs.get(0);
+            BlockPos fluidInput = inputs.get(1);
+            server.runOnServer(s -> {
+                s.overworld().setBlockAndUpdate(rodInput, CNBlocks.REACTOR_ROD_INPUT.getDefaultState());
+                s.overworld().setBlockAndUpdate(fluidInput, CNBlocks.REACTOR_FLUID_INPUT.getDefaultState());
+            });
+            context.waitTicks(2);
             boolean assembled = server.computeOnServer(s -> {
                 ReactorAssembler.assemble(controller, s.overworld());
                 return s.overworld().getBlockEntity(controller) instanceof ReactorControllerBlockEntity be && be.isAssembled();
@@ -153,6 +186,59 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
             }
             if (!assembled) {
                 throw new AssertionError("The 5x5 reactor built from its own pattern did not assemble");
+            }
+
+            // 6. Run it: uranium rods and water go in through Fabric's transfer API (CNTransfer), the
+            //    controller gets a blueprint with one fuel rod, and it must turn ACTIVE and heat up.
+            long[] inserted = server.computeOnServer(s -> {
+                ServerLevel level = s.overworld();
+                long rods, water;
+                try (Transaction tx = Transaction.openOuter()) {
+                    Storage<ItemVariant> rodStorage = ItemStorage.SIDED.find(level, rodInput, null);
+                    Storage<FluidVariant> fluids = FluidStorage.SIDED.find(level, fluidInput, null);
+                    rods = rodStorage == null ? -1 : rodStorage.insert(ItemVariant.of(CNItems.URANIUM_ROD.get()), 64, tx);
+                    water = fluids == null ? -1 : fluids.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET * 8, tx);
+                    tx.commit();
+                }
+                PatternData[] pattern = new PatternData[57];
+                for (int i = 0; i < pattern.length; i++) {
+                    pattern[i] = new PatternData(i, new ItemStack(Items.GLASS_PANE));
+                }
+                pattern[28] = new PatternData(28, new ItemStack(CNItems.URANIUM_ROD.get()));
+                ItemStack blueprint = new ItemStack(CNItems.REACTOR_BLUEPRINT.get());
+                blueprint.set(CNDataComponents.REACTOR_BLUE_PRINT_DATA, new ReactorBluePrintData(0, 1, pattern));
+                // As ReactorControllerBlock.useItemOn: the same stack goes in inventory slot 0 and the pattern.
+                ReactorControllerBlockEntity be = (ReactorControllerBlockEntity) level.getBlockEntity(controller);
+                be.getInventoryObject().setItem(0, blueprint);
+                be.setConfiguredPattern(blueprint);
+                return new long[] {rods, water};
+            });
+            System.out.println("[createnuclear-gametest] inserted rods=" + inserted[0] + " water(droplets)=" + inserted[1]);
+            context.waitTicks(100);
+            String running = server.computeOnServer(s -> {
+                ServerLevel level = s.overworld();
+                ReactorControllerBlockEntity be = (ReactorControllerBlockEntity) level.getBlockEntity(controller);
+                return "active=" + level.getBlockState(controller).getValue(ReactorControllerBlock.ACTIVE)
+                    + " heat=" + be.getConfiguredPatternHeat();
+            });
+            System.out.println("[createnuclear-gametest] reactor after 100 ticks: " + running);
+
+            server.runCommand("gamemode creative @p");
+            server.runCommand("item replace entity @p armor.head with " + NS + ":default_anti_radiation_helmet");
+            // Stand on the open side of the controller, looking at it: the helmet works as goggles.
+            Direction outside = server.computeOnServer(sv -> java.util.Arrays.stream(Direction.values())
+                .filter(d -> sv.overworld().getBlockState(controller.relative(d)).isAir())
+                .findFirst().orElse(Direction.NORTH));
+            BlockPos eye = controller.relative(outside, 3);
+            server.runCommand("tp @p " + eye.getX() + " " + (eye.getY() - 1) + " " + eye.getZ()
+                + " facing " + controller.getX() + " " + controller.getY() + " " + controller.getZ());
+            context.waitTicks(20);
+            context.takeScreenshot("createnuclear-reactor-running");
+            if (inserted[0] <= 0 || inserted[1] <= 0) {
+                throw new AssertionError("Transfer API refused the inputs: rods=" + inserted[0] + " water=" + inserted[1]);
+            }
+            if (!running.startsWith("active=true")) {
+                throw new AssertionError("Reactor with fuel, water and a blueprint is not running: " + running);
             }
         }
     }
