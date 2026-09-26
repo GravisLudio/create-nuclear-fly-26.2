@@ -7,7 +7,16 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContex
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import lib.multiblock.SimpleMultiBlockAislePatternBuilder;
+import lib.multiblock.impl.IMultiBlockPattern;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.nuclearteam.createnuclear.CNBlocks;
+import net.nuclearteam.createnuclear.client.CNSpriteShifts;
+import com.zurrtum.create.client.foundation.block.connected.CTSpriteShiftEntry;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.nuclearteam.createnuclear.content.multiblock.ReactorAssembler;
+import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
 import net.minecraft.resources.Identifier;
 
 import java.util.List;
@@ -84,6 +93,67 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
             context.waitTicks(10);
             context.takeScreenshot("createnuclear-items");
             context.setScreen(() -> null);
+
+            // 5. The 5x5 reactor: the mod's own pattern, built block by block, then assembled the way
+            //    placing the controller by hand does (ReactorControllerBlock.setPlacedBy).
+            server.runCommand("clear @p");
+            server.runCommand("gamemode creative @p");
+            server.runCommand("fill -8 100 -8 12 110 16 minecraft:air");
+            BlockPos controller = new BlockPos(2, 103, 6);
+            IMultiBlockPattern reactor = SimpleMultiBlockAislePatternBuilder.start()
+                .aisle("OOOOO", "OAAAO", "OAAAO", "OAAAO", "OOOOO")
+                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO")
+                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO")
+                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OA*AO")
+                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO")
+                .aisle("OABAO", "ADDDA", "BDCDB", "ADDDA", "OABAO")
+                .aisle("OOOOO", "OAAAO", "OAAAO", "OAAAO", "OOOOO")
+                .where('A', b -> true).where('B', b -> true).where('C', b -> true)
+                .where('D', b -> true).where('O', b -> true).where('*', b -> true)
+                .block('A', () -> CNBlocks.REACTOR_CASING.getDefaultState())
+                .block('B', () -> CNBlocks.REACTOR_FRAME.getDefaultState())
+                .block('C', () -> CNBlocks.REACTOR_CORE.getDefaultState())
+                .block('D', () -> CNBlocks.REACTOR_COOLER.getDefaultState())
+                .block('O', () -> CNBlocks.REACTOR_CASING.getDefaultState())
+                .block('*', () -> CNBlocks.REACTOR_CONTROLLER.getDefaultState())
+                .build();
+            server.runOnServer(s -> reactor.construct(s.overworld(), controller, (c, st) -> true));
+            context.waitTicks(10);
+            boolean assembled = server.computeOnServer(s -> {
+                ReactorAssembler.assemble(controller, s.overworld());
+                return s.overworld().getBlockEntity(controller) instanceof ReactorControllerBlockEntity be && be.isAssembled();
+            });
+            server.runCommand("gamemode spectator @p");
+            server.runCommand("tp @p -9 108 -8 facing 2 103 6");
+            context.waitTicks(20);
+            context.takeScreenshot("createnuclear-reactor");
+            // Connected-texture sprites: a missing one renders the whole casing as missingno.
+            //    Create Fly reads one sprite per connection state (<name>_connected/<i>.png, tools/split-ct.py).
+            String missingCt = context.computeOnClient(mc -> {
+                StringBuilder missing = new StringBuilder();
+                for (CTSpriteShiftEntry entry : List.of(CNSpriteShifts.REACTOR_CASING, CNSpriteShifts.REACTOR_GLASS,
+                    CNSpriteShifts.AUTUNITE_CAP, CNSpriteShifts.AUTUNITE_LAYERED, CNSpriteShifts.AUTUNITE_PILLAR)) {
+                    for (int i = 0; i < entry.getType().getSpriteSize(); i++) {
+                        if (entry.getType().replaceOriginal() || i > 0) {
+                            Identifier name = entry.getTarget(i).contents().name();
+                            if (name.equals(MissingTextureAtlasSprite.getLocation())) {
+                                missing.append(entry.getType().getId()).append('/').append(i).append(' ');
+                            }
+                        }
+                    }
+                }
+                return missing.toString();
+            });
+            server.runCommand("fill -6 100 12 -4 102 12 " + NS + ":reactor_casing");
+            server.runCommand("tp @p -5 101 7 facing -5 101 12");
+            context.waitTicks(10);
+            context.takeScreenshot("createnuclear-casing-wall");
+            if (!missingCt.isEmpty()) {
+                throw new AssertionError("Connected-texture sprites missing from the atlas: " + missingCt);
+            }
+            if (!assembled) {
+                throw new AssertionError("The 5x5 reactor built from its own pattern did not assemble");
+            }
         }
     }
 }
