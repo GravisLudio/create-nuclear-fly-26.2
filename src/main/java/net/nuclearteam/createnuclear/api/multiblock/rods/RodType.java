@@ -358,7 +358,7 @@ public record RodType(Holder<Item> item,
     @Override
     public String toString() {
         String itemName = this.item.unwrapKey()
-            .map(k -> k.location().toString())
+            .map(k -> k.identifier().toString())
             .orElseGet(() -> {
                 Identifier rl = BuiltInRegistries.ITEM.getKey(this.item.value());
                 return rl != null ? rl.toString() : this.item.value().toString();

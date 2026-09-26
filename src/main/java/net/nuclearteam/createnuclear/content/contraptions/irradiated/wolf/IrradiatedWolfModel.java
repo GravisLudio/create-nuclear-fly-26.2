@@ -1,14 +1,19 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.wolf;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.ColorableAgeableListModel;
+import net.minecraft.client.model.BabyModelTransform;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
+
+import java.util.Set;
 @SuppressWarnings("unused")
-public class IrradiatedWolfModel<T extends IrradiatedWolf> extends ColorableAgeableListModel<T> {
+/** Posed from vanilla's {@link WolfRenderState}. Babies: see {@code IrradiatedCowModel}. */
+public class IrradiatedWolfModel extends EntityModel<WolfRenderState> {
+	public static final BabyModelTransform BABY_TRANSFORMER = new BabyModelTransform(Set.of("head"));
+
 	private final ModelPart head;
 	private final ModelPart pustule1;
 	private final ModelPart pustule2;
@@ -28,6 +33,7 @@ public class IrradiatedWolfModel<T extends IrradiatedWolf> extends ColorableAgea
 	private final ModelPart tail;
 
 	public IrradiatedWolfModel(ModelPart root) {
+		super(root);
 		this.head = root.getChild("head");
 		this.pustule1 = this.head.getChild("pustule1");
 		this.pustule2 = this.head.getChild("pustule2");
@@ -45,6 +51,10 @@ public class IrradiatedWolfModel<T extends IrradiatedWolf> extends ColorableAgea
 		this.leg3 = root.getChild("leg3");
 		this.leg4 = root.getChild("leg4");
 		this.tail = root.getChild("tail");
+	}
+
+	public static LayerDefinition createBabyLayer() {
+		return createBodyLayer().apply(BABY_TRANSFORMER);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -90,12 +100,15 @@ public class IrradiatedWolfModel<T extends IrradiatedWolf> extends ColorableAgea
 	}
 
 	@Override
-	public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		this.head.xRot = headPitch * 0.017453292F;
-		this.head.yRot = netHeadYaw * 0.017453292F;
-		this.tail.xRot = ageInTicks;
+	public void setupAnim(WolfRenderState state) {
+		super.setupAnim(state);
+		float limbSwing = state.walkAnimationPos;
+		float limbSwingAmount = state.walkAnimationSpeed;
+		this.head.xRot = state.xRot * 0.017453292F;
+		this.head.yRot = state.yRot * 0.017453292F;
+		this.tail.xRot = state.tailAngle;
 
-		if (entity.isAngry()) {
+		if (state.isAngry) {
 			this.tail.yRot = 0.0F;
 		} else {
 			this.tail.yRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
@@ -112,29 +125,8 @@ public class IrradiatedWolfModel<T extends IrradiatedWolf> extends ColorableAgea
 		this.leg3.xRot = Mth.cos(limbSwing * 0.6662F + 3.1415927F) * 1.4F * limbSwingAmount;
 		this.leg4.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
 
-		this.body.zRot = entity.getBodyRollAngle(headPitch, -0.16F);
-		this.tail.zRot = entity.getBodyRollAngle(headPitch, -0.2F);
-	}
-
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-		head.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		body.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		mane.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		leg1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		leg2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		leg3.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		leg4.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-		tail.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-	}
-
-	@Override
-	protected Iterable<ModelPart> headParts() {
-		return null;
-	}
-
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return null;
+		// Upstream passed headPitch as the partial tick here; the shake progress now comes lerped in the state.
+		this.body.zRot = state.getBodyRollAngle(-0.16F);
+		this.tail.zRot = state.getBodyRollAngle(-0.2F);
 	}
 }

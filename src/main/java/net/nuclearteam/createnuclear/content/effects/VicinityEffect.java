@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.content.effects;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -27,7 +28,7 @@ public abstract class VicinityEffect extends MobEffect {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+    public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity entity, int amplifier) {
         long currentTime = entity.level().getGameTime();
 
         List<Entity> nearbyEntities = entity.level().getEntities(

@@ -89,7 +89,7 @@ public class BigFluidStack {
 
     @Override
     public String toString() {
-        return "(" + stack.getHoverName().getString() + " x" + amount + ")";
+        return "(" + stack.getName().getString() + " x" + amount + ")";
     }
 
     public static List<BigFluidStack> duplicateWrappers(List<BigFluidStack> list) {

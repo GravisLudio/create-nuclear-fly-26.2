@@ -1,15 +1,24 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.cow;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.model.BabyModelTransform;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-public class IrradiatedCowModel<T extends IrradiatedCow> extends AgeableListModel<T> {
+import java.util.Set;
+
+/**
+ * 1.21.1's {@code AgeableListModel} is gone: models are posed from a render state, and babies use
+ * their own baked layer ({@link #BABY_TRANSFORMER}, same numbers as the old AgeableListModel
+ * defaults). Upstream overrode {@code renderToBuffer}, which skipped the baby scaling, so baby cows
+ * drew at full size there.
+ */
+public class IrradiatedCowModel extends EntityModel<LivingEntityRenderState> {
+    public static final BabyModelTransform BABY_TRANSFORMER = new BabyModelTransform(Set.of("head"));
+
     // This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
     private final ModelPart head;
     private final ModelPart pustule;
@@ -23,6 +32,7 @@ public class IrradiatedCowModel<T extends IrradiatedCow> extends AgeableListMode
     private final ModelPart pustule2;
 
     public IrradiatedCowModel(ModelPart root) {
+        super(root);
         this.head = root.getChild("head");
         this.pustule = this.head.getChild("pustule");
         this.body = root.getChild("body");
@@ -33,6 +43,10 @@ public class IrradiatedCowModel<T extends IrradiatedCow> extends AgeableListMode
         this.leg3 = this.legs.getChild("leg3");
         this.leg4 = this.legs.getChild("leg4");
         this.pustule2 = this.leg4.getChild("pustule2");
+    }
+
+    public static LayerDefinition createBabyLayer() {
+        return createBodyLayer().apply(BABY_TRANSFORMER);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -74,30 +88,15 @@ public class IrradiatedCowModel<T extends IrradiatedCow> extends AgeableListMode
     }
 
     @Override
-    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.head.xRot = headPitch * ((float)Math.PI / 180F);
-        this.head.yRot = netHeadYaw * ((float)Math.PI / 180F);
+    public void setupAnim(LivingEntityRenderState state) {
+        super.setupAnim(state);
+        float limbSwing = state.walkAnimationPos;
+        float limbSwingAmount = state.walkAnimationSpeed;
+        this.head.xRot = state.xRot * ((float)Math.PI / 180F);
+        this.head.yRot = state.yRot * ((float)Math.PI / 180F);
         this.leg3.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
         this.leg4.xRot = Mth.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount;
         this.leg1.xRot = Mth.cos(limbSwing * 0.6662F + (float)Math.PI) * 1.4F * limbSwingAmount;
         this.leg2.xRot = Mth.cos(limbSwing * 0.6662F) * 1.4F * limbSwingAmount;
     }
-
-    @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-        head.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        body.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        legs.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-    }
-
-    @Override
-    protected Iterable<ModelPart> headParts() {
-        return ImmutableList.of(this.head);
-    }
-
-    @Override
-    protected Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.body, this.leg1, this.leg2, this.leg3, this.leg4);
-    }
-
 }

@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -28,9 +27,18 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.*;
 import net.minecraft.world.entity.animal.*;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Llama;
-import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Llama;
+import net.minecraft.world.entity.animal.turtle.Turtle;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.animal.wolf.WolfSoundVariant;
+import net.minecraft.world.entity.animal.wolf.WolfSoundVariants;
+import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
@@ -50,13 +58,11 @@ import net.nuclearteam.createnuclear.content.contraptions.irradiated.AnimalUtil;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
-import java.util.function.Predicate;
 @SuppressWarnings({"unused", "deprecation"})
 public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
     private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID;
-    private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
-    public static final Predicate<LivingEntity> PREY_SELECTOR;
+    private static final EntityDataAccessor<Long> DATA_ANGER_END_TIME;
+    public static final TargetingConditions.Selector PREY_SELECTOR;
     private static final float START_HEALTH = 8.0F;
     private static final float TAME_HEALTH = 20.0F;
     private float interestedAngle;
@@ -67,18 +73,18 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
     private float shakeAnimO;
     private static final UniformInt PERSISTENT_ANGER_TIME;
     @Nullable
-    private UUID persistentAngerTarget;
+    private EntityReference<LivingEntity> persistentAngerTarget;
 
     public IrradiatedWolf(EntityType<? extends IrradiatedWolf> entityType, Level level) {
         super(entityType, level);
         this.setTame(false, false);
         this.setPathfindingMalus(PathType.POWDER_SNOW, -1.0F);
-        this.setPathfindingMalus(PathType.DANGER_POWDER_SNOW, -1.0F);
+        this.setPathfindingMalus(PathType.ON_TOP_OF_POWDER_SNOW, -1.0F);
     }
 
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new WolfPanicGoal(1.5));
+        this.goalSelector.addGoal(1, new TamableAnimal.TamableAnimalPanicGoal(1.5, DamageTypeTags.PANIC_ENVIRONMENTAL_CAUSES));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(3, new IrradiatedWolfAvoidEntityGoal<>(this, Llama.class, 24.0F, (double) 1.5F, (double) 1.5F));
         this.goalSelector.addGoal(4, new LeapAtTargetGoal(this, 0.4F));
@@ -112,48 +118,54 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
         RegistryAccess registryaccess = this.registryAccess();
 
         builder.define(DATA_INTERESTED_ID, false);
-        builder.define(DATA_REMAINING_ANGER_TIME, 0);
+        builder.define(DATA_ANGER_END_TIME, -1L);
     }
 
     protected void playStepSound(BlockPos pos, BlockState block) {
-        this.playSound(SoundEvents.WOLF_STEP, 0.15F, 1.0F);
+        this.playSound(sounds().stepSound().value(), 0.15F, 1.0F);
     }
 
-    public void addAdditionalSaveData(CompoundTag compound) {
-        super.addAdditionalSaveData(compound);
+    protected void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
 
-        this.addPersistentAngerSaveData(compound);
+        this.addPersistentAngerSaveData(output);
     }
 
-    public void readAdditionalSaveData(CompoundTag compound) {
-        super.readAdditionalSaveData(compound);
+    protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
 
-        this.readPersistentAngerSaveData(this.level(), compound);
+        this.readPersistentAngerSaveData(this.level(), input);
     }
 
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType, @Nullable SpawnGroupData spawnGroupData) {
         Holder<Biome> holder = level.getBiome(this.blockPosition());
 
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
+    // 26.2 wolf sounds come in sound sets; the irradiated wolf uses the classic one.
+    private WolfSoundVariant.WolfSoundSet sounds() {
+        WolfSoundVariant variant = SoundEvents.WOLF_SOUNDS.get(WolfSoundVariants.SoundSet.CLASSIC);
+        return this.isBaby() ? variant.babySounds() : variant.adultSounds();
+    }
+
     protected SoundEvent getAmbientSound() {
         if (this.isAngry()) {
-            return SoundEvents.WOLF_GROWL;
+            return sounds().growlSound().value();
         } else if (this.random.nextInt(3) != 0) {
-            return SoundEvents.WOLF_AMBIENT;
+            return sounds().ambientSound().value();
         } else {
-            return this.isTame() && this.getHealth() < 20.0F ? SoundEvents.WOLF_WHINE : SoundEvents.WOLF_PANT;
+            return this.isTame() && this.getHealth() < 20.0F ? sounds().whineSound().value() : sounds().pantSound().value();
         }
     }
 
     protected SoundEvent getHurtSound(DamageSource damageSource) {
-        return SoundEvents.WOLF_HURT;
+        return sounds().hurtSound().value();
     }
 
     protected SoundEvent getDeathSound() {
-        return SoundEvents.WOLF_DEATH;
+        return sounds().deathSound().value();
     }
 
     protected float getSoundVolume() {
@@ -185,7 +197,7 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
                 this.interestedAngle += (0.0F - this.interestedAngle) * 0.4F;
             }
 
-            if (this.isInWaterRainOrBubble()) {
+            if (this.isInWaterOrRain()) {
                 this.isWet = true;
                 if (this.isShaking && !this.level().isClientSide()) {
                     this.level().broadcastEntityEvent(this, (byte)56);
@@ -244,6 +256,10 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
         return Math.min(0.75F + Mth.lerp(partialTicks, this.shakeAnimO, this.shakeAnim) / 2.0F * 0.25F, 1.0F);
     }
 
+    public float getShakeAnim(float partialTicks) {
+        return Mth.lerp(partialTicks, this.shakeAnimO, this.shakeAnim);
+    }
+
     public float getBodyRollAngle(float partialTicks, float offset) {
         float f = (Mth.lerp(partialTicks, this.shakeAnimO, this.shakeAnim) + offset) / 1.8F;
         if (f < 0.0F) {
@@ -263,15 +279,12 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
         return this.isInSittingPose() ? 20 : super.getMaxHeadXRot();
     }
 
-    public boolean hurt(DamageSource source, float amount) {
-        if (this.isInvulnerableTo(source)) {
+    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+        if (this.isInvulnerableTo(level, source)) {
             return false;
         } else {
-            if (!this.level().isClientSide()) {
-                this.setOrderedToSit(false);
-            }
-
-            return super.hurt(source, amount);
+            this.setOrderedToSit(false);
+            return super.hurtServer(level, source, amount);
         }
     }
 
@@ -294,7 +307,7 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
         } else {
             if (this.isTame()) {
                 if (this.isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
-                    FoodProperties foodproperties = itemstack.getFoodProperties(this);
+                    FoodProperties foodproperties = itemstack.get(DataComponents.FOOD);
                     float f = foodproperties != null ? (float)foodproperties.nutrition() : 1.0F;
                     this.heal(2.0F * f);
                     itemstack.consume(1, player);
@@ -307,7 +320,7 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
                         this.jumping = false;
                         this.navigation.stop();
                         this.setTarget((LivingEntity)null);
-                        return InteractionResult.SUCCESS_NO_ITEM_USED;
+                        return InteractionResult.SUCCESS.withoutItem();
                     } else {
                         return interactionresult;
                     }
@@ -353,31 +366,32 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
         return 8;
     }
 
-    public int getRemainingPersistentAngerTime() {
-        return (Integer)this.entityData.get(DATA_REMAINING_ANGER_TIME);
+    // 26.2 NeutralMob keeps an anger end time (game time) instead of a remaining-ticks counter.
+    public long getPersistentAngerEndTime() {
+        return this.entityData.get(DATA_ANGER_END_TIME);
     }
 
-    public void setRemainingPersistentAngerTime(int time) {
-        this.entityData.set(DATA_REMAINING_ANGER_TIME, time);
+    public void setPersistentAngerEndTime(long endTime) {
+        this.entityData.set(DATA_ANGER_END_TIME, endTime);
     }
 
     public void startPersistentAngerTimer() {
-        this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
+        this.setTimeToRemainAngry(PERSISTENT_ANGER_TIME.sample(this.random));
     }
 
     @Nullable
-    public UUID getPersistentAngerTarget() {
+    public EntityReference<LivingEntity> getPersistentAngerTarget() {
         return this.persistentAngerTarget;
     }
 
-    public void setPersistentAngerTarget(@Nullable UUID target) {
+    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> target) {
         this.persistentAngerTarget = target;
     }
 
 
     @Nullable
     public IrradiatedWolf getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
-        return CNEntityType.IRRADIATED_WOLF.create(level);
+        return CNEntityType.IRRADIATED_WOLF.create(level, EntitySpawnReason.BREEDING);
     }
 
     public void setIsInterested(boolean isInterested) {
@@ -429,28 +443,18 @@ public class IrradiatedWolf extends TamableAnimal implements NeutralMob {
         return new Vec3((double)0.0F, (double)(0.6F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
     }
 
-    public static boolean checkWolfSpawnRules(EntityType<Wolf> wolf, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
+    public static boolean checkWolfSpawnRules(EntityType<Wolf> wolf, LevelAccessor level, EntitySpawnReason spawnType, BlockPos pos, RandomSource random) {
         return level.getBlockState(pos.below()).is(BlockTags.WOLVES_SPAWNABLE_ON) && isBrightEnoughToSpawn(level, pos);
     }
 
     static {
         DATA_INTERESTED_ID = SynchedEntityData.defineId(IrradiatedWolf.class, EntityDataSerializers.BOOLEAN);
-        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(IrradiatedWolf.class, EntityDataSerializers.INT);
-        PREY_SELECTOR = (p_348295_) -> {
-            EntityType<?> entitytype = p_348295_.getType();
+        DATA_ANGER_END_TIME = SynchedEntityData.defineId(IrradiatedWolf.class, EntityDataSerializers.LONG);
+        PREY_SELECTOR = (target, level) -> {
+            EntityType<?> entitytype = target.getType();
             return entitytype == EntityTypes.SHEEP || entitytype == EntityTypes.RABBIT || entitytype == EntityTypes.FOX || entitytype == CNEntityType.IRRADIATED_CAT.get();
         };
         PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
-    }
-
-    private class WolfPanicGoal extends PanicGoal {
-        public WolfPanicGoal(double speedModifier) {
-            super(IrradiatedWolf.this, speedModifier);
-        }
-
-        protected boolean shouldPanic() {
-            return this.mob.isFreezing() || this.mob.isOnFire();
-        }
     }
 
     static class IrradiatedWolfAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {

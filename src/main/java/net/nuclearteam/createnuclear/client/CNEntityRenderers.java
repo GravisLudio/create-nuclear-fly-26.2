@@ -14,6 +14,7 @@ import net.nuclearteam.createnuclear.content.contraptions.irradiated.cow.Irradia
 import net.nuclearteam.createnuclear.content.contraptions.irradiated.wolf.IrradiatedWolfModel;
 import net.nuclearteam.createnuclear.content.contraptions.irradiated.wolf.IrradiatedWolfRenderer;
 import net.nuclearteam.createnuclear.content.equipment.armor.AntiRadiationArmorModel;
+import net.nuclearteam.createnuclear.content.equipment.armor.AntiRadiationArmorRenderer;
 
 /**
  * Entity renderers and model layers. Registrate chained the renderers onto entity registration and
@@ -29,7 +30,13 @@ public final class CNEntityRenderers {
         ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_CHICKEN, IrradiatedChickenModel::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_WOLF, IrradiatedWolfModel::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_COW, IrradiatedCowModel::createBodyLayer);
+        ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_CAT_BABY, IrradiatedCatModel::createBabyLayer);
+        ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_CHICKEN_BABY, IrradiatedChickenModel::createBabyLayer);
+        ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_WOLF_BABY, IrradiatedWolfModel::createBabyLayer);
+        ModelLayerRegistry.registerModelLayer(CNModelLayers.IRRADIATED_COW_BABY, IrradiatedCowModel::createBabyLayer);
         ModelLayerRegistry.registerModelLayer(CNModelLayers.ANTI_RADIATION_ARMOR, AntiRadiationArmorModel::createBodyLayer);
+
+        AntiRadiationArmorRenderer.register();
 
         EntityRenderers.register(CNEntityType.NUCLEAR_EXPLOSION.get(), NoopRenderer::new);
         EntityRenderers.register(CNEntityType.IRRADIATED_CAT.get(), IrradiatedCatRenderer::new);

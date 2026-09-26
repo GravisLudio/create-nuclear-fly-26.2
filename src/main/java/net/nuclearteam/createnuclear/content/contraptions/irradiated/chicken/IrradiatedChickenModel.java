@@ -1,9 +1,8 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.chicken;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.model.BabyModelTransform;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.state.ChickenRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -11,8 +10,13 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
-public class IrradiatedChickenModel<T extends IrradiatedChicken> extends AgeableListModel<T> {
+
+import java.util.Set;
+
+/** Posed from vanilla's {@link ChickenRenderState} (flap + flap speed). Babies: see {@code IrradiatedCowModel}. */
+public class IrradiatedChickenModel extends EntityModel<ChickenRenderState> {
+    public static final BabyModelTransform BABY_TRANSFORMER = new BabyModelTransform(Set.of("head", "beak", "red_thing", "pustule1"));
+
 
     private final ModelPart head;
     private final ModelPart body;
@@ -27,6 +31,7 @@ public class IrradiatedChickenModel<T extends IrradiatedChicken> extends Ageable
     private final ModelPart pustule3;
 
     public IrradiatedChickenModel(ModelPart root) {
+        super(root);
         this.head = root.getChild("head");
         this.beak = root.getChild("beak");
         this.redThing = root.getChild("red_thing");
@@ -38,6 +43,10 @@ public class IrradiatedChickenModel<T extends IrradiatedChicken> extends Ageable
         this.pustule1 = root.getChild("pustule1");
         this.pustule2 = root.getChild("pustule2");
         this.pustule3 = root.getChild("pustule3");
+    }
+
+    public static LayerDefinition createBabyLayer() {
+        return createBodyLayer().apply(BABY_TRANSFORMER);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -62,41 +71,20 @@ public class IrradiatedChickenModel<T extends IrradiatedChicken> extends Ageable
     }
 
     @Override
-    public void setupAnim(@NotNull T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.head.xRot = headPitch * ((float)Math.PI / 180);
-        this.head.yRot = netHeadYaw * ((float)Math.PI / 180);
+    public void setupAnim(ChickenRenderState state) {
+        super.setupAnim(state);
+        this.head.xRot = state.xRot * ((float)Math.PI / 180);
+        this.head.yRot = state.yRot * ((float)Math.PI / 180);
         this.pustule1.xRot = this.head.xRot;
         this.pustule1.yRot = this.head.yRot;
         this.beak.xRot = this.head.xRot;
         this.beak.yRot = this.head.yRot;
         this.redThing.xRot = this.head.xRot;
         this.redThing.yRot = this.head.yRot;
-        this.rightLeg.xRot = Mth.cos(limbSwing * 0.6662f) * 1.4f * limbSwingAmount;
-        this.leftLeg.xRot = Mth.cos(limbSwing * 0.6662f + (float)Math.PI) * 1.4f * limbSwingAmount;
-        this.rightWing.zRot = ageInTicks;
-        this.leftWing.zRot = -ageInTicks;
-    }
-
-    @Override
-    public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-        head.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        beak.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        redThing.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        body.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        rightLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        leftLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        rightWing.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        leftWing.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        pustule1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        pustule2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        pustule3.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-    }
-
-    protected Iterable<ModelPart> headParts() {
-        return ImmutableList.of(this.head, this.beak, this.redThing, this.pustule1);
-    }
-
-    protected Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.body, this.rightLeg, this.leftLeg, this.rightWing, this.leftWing, this.pustule2, this.pustule3);
+        this.rightLeg.xRot = Mth.cos(state.walkAnimationPos * 0.6662f) * 1.4f * state.walkAnimationSpeed;
+        this.leftLeg.xRot = Mth.cos(state.walkAnimationPos * 0.6662f + (float)Math.PI) * 1.4f * state.walkAnimationSpeed;
+        float flapAngle = (Mth.sin(state.flap) + 1.0F) * state.flapSpeed;
+        this.rightWing.zRot = flapAngle;
+        this.leftWing.zRot = -flapAngle;
     }
 }

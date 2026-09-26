@@ -1,14 +1,19 @@
 package net.nuclearteam.createnuclear.content.contraptions.irradiated.cat;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.model.AgeableListModel;
+import net.minecraft.client.model.BabyModelTransform;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.entity.state.CatRenderState;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
-public class IrradiatedCatModel<T extends IrradiatedCat> extends AgeableListModel<T> {
+
+import java.util.Set;
+
+/** Posed from vanilla's {@link CatRenderState}. Babies: see {@code IrradiatedCowModel}. */
+public class IrradiatedCatModel extends EntityModel<CatRenderState> {
+    public static final BabyModelTransform BABY_TRANSFORMER = new BabyModelTransform(Set.of("head", "pustule"));
+
 
     private final ModelPart pustule3;
     private final ModelPart pustule2;
@@ -26,6 +31,7 @@ public class IrradiatedCatModel<T extends IrradiatedCat> extends AgeableListMode
     protected int state = 1;
 
     public IrradiatedCatModel(ModelPart root) {
+        super(root);
         this.pustule = root.getChild("pustule");
         this.pustule3 = root.getChild("pustule3");
         this.pustule2 = root.getChild("pustule2");
@@ -42,19 +48,12 @@ public class IrradiatedCatModel<T extends IrradiatedCat> extends AgeableListMode
     }
 
     @Override
-    protected Iterable<ModelPart> headParts() {
-        return ImmutableList.of(this.head, this.pustule);
-    }
-
-    @Override
-    protected Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.body, this.leftHindLeg, this.rightHindLeg, this.leftFrontLeg, this.rightFrontLeg,  this.tail1, this.tail2, this.pustule2, this.pustule3);
-    }
-
-    @Override
-    public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        this.head.xRot = headPitch * 0.017453292F;
-        this.head.yRot = netHeadYaw * 0.017453292F;
+    public void setupAnim(CatRenderState renderState) {
+        super.setupAnim(renderState);
+        float limbSwing = renderState.walkAnimationPos;
+        float limbSwingAmount = renderState.walkAnimationSpeed;
+        this.head.xRot = renderState.xRot * 0.017453292F;
+        this.head.yRot = renderState.yRot * 0.017453292F;
         if (this.state != 3) {
             this.body.xRot = 1.5707964F;
             if (this.state == 2) {
@@ -77,22 +76,8 @@ public class IrradiatedCatModel<T extends IrradiatedCat> extends AgeableListMode
         }
     }
 
-    @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
-        head.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        body.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        leftFrontLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        rightFrontLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        leftHindLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        rightHindLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        tail1.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        tail2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-
-        pustule.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        pustule3.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        pustule2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        teeth2.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        teeth.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+    public static LayerDefinition createBabyLayer() {
+        return createBodyLayer().apply(BABY_TRANSFORMER);
     }
 
     public static LayerDefinition createBodyLayer() {

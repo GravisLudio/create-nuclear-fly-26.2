@@ -60,7 +60,7 @@ public record ReactorFluidType(Holder<Fluid> fluid, int maxHeat, int efficiency,
         return registryAccess.lookupOrThrow(CreateNuclearRegistries.FLUID_TYPE)
             .listElements()
             .filter(ref -> ref.value().fluid.unwrapKey()
-                .map(k -> k.location().equals(fluidKey))
+                .map(k -> k.identifier().equals(fluidKey))
                 .orElse(false)
             )
             .findFirst();
@@ -183,7 +183,7 @@ public record ReactorFluidType(Holder<Fluid> fluid, int maxHeat, int efficiency,
     @Override
     public @NotNull String toString() {
         String fluidNames = this.fluid.unwrapKey()
-            .map(k -> k.location().toString())
+            .map(k -> k.identifier().toString())
             .orElseGet(() -> {
                 Identifier rl = BuiltInRegistries.FLUID.getKey(this.fluid.value());
                 return rl != null ? rl.toString() : this.fluid.value().toString();

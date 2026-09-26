@@ -2,8 +2,6 @@ package net.nuclearteam.createnuclear.content.contraptions.irradiated.chicken;
 
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -17,7 +15,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.animal.chicken.Chicken;
+import net.minecraft.world.entity.animal.chicken.ChickenSoundVariant;
+import net.minecraft.world.entity.animal.chicken.ChickenSoundVariants;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -94,9 +96,9 @@ public class IrradiatedChicken extends Animal implements IrradiatedAnimal {
         }
 
         this.flap += this.flapping * 2.0F;
-        if (!this.level().isClientSide() && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
+        if (this.level() instanceof ServerLevel serverLevel && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
             this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-            this.spawnAtLocation(Items.EGG);
+            this.spawnAtLocation(serverLevel, Items.EGG);
             this.gameEvent(GameEvent.ENTITY_PLACE);
             this.eggTime = this.random.nextInt(6000) + 6000;
         }
@@ -111,52 +113,56 @@ public class IrradiatedChicken extends Animal implements IrradiatedAnimal {
         this.nextFlap = this.flyDist + this.flapSpeed / 2.0F;
     }
 
+    // 26.2 chicken sounds come in sound sets; the irradiated chicken uses the classic one.
+    private ChickenSoundVariant.ChickenSoundSet sounds() {
+        ChickenSoundVariant variant = SoundEvents.CHICKEN_SOUNDS.get(ChickenSoundVariants.SoundSet.CLASSIC);
+        return this.isBaby() ? variant.babySounds() : variant.adultSounds();
+    }
+
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.CHICKEN_AMBIENT;
+        return sounds().ambientSound().value();
     }
 
     protected SoundEvent getHurtSound(DamageSource damageSource) {
-        return SoundEvents.CHICKEN_HURT;
+        return sounds().hurtSound().value();
     }
 
     protected SoundEvent getDeathSound() {
-        return SoundEvents.CHICKEN_DEATH;
+        return sounds().deathSound().value();
     }
 
     protected void playStepSound(BlockPos pos, BlockState block) {
-        this.playSound(SoundEvents.CHICKEN_STEP, 0.15F, 1.0F);
+        this.playSound(sounds().stepSound().value(), 0.15F, 1.0F);
     }
 
     @Nullable
     public IrradiatedChicken getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
-        return CNEntityType.IRRADIATED_CHICKEN.create(level);
+        return CNEntityType.IRRADIATED_CHICKEN.create(level, EntitySpawnReason.BREEDING);
     }
 
     public boolean isFood(ItemStack stack) {
         return stack.is(CNTags.CNItemTags.FUEL.tag);
     }
 
-    protected int getBaseExperienceReward() {
-        return this.isChickenJockey() ? 10 : super.getBaseExperienceReward();
+    protected int getBaseExperienceReward(ServerLevel level) {
+        return this.isChickenJockey() ? 10 : super.getBaseExperienceReward(level);
     }
 
-    public void readAdditionalSaveData(CompoundTag compound) {
-        super.readAdditionalSaveData(compound);
-        this.isChickenJockey = compound.getBooleanOr("IsChickenJockey", false);
-        if (compound.contains("EggLayTime")) {
-            this.eggTime = compound.getIntOr("EggLayTime", 0);
-        }
-
-        if (compound.contains("ConversionTime", Tag.TAG_ANY_NUMERIC) && compound.getIntOr("ConversionTime", 0) > -1) {
-            this.startConverting(compound.getIntOr("ConversionTime", 0));
+    protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        this.isChickenJockey = input.getBooleanOr("IsChickenJockey", false);
+        input.getInt("EggLayTime").ifPresent(time -> this.eggTime = time);
+        int conversionTime = input.getIntOr("ConversionTime", -1);
+        if (conversionTime > -1) {
+            this.startConverting(conversionTime);
         }
     }
 
-    public void addAdditionalSaveData(CompoundTag compound) {
-        super.addAdditionalSaveData(compound);
-        compound.putBoolean("IsChickenJockey", this.isChickenJockey);
-        compound.putInt("EggLayTime", this.eggTime);
-        compound.putInt("ConversionTime", this.isConverting() ? this.conversionTime : -1);
+    protected void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putBoolean("IsChickenJockey", this.isChickenJockey);
+        output.putInt("EggLayTime", this.eggTime);
+        output.putInt("ConversionTime", this.isConverting() ? this.conversionTime : -1);
     }
 
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {

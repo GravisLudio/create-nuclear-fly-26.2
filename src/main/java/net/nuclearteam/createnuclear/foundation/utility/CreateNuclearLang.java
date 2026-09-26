@@ -48,7 +48,7 @@ public class CreateNuclearLang extends Lang {
     }
 
     public static LangBuilder fluidName(FluidStack stack) {
-        return builder().add(stack.getHoverName()
+        return builder().add(stack.getName()
                 .copy());
     }
 

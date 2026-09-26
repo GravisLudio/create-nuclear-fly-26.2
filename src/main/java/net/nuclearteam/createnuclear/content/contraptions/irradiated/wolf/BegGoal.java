@@ -6,7 +6,7 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
@@ -15,14 +15,14 @@ public class BegGoal extends Goal {
     private final IrradiatedWolf irradiatedWolf;
     @Nullable
     private Player player;
-    private final Level level;
+    private final ServerLevel level;
     private final float lookDistance;
     private int lookTime;
     private final TargetingConditions begTargeting;
 
     public BegGoal(IrradiatedWolf wolf, float lookDistance) {
         this.irradiatedWolf = wolf;
-        this.level = wolf.level();
+        this.level = getServerLevel(wolf);
         this.lookDistance = lookDistance;
         this.begTargeting = TargetingConditions.forNonCombat().range((double)lookDistance);
         this.setFlags(EnumSet.of(Goal.Flag.LOOK));

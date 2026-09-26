@@ -63,7 +63,7 @@ public record SimpleMultiBlockPattern(List<MultiBlockOffsetPos> multiBlockOffset
                 var pos = blockPos.offset(multiBlockOffsetPos.pos().rotate(Rotation.NONE));
                 var state = stateSupplier.get();
                 if (stateBiPredicate.test(character, state))
-                    level.getServer().tell(new TickTask(3, () -> level.setBlock(pos, state, Block.UPDATE_ALL)));
+                    level.getServer().schedule(new TickTask(3, () -> level.setBlock(pos, state, Block.UPDATE_ALL)));
             }
         }
     }

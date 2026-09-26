@@ -12,6 +12,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.cow.CowSoundVariant;
+import net.minecraft.world.entity.animal.cow.CowSoundVariants;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -54,20 +56,25 @@ public class IrradiatedCow extends Animal {
         return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0D).add(Attributes.MOVEMENT_SPEED, (double)0.2F);
     }
 
+    // 26.2 cow sounds come in sound sets; the irradiated cow uses the classic one.
+    private static CowSoundVariant sounds() {
+        return SoundEvents.COW_SOUNDS.get(CowSoundVariants.SoundSet.CLASSIC);
+    }
+
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.COW_AMBIENT;
+        return sounds().ambientSound().value();
     }
 
     protected SoundEvent getHurtSound(DamageSource pDamageSource) {
-        return SoundEvents.COW_HURT;
+        return sounds().hurtSound().value();
     }
 
     protected SoundEvent getDeathSound() {
-        return SoundEvents.COW_DEATH;
+        return sounds().deathSound().value();
     }
 
     protected void playStepSound(BlockPos pPos, BlockState pBlock) {
-        this.playSound(SoundEvents.COW_STEP, 0.15F, 1.0F);
+        this.playSound(sounds().stepSound().value(), 0.15F, 1.0F);
     }
 
     /**
@@ -83,7 +90,7 @@ public class IrradiatedCow extends Animal {
             pPlayer.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
             ItemStack itemstack1 = ItemUtils.createFilledResult(itemstack, pPlayer, Items.MILK_BUCKET.getDefaultInstance());
             pPlayer.setItemInHand(pHand, itemstack1);
-            return InteractionResult.sidedSuccess(this.level().isClientSide());
+            return InteractionResult.SUCCESS;
         } else {
             return super.mobInteract(pPlayer, pHand);
         }
@@ -91,10 +98,6 @@ public class IrradiatedCow extends Animal {
 
     @Nullable
     public IrradiatedCow getBreedOffspring(ServerLevel pLevel, AgeableMob pOtherParent) {
-        return CNEntityType.IRRADIATED_COW.create(pLevel);
-    }
-
-    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pSize) {
-        return this.isBaby() ? pSize.height() * 0.95F : 1.3F;
+        return CNEntityType.IRRADIATED_COW.create(pLevel, EntitySpawnReason.BREEDING);
     }
 }

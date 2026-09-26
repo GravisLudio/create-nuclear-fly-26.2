@@ -7,12 +7,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.ConversionParams;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.event.EventHooks;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,25 +40,24 @@ public interface IrradiatedAnimal {
         setConversionTime(conversionTime);
         setConverting();
         animal.removeEffect(MobEffects.WEAKNESS);
-        animal.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, conversionTime, Math.min(animal.level().getDifficulty().getId() - 1, 0)));
+        animal.addEffect(new MobEffectInstance(MobEffects.STRENGTH, conversionTime, Math.min(animal.level().getDifficulty().getId() - 1, 0)));
         animal.level().broadcastEntityEvent(animal, EntityEvent.ZOMBIE_CONVERTING);
     }
 
+    @SuppressWarnings("unchecked")
     default void finishConversion(ServerLevel level) {
         Animal irradiatedAnimal = (Animal) this;
-        Animal vanillaAnimal = irradiatedAnimal.convertTo(getNormalVariant(), false);
-
-        if (vanillaAnimal != null) {
-            vanillaAnimal.finalizeSpawn(level, level.getCurrentDifficultyAt(vanillaAnimal.blockPosition()), MobSpawnType.CONVERSION, null);
+        // Fabric fires ServerLivingEntityEvents.MOB_CONVERSION from convertTo itself (was EventHooks.onLivingConvert).
+        // keepEquipment=false and preserveCanPickUpLoot=false match the old convertTo(type, false).
+        irradiatedAnimal.convertTo((EntityType<Animal>) getNormalVariant(), ConversionParams.single(irradiatedAnimal, false, false), vanillaAnimal -> {
+            vanillaAnimal.finalizeSpawn(level, level.getCurrentDifficultyAt(vanillaAnimal.blockPosition()), EntitySpawnReason.CONVERSION, null);
             writeToVanilla(vanillaAnimal);
-            vanillaAnimal.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
+            vanillaAnimal.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200, 0));
 
             if (!irradiatedAnimal.isSilent()) {
                 level.levelEvent(null, LevelEvent.SOUND_ZOMBIE_CONVERTED, irradiatedAnimal.blockPosition(), 0);
             }
-
-            EventHooks.onLivingConvert(irradiatedAnimal, vanillaAnimal);
-        }
+        });
     }
 
     default int getConversionProgress() {

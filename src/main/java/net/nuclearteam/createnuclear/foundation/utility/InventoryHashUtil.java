@@ -1,5 +1,6 @@
 package net.nuclearteam.createnuclear.foundation.utility;
 
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -53,16 +54,14 @@ public class InventoryHashUtil {
     public static long compute(Player player) {
         long hash = 1;
 
-        for (ItemStack stack : player.getInventory().items) {
+        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             hash = 31 * hash + stackHash(stack);
         }
 
-        for (ItemStack stack : player.getInventory().offhand) {
-            hash = 31 * hash + stackHash(stack);
-        }
-
-        for (ItemStack stack : player.getArmorSlots()) {
-            hash = 31 * hash + stackHash(stack);
+        // 26.2: offhand and armour live in the entity equipment; same order as upstream (offhand, then armour feet→head).
+        hash = 31 * hash + stackHash(player.getItemBySlot(EquipmentSlot.OFFHAND));
+        for (EquipmentSlot slot : new EquipmentSlot[] { EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD }) {
+            hash = 31 * hash + stackHash(player.getItemBySlot(slot));
         }
 
         return hash;

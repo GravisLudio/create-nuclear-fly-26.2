@@ -11,6 +11,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.Level;
 import net.nuclearteam.createnuclear.CNDataComponents;
 import net.nuclearteam.createnuclear.foundation.utility.CreateNuclearLang;
@@ -18,7 +20,7 @@ import net.nuclearteam.createnuclear.infrastructure.config.CNConfigs;
 import net.nuclearteam.createnuclear.infrastructure.worldgen.biome.BiomeIrradiationService;
 
 
-import java.util.List;
+import java.util.function.Consumer;
 
 
 public class BiomeIrradiationExtractorItem extends Item {
@@ -61,20 +63,15 @@ public class BiomeIrradiationExtractorItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        super.appendHoverText(stack, context, display, tooltipComponents, tooltipFlag);
         if (tooltipFlag.isAdvanced() && getCharge(stack) > 0) {
-            tooltipComponents.add(
+            tooltipComponents.accept(
                 CreateNuclearLang
                     .translateDirect("tooltip.biome_irradiation_extractor." + TAG, getCharge(stack), getMaxCharge())
                     .withStyle(ChatFormatting.GRAY)
             );
         }
-    }
-
-    @Override
-    public int getMaxStackSize(ItemStack stack) {
-        return getCharge(stack) > 0 ? 1 : this.getDefaultMaxStackSize();
     }
 
     public static int getCharge(ItemStack stack) {
@@ -90,6 +87,9 @@ public class BiomeIrradiationExtractorItem extends Item {
         int next = Mth.clamp(current + amount, 0, getMaxCharge());
 
         stack.set(CNDataComponents.CHARGE_BIOME_IRRADIATION_EXTRACTOR, next);
+        // 26.2 has no per-stack getMaxStackSize override: a charged extractor stops stacking
+        // through the MAX_STACK_SIZE component instead (upstream: getMaxStackSize → 1 when charged).
+        stack.set(DataComponents.MAX_STACK_SIZE, next > 0 ? 1 : stack.getItem().getDefaultMaxStackSize());
     }
 
     public static int getChargeDataComponents(ItemStack stack, int defaultValue) {

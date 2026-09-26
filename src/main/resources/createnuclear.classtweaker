@@ -4,3 +4,4 @@ classTweaker v1 official
 # accesstransformer.neoforge.cfg.txt en la raiz como referencia. Cada entrada se agrega aca
 # solo cuando el compilador la pide y despues de verificarla con javap contra el jar de 26.2:
 # Loom ignora en silencio las entradas que no resuelven.
+accessible field net/minecraft/client/renderer/blockentity/state/BlockEntityRenderState blockState Lnet/minecraft/world/level/block/state/BlockState;

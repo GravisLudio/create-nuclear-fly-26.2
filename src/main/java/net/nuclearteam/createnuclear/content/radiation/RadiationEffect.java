@@ -2,6 +2,7 @@ package net.nuclearteam.createnuclear.content.radiation;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.nuclearteam.createnuclear.CreateNuclear;
 import net.nuclearteam.createnuclear.content.effects.VicinityEffect;
@@ -63,8 +64,8 @@ public class RadiationEffect extends VicinityEffect {
      * @param amplifier    The strength (level) of the effect.
      */
     @Override
-    public boolean applyEffectTick(LivingEntity livingEntity, int amplifier) {
-        super.applyEffectTick(livingEntity, amplifier);
+    public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity livingEntity, int amplifier) {
+        super.applyEffectTick(serverLevel, livingEntity, amplifier);
 
         double resistance = RadiationCapability.getRadiationResistance(livingEntity);
 

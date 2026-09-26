@@ -143,7 +143,7 @@ public class ReactorBluePrintMenu extends GhostItemMenu<ItemStack> {
 
     @Override
     public boolean stillValid(Player player) {
-        return playerInventory.getSelected() == contentHolder;
+        return playerInventory.getSelectedItem() == contentHolder;
     }
 
     @Override

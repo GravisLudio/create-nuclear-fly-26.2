@@ -54,8 +54,7 @@ public class NotifyUtil {
         List<ServerPlayer> targets = getTargetPlayers(level, pos, radius, warnAll);
 
         for (ServerPlayer player : targets) {
-            // The 'true' parameter routes the message to the Action Bar
-            player.displayClientMessage(actionBarComp, true);
+            player.sendOverlayMessage(actionBarComp);
         }
     }
 

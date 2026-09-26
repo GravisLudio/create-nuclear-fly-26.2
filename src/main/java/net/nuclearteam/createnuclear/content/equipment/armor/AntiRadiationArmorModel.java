@@ -1,51 +1,39 @@
 package net.nuclearteam.createnuclear.content.equipment.armor;
 
-
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 
-public class AntiRadiationArmorModel extends HumanoidModel<LivingEntity> {
-    private final ModelPart head;
-    private final ModelPart body;
-    private final ModelPart right_arm;
-    private final ModelPart left_arm;
-    private final ModelPart right_leg;
-    private final ModelPart left_leg;
+/**
+ * The suit model. 26.2 models are posed from a render state, and draws are deferred: the model is
+ * posed when the submission is drawn, not when it is made. So the slot can no longer be a field
+ * set just before rendering (upstream's {@code currentSlot}); instead there is one instance per
+ * slot, each showing only its own parts ({@link AntiRadiationArmorRenderer}).
+ */
+public class AntiRadiationArmorModel extends HumanoidModel<HumanoidRenderState> {
     private final ModelPart left_boot;
     private final ModelPart right_boot;
+    private final EquipmentSlot slot;
 
-    // Set per render pass by AntiRadiationArmorClientExtensions so renderToBuffer can show
-    // the legs for LEGS (leggings) but only the boots for FEET (boots) — Forge makes the
-    // vanilla leg parts visible for BOTH slots, so we disambiguate here.
-    public EquipmentSlot currentSlot = EquipmentSlot.HEAD;
-
-    public AntiRadiationArmorModel(ModelPart root) {
-        super(root);
-        this.head = root.getChild("head");
-        this.body = root.getChild("body");
-        this.right_arm = root.getChild("right_arm");
-        this.left_arm = root.getChild("left_arm");
-        this.right_leg = root.getChild("right_leg");
-        this.left_leg = root.getChild("left_leg");
+    public AntiRadiationArmorModel(ModelPart root, EquipmentSlot slot) {
+        super(root, RenderTypes::armorCutoutNoCull);
         this.left_boot = root.getChild("left_boot");
         this.right_boot = root.getChild("right_boot");
+        this.slot = slot;
     }
 
     public static LayerDefinition createBodyLayer() {
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
 
-        // HumanoidModel's constructor requires a "hat" child; keep it empty.
-        partdefinition.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
-
         PartDefinition head = partdefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(30, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.2F))
                 .texOffs(30, 16).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+        // 26.2's HumanoidModel looks the hat up under the head; keep it empty.
+        head.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
 
         PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 19).addBox(-3.7F, 0.0F, -2.8F, 8.0F, 12.0F, 5.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 0).addBox(-4.4F, -1.0F, -3.1F, 9.0F, 13.0F, 6.0F, new CubeDeformation(0.0F))
@@ -72,28 +60,21 @@ public class AntiRadiationArmorModel extends HumanoidModel<LivingEntity> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
+    public void setupAnim(HumanoidRenderState state) {
+        super.setupAnim(state);
         // Make the boots follow the (already animated) legs.
-        this.right_boot.copyFrom(this.right_leg);
-        this.left_boot.copyFrom(this.left_leg);
+        this.right_boot.loadPose(this.rightLeg.storePose());
+        this.left_boot.loadPose(this.leftLeg.storePose());
 
-        // Control part visibility based on the slot being rendered
-        this.head.visible = this.currentSlot == EquipmentSlot.HEAD;
-        this.body.visible = this.currentSlot == EquipmentSlot.CHEST;
-        this.right_arm.visible = this.currentSlot == EquipmentSlot.CHEST;
-        this.left_arm.visible = this.currentSlot == EquipmentSlot.CHEST;
-        this.right_leg.visible = this.currentSlot == EquipmentSlot.LEGS;
-        this.left_leg.visible = this.currentSlot == EquipmentSlot.LEGS;
-        this.right_boot.visible = this.currentSlot == EquipmentSlot.FEET;
-        this.left_boot.visible = this.currentSlot == EquipmentSlot.FEET;
-
-        if (this.head.visible) head.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        if (this.body.visible) body.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        if (this.right_arm.visible) right_arm.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        if (this.left_arm.visible) left_arm.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        if (this.right_leg.visible) right_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        if (this.left_leg.visible) left_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        if (this.right_boot.visible) right_boot.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
-        if (this.left_boot.visible) left_boot.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        // Leggings show the legs, boots only the boot parts: vanilla's leg parts serve both slots.
+        this.head.visible = this.slot == EquipmentSlot.HEAD;
+        this.hat.visible = false;
+        this.body.visible = this.slot == EquipmentSlot.CHEST;
+        this.rightArm.visible = this.slot == EquipmentSlot.CHEST;
+        this.leftArm.visible = this.slot == EquipmentSlot.CHEST;
+        this.rightLeg.visible = this.slot == EquipmentSlot.LEGS;
+        this.leftLeg.visible = this.slot == EquipmentSlot.LEGS;
+        this.right_boot.visible = this.slot == EquipmentSlot.FEET;
+        this.left_boot.visible = this.slot == EquipmentSlot.FEET;
     }
 }

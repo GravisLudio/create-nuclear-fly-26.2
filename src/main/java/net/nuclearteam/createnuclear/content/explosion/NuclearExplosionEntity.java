@@ -1,7 +1,6 @@
 package net.nuclearteam.createnuclear.content.explosion;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -15,6 +14,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ServerExplosion;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -91,7 +93,7 @@ public class NuclearExplosionEntity extends Entity {
                 float playerFling = entity instanceof Player ? 0.5F * flingStrength : flingStrength;
 
                 if (damage > 0) {
-                    if (entity.getType().is(CNTags.CNEntityTags.IRRADIATED_IMMUNE.tag)) {
+                    if (entity.is(CNTags.CNEntityTags.IRRADIATED_IMMUNE.tag)) {
                         damage *= 0.25F;
                         playerFling *= 0.1F;
 
@@ -126,7 +128,7 @@ public class NuclearExplosionEntity extends Entity {
             int dist = Math.max(getChunksAffected(), serverLevel.getServer().getPlayerList().getViewDistance() / 2);
             for (int i = -dist; i <= dist; i++) {
                 for (int j = -dist; j <= dist; j++) {
-                    serverLevel.setChunkForced(chunkPos.x + i, chunkPos.z + j, load);
+                    serverLevel.setChunkForced(chunkPos.x() + i, chunkPos.z() + j, load);
                 }
             }
         }
@@ -147,7 +149,8 @@ public class NuclearExplosionEntity extends Entity {
         float itemDropModifier = 0.025F / Math.min(1, this.getSize());
 
 
-        Explosion dummyExplosion = new Explosion(level(), this, this.getX(), this.getY(), this.getZ(), 10.0F, false, Explosion.BlockInteraction.DESTROY);
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+        Explosion dummyExplosion = new ServerExplosion(serverLevel, this, null, null, this.position(), 10.0F, false, Explosion.BlockInteraction.DESTROY);
 
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
@@ -170,8 +173,10 @@ public class NuclearExplosionEntity extends Entity {
                             // 1. Create an immutable copy of the position
                             BlockPos immutablePos = carve.immutable();
 
-                            // 2. Call the explosion behavior
-                            state.onBlockExploded(level(), immutablePos, dummyExplosion);
+                            // 2. Call the explosion behavior. NeoForge's onBlockExploded removed the block and
+                            //    called wasExploded without drops; onExplosionHit does the same once its drops
+                            //    are discarded (a nuke dropping every block would flood the world with items).
+                            state.onExplosionHit(serverLevel, immutablePos, dummyExplosion, (stack, pos) -> {});
 
                             // 3. onBlockExploded() doesn't remove plain vanilla blocks (e.g. stone/dirt) by
                             //    itself, so force removal here and let items drop normally
@@ -225,12 +230,17 @@ public class NuclearExplosionEntity extends Entity {
 
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag compoundTag) {
-        loadingChunks = compoundTag.getBooleanOr("WasLoadingChunks", false);
+    public boolean hurtServer(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float damage) {
+        return false;
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag compoundTag) {
-        compoundTag.putBoolean("WasLoadingChunks", loadingChunks);
+    protected void readAdditionalSaveData(ValueInput input) {
+        loadingChunks = input.getBooleanOr("WasLoadingChunks", false);
+    }
+
+    @Override
+    protected void addAdditionalSaveData(ValueOutput output) {
+        output.putBoolean("WasLoadingChunks", loadingChunks);
     }
 }

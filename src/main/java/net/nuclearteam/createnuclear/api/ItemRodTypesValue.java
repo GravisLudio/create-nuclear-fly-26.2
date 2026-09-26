@@ -39,7 +39,7 @@ public class ItemRodTypesValue {
      * @return a non-null consumer that registers the mapping
      * @throws NullPointerException if {@code type} is null
      */
-    public static Consumer<Item> setRodTypeInfos(RodType.Builder type) {
+    public static <T extends Item> Consumer<T> setRodTypeInfos(RodType.Builder type) {
         return item -> ROD_TYPE.register(item, type.item(item).build());
     }
 
@@ -59,7 +59,7 @@ public class ItemRodTypesValue {
      * @return a non-null consumer that registers the built RodType
      * @throws NullPointerException if {@code type} is null
      */
-    public static Consumer<Item> setRodTypeInfos(int baseRodHeat, int proximityRodHeat, int rodTimer, RodType.TypeRod type) {
+    public static <T extends Item> Consumer<T> setRodTypeInfos(int baseRodHeat, int proximityRodHeat, int rodTimer, RodType.TypeRod type) {
         RodType.Builder builder = new RodType.Builder()
                 .baseRodHeat(baseRodHeat)
                 .proximityRodHeat(proximityRodHeat)

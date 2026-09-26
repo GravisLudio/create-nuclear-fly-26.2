@@ -45,7 +45,7 @@ public class RadiationOverlay extends EasingHudOverlay {
     @Override
     protected void renderWithAlpha(GuiGraphicsExtractor graphics, float partialTicks, float alpha) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.gameMode == null || mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.gameMode.getPlayerMode() == GameType.CREATIVE)
+        if (mc.gui.hud.isHidden() || mc.gameMode == null || mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.gameMode.getPlayerMode() == GameType.CREATIVE)
             return;
         if (!mc.options.getCameraType().isFirstPerson())
             return;

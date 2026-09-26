@@ -123,7 +123,7 @@ public final class ReactorGoggleTooltipRenderer {
                     fillRatio = 1.0f;
                 int filledBars = Math.round(fillRatio * 5);
 
-                CreateNuclearLang.translate("tooltip.fluid", stack.stack.getHoverName())
+                CreateNuclearLang.translate("tooltip.fluid", stack.stack.getName())
                         .style(ChatFormatting.GRAY)
                         .forGoggles(tooltip);
 
