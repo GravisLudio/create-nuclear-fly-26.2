@@ -257,6 +257,10 @@ widgets; config.
 - **Item atlas**: an item model texture outside `textures/item/` (the suit's `textures/models/armor`)
   is missingno until a source is added to `assets/minecraft/atlases/items.json`.
 - **Fluid model registry**: register only the source fluid in `AllFluidConfigs.MODEL`.
+- **Recipe viewers see only synced serializers**: 26.2 does not send every recipe to clients. JEI/RRV read
+  Fabric's recipe sync, so a custom recipe type must be registered with
+  `RecipeSynchronization.synchronizeRecipeSerializer` (as Create Fly's `RecipeCommonPlugin`), or its JEI
+  category loads empty. Found by the user in game: the fan categories showed nothing.
 - Removed/renamed in 26.2, met this session: `ResourceKey.location()` -> `identifier()`;
   `Inventory.items/offhand`, `getArmorSlots()` -> `getNonEquipmentItems()` + `getItemBySlot`;
   `Explosion` is abstract (`ServerExplosion(level, source, damageSource, calculator, center, r, fire, interaction)`);

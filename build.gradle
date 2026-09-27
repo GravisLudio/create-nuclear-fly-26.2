@@ -115,6 +115,7 @@ dependencies {
     implementation fabricApi.module("fabric-resource-loader-v1", fabric_version)
     implementation fabricApi.module("fabric-key-mapping-api-v1", fabric_version)
     implementation fabricApi.module("fabric-content-registries-v0", fabric_version)
+    implementation fabricApi.module("fabric-recipe-api-v1", fabric_version)
     runtimeOnly "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
     // Create Fly: trae Flywheel, Ponder y Catnip embebidos. `implementation` y no

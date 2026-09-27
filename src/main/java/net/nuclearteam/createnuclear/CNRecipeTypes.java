@@ -1,5 +1,7 @@
 package net.nuclearteam.createnuclear;
 
+import net.fabricmc.fabric.api.recipe.v1.sync.RecipeSynchronization;
+import net.fabricmc.loader.api.FabricLoader;
 import com.zurrtum.create.AllRecipeSets;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -55,5 +57,14 @@ public class CNRecipeTypes {
     public static void register() {
         AllRecipeSets.ALL.put(ENRICHED_SET, recipe -> recipe instanceof EnrichedRecipe r ? Optional.of(r.ingredient()) : Optional.empty());
         AllRecipeSets.ALL.put(SNOW_POWDER_SET, recipe -> recipe instanceof SnowPowderRecipe r ? Optional.of(r.ingredient()) : Optional.empty());
+
+        // 26.2 no longer sends every recipe to clients: recipe viewers (JEI, RRV) only see the
+        // serializers registered here, through Fabric's recipe sync. Without it the JEI fan
+        // categories load but stay empty. Same guard as Create Fly's CompatMod.
+        FabricLoader loader = FabricLoader.getInstance();
+        if (loader.isModLoaded("jei") || loader.isModLoaded("rrv")) {
+            RecipeSynchronization.synchronizeRecipeSerializer(ENRICHED_SERIALIZER);
+            RecipeSynchronization.synchronizeRecipeSerializer(SNOW_POWDER_SERIALIZER);
+        }
     }
 }
