@@ -12,7 +12,8 @@
     "ZurrTum (Create Fly)"
   ],
   "contact": {
-    "sources": "https://github.com/GravisLudio/create-nuclear-fly",
+    "sources": "https://github.com/GravisLudio/create-nuclear-fly-26.2",
+    "issues": "https://github.com/GravisLudio/create-nuclear-fly-26.2/issues",
     "original": "https://github.com/Create-Nuclear-Team/CreateNuclearNeoForge"
   },
   "license": "${mod_license}",
