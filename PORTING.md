@@ -20,7 +20,7 @@ player (dyed), item icons, and a 5x5 reactor built from its own pattern, which *
 transfer API and a one-rod blueprint, the controller turns `ACTIVE` and reaches heat 67 after
 100 ticks (all asserted in the test). A summoned `nuclear_explosion` carves its crater and draws
 the mushroom cloud and the flash. The headless datapack check
-(`gradlew runGametest`) loads 3716 recipes and 3044 advancements with **zero errors**.
+(`gradlew runGameTest`) loads 3716 recipes and 3044 advancements with **zero errors**.
 
 Third session (2026-09-26): the test now also covers **rod consumption** (lifetime set to 100 ticks:
 64 → 62 rods in 250 ticks), a **reactor output** placed on the running reactor (registers itself,
@@ -31,7 +31,23 @@ around turning `createnuclear:irradiated_land`. Configs are restored by the test
 
 The 7x7 and 9x9 reactors assemble with their size (step 5b).
 
-Not yet exercised in game: the 7x7 and 9x9 reactors running, the JEI categories, the Flywheel-off path, a dedicated server.
+**Dedicated server**: `gradlew runGameTest` (Loom's `configureTests`, replaces the old
+`runGametest` run config) boots a real dedicated server, loads every datapack and runs
+`CreateNuclearServerGameTest`: the fuelled 5x5 reactor turns `ACTIVE` there too, so common code
+reaches no client class on that path.
+
+**recipe-auditor** (`C:\dev\recipe-auditor`, GitHub GravisLudio/recipe-auditor), both passes clean:
+- server: `.\audit-modpack.ps1 -Mods <folder with create-fly, fabric-api, this jar> -Namespaces createnuclear`
+  → PASS, 0 errors / 0 warnings; 194 recipes in scope, 77 grid-tested, all 8 mechanical-crafting
+  recipes completed on real Create machines. Info only: ores / buckets / eggs have no recipe (by
+  design) and 6 duplicate decompacting recipes (upstream has them in two folders).
+- client: run this project's `runClient` with `JAVA_TOOL_OPTIONS="-Dfabric.addMods=<auditor jar>
+  -Drecipeaudit.autorun=true -Drecipeaudit.exit=true -Drecipeaudit.namespaces=createnuclear
+  -Drecipeaudit.out=<dir>"` → PASS over 95 items (models, translations, resource log). It needs
+  Fabric Loader >= 0.19.5, hence `loader_version = 0.19.5`.
+
+Not yet exercised in game: the 7x7 and 9x9 reactors running, the JEI categories, the blueprint
+menu by hand, the Flywheel-off path.
 
 What this session changed, beyond the compile fixes listed below:
 
@@ -72,7 +88,6 @@ What this session changed, beyond the compile fixes listed below:
 ### Known, left as is
 
 - `createnuclear:alarm/reactor_alarm` sound has no `.ogg` — missing upstream too.
-- A few models lack a `particle` texture (log warning only).
 - Closing the client game test ends in a "Client shutdown from post-main" watchdog crash report
   (Flywheel worker threads). It happens after the test finished and every screenshot was taken.
 
@@ -261,7 +276,7 @@ widgets; config.
 
 ## Testing
 
-- `gradlew runGametest`: headless server (`build/gametest`) that loads every datapack and exits.
+- `gradlew runGameTest`: dedicated server (`build/run/gameTest`) that loads every datapack, runs the server game test and exits.
   Grep its log for `ERROR` / `Couldn't parse`. No EULA needed.
 - `gradlew runClientGameTest`: Fabric client game test in `src/gametest` (own source set, not
   packaged). Opens a window, creates a world, builds the scene, writes screenshots to
@@ -282,8 +297,8 @@ widgets; config.
    pattern crashes the server in `DefaultHeatCalculator.computeHeat`.
 2. JEI categories (enriched / snow powder) with JEI installed; Ponder scenes; goggles tooltips;
    display link sources; blueprint menu.
-3. Dedicated server launch (`runServer` needs `eula.txt` accepted by you): check no client class
-   is reached server-side.
+3. Dedicated server: covered by `gradlew runGameTest` for the reactor path; a long play session on
+   a real server is still worth doing.
 4. Flywheel-off path (Connected's *Testing*), the recipe auditor
    (`C:\dev\recipe-auditor\audit-modpack.ps1`).
 5. Own spawn egg textures; `reactor_alarm.ogg` (missing upstream).

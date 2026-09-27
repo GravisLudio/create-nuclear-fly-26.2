@@ -21,16 +21,6 @@ loom {
         }
     }
 
-    runs {
-        // Headless server that loads every datapack (recipes, loot, advancements, worldgen) and exits:
-        // the quickest check that the committed data parses on 26.2. `gradlew runGametest`.
-        gametest {
-            server()
-            name "Game Test"
-            vmArg "-Dfabric-api.gametest"
-            runDir "build/gametest"
-        }
-    }
 }
 
 sourceSets.main.java {
@@ -83,11 +73,13 @@ repositories {
 fabricApi {
     // src/gametest: a client game test that creates a world, spawns the mod's content and takes
     // screenshots (build/run/clientGameTest/screenshots). Not packaged with the mod.
-    // `gradlew runClientGameTest`. Server game tests stay off: runGametest covers the datapack load.
+    // `gradlew runClientGameTest`.
+    // Server game tests (`gradlew runGameTest`): a headless dedicated server that loads every
+    // datapack, runs CreateNuclearServerGameTest and exits. No EULA needed.
     configureTests {
         createSourceSet = true
         modId = "createnuclear-gametest"
-        enableGameTests = false
+        enableGameTests = true
         enableClientGameTests = true
         eula = false
     }
@@ -95,6 +87,7 @@ fabricApi {
 
 dependencies {
     gametestImplementation fabricApi.module("fabric-client-gametest-api-v1", fabric_version)
+    gametestImplementation fabricApi.module("fabric-gametest-api-v1", fabric_version)
     minecraft "com.mojang:minecraft:${minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${loader_version}"
 

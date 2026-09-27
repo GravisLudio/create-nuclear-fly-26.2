@@ -5,6 +5,9 @@
   "name": "Create Nuclear game tests",
   "environment": "*",
   "entrypoints": {
+    "fabric-gametest": [
+      "net.nuclearteam.createnuclear.gametest.CreateNuclearServerGameTest"
+    ],
     "fabric-client-gametest": [
       "net.nuclearteam.createnuclear.gametest.CreateNuclearClientGameTest"
     ]
