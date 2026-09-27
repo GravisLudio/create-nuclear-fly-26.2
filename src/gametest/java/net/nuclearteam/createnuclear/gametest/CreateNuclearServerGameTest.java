@@ -24,29 +24,62 @@ import net.nuclearteam.createnuclear.content.multiblock.bluePrintItem.ReactorBlu
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlock;
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Server game tests (`gradlew runGameTest`): run on a dedicated server, so they also catch client
- * classes reached from common code. The same 5x5 reactor as the client test's step 6, without screenshots.
+ * classes reached from common code. Each reactor size is built from its own pattern, gets a rod input
+ * and a fluid input on the controller's face, is fuelled through Fabric's transfer API and given a
+ * one-rod blueprint, and must turn ACTIVE and produce heat.
  */
 public class CreateNuclearServerGameTest {
 
     @GameTest(maxTicks = 200)
     public void reactorRunsOnDedicatedServer(GameTestHelper helper) {
+        runReactor(helper, ReactorPatterns.REACTOR_5, 5);
+    }
+
+    @GameTest(maxTicks = 200)
+    public void reactor7x7Runs(GameTestHelper helper) {
+        runReactor(helper, ReactorPatterns.REACTOR_7, 7);
+    }
+
+    @GameTest(maxTicks = 200)
+    public void reactor9x9Runs(GameTestHelper helper) {
+        runReactor(helper, ReactorPatterns.REACTOR_9, 9);
+    }
+
+    private static void runReactor(GameTestHelper helper, String[][] aisles, int size) {
         ServerLevel level = helper.getLevel();
         BlockPos controller = helper.absolutePos(new BlockPos(0, 4, 0)).above(20);
         // construct() places the blocks through TickTask(3): wait before reading them back.
-        ReactorPatterns.build(ReactorPatterns.REACTOR_5).construct(level, controller, (c, st) -> true);
-        helper.runAfterDelay(10, () -> fuelAndRun(helper, level, controller));
+        ReactorPatterns.build(aisles).construct(level, controller, (c, st) -> true);
+        helper.runAfterDelay(10, () -> fuelAndRun(helper, level, controller, size));
     }
 
-    private static void fuelAndRun(GameTestHelper helper, ServerLevel level, BlockPos controller) {
-        List<BlockPos> inputs = Direction.Plane.HORIZONTAL.stream()
-            .map(controller::relative)
-            .filter(pos -> level.getBlockState(pos).is(CNBlocks.REACTOR_CASING.get()))
-            .toList();
-        helper.assertTrue(inputs.size() == 2, "Expected two casings beside the controller, found " + inputs);
+    /**
+     * The nearest casing in each horizontal direction along the controller's row: right beside it on
+     * the 5x5 and 9x9 ("OA*AO", "OBAA*AABO"), two blocks away on the 7x7 ("OAB*BAO", frames between).
+     */
+    private static List<BlockPos> inputSlots(ServerLevel level, BlockPos controller) {
+        List<BlockPos> slots = new ArrayList<>();
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            for (int k = 1; k <= 3; k++) {
+                BlockPos pos = controller.relative(d, k);
+                if (level.getBlockState(pos).is(CNBlocks.REACTOR_CASING.get())) {
+                    slots.add(pos);
+                    break;
+                }
+                if (!level.getBlockState(pos).is(CNBlocks.REACTOR_FRAME.get())) break;
+            }
+        }
+        return slots;
+    }
+
+    private static void fuelAndRun(GameTestHelper helper, ServerLevel level, BlockPos controller, int size) {
+        List<BlockPos> inputs = inputSlots(level, controller);
+        helper.assertTrue(inputs.size() >= 2, size + "x" + size + ": expected two casings along the controller's row, found " + inputs);
         BlockPos rodInput = inputs.get(0);
         BlockPos fluidInput = inputs.get(1);
         level.setBlockAndUpdate(rodInput, CNBlocks.REACTOR_ROD_INPUT.getDefaultState());
@@ -54,7 +87,8 @@ public class CreateNuclearServerGameTest {
 
         ReactorAssembler.assemble(controller, level);
         ReactorControllerBlockEntity be = (ReactorControllerBlockEntity) level.getBlockEntity(controller);
-        helper.assertTrue(be != null && be.isAssembled(), "The 5x5 reactor did not assemble");
+        helper.assertTrue(be != null && be.isAssembled(), "The " + size + "x" + size + " reactor did not assemble");
+        helper.assertTrue(be.getMultiblockSize() == size, "Assembled with size " + be.getMultiblockSize() + ", expected " + size);
 
         long rods, water;
         try (Transaction tx = Transaction.openOuter()) {
@@ -73,13 +107,15 @@ public class CreateNuclearServerGameTest {
         pattern[28] = new PatternData(28, new ItemStack(CNItems.URANIUM_ROD.get()));
         ItemStack blueprint = new ItemStack(CNItems.REACTOR_BLUEPRINT.get());
         blueprint.set(CNDataComponents.REACTOR_BLUE_PRINT_DATA, new ReactorBluePrintData(0, 1, pattern));
+        // As ReactorControllerBlock.useItemOn: the same stack goes in inventory slot 0 and the pattern.
         be.getInventoryObject().setItem(0, blueprint);
         be.setConfiguredPattern(blueprint);
 
         helper.runAfterDelay(100, () -> {
             boolean active = level.getBlockState(controller).getValue(ReactorControllerBlock.ACTIVE);
             int heat = be.getConfiguredPatternHeat();
-            helper.assertTrue(active && heat > 0, "Reactor is not running: active=" + active + " heat=" + heat);
+            helper.assertTrue(active && heat > 0, size + "x" + size + " reactor is not running: active=" + active + " heat=" + heat);
+            System.out.println("[createnuclear-gametest] " + size + "x" + size + " reactor running: heat=" + heat);
             helper.succeed();
         });
     }

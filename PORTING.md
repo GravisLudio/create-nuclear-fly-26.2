@@ -51,8 +51,12 @@ JEI "Bulk Enriching" category (after the recipe-sync fix), the blueprint menu (k
 with the GUI), and a 5x5 built and fuelled by hand running up to danger and melting down (countdown,
 "REACTOR DESTROYED", crater, irradiated biome). Recorded on video.
 
-Not yet exercised in game: the 7x7 and 9x9 reactors running, the snow powder JEI category, the
-Flywheel-off path.
+**All three sizes run** on a dedicated server (`CreateNuclearServerGameTest`, one test per size): the
+5x5, 7x7 and 9x9 assemble with their size, take rods and water through the transfer API and turn
+`ACTIVE` with heat (67-68 Q after 100 ticks). On the 7x7 the controller has frames beside it
+("OAB*BAO"), so the inputs go on the nearest casing along its row.
+
+Not yet exercised in game: the snow powder JEI category, the Flywheel-off path.
 
 What this session changed, beyond the compile fixes listed below:
 
