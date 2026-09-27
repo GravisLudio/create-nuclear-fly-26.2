@@ -56,6 +56,11 @@ with the GUI), and a 5x5 built and fuelled by hand running up to danger and melt
 `ACTIVE` with heat (67-68 Q after 100 ticks). On the 7x7 the controller has frames beside it
 ("OAB*BAO"), so the inputs go on the nearest casing along its row.
 
+**Save and reload, radiation** (client game test, steps 6c/6d): the running 5x5 is saved, the world
+closed and reopened from its save, and it comes back assembled, `ACTIVE`, with its blueprint and
+rods, still consuming them (heat 75 -> 68, rods 62 -> 60). Uranium rods in the inventory give the
+radiation effect; with the full suit (0.25 resistance per piece) it stays off.
+
 Not yet exercised in game: the snow powder JEI category, the Flywheel-off path.
 
 What this session changed, beyond the compile fixes listed below:
@@ -295,7 +300,8 @@ widgets; config.
   packaged). Opens a window, creates a world, builds the scene, writes screenshots to
   `build/run/clientGameTest/screenshots/`, and fails on: the 5x5 reactor not assembling, a
   connected-texture sprite missing from the atlas, the transfer API refusing rods or water, or the
-  fuelled reactor not turning `ACTIVE`. The last screenshot does not frame the controller yet (its
+  fuelled reactor not turning `ACTIVE`, the reactor not surviving a save and reload, or the
+  radiation effect not applying without the suit / applying with the full suit. The last screenshot does not frame the controller yet (its
   open side depends on the pattern's orientation). Look at the screenshots: models, textures and
   poses are not asserted. It ends with a harmless shutdown-watchdog crash report (see *Known*).
 - `gradlew runClient`: the normal dev client (`run/`).

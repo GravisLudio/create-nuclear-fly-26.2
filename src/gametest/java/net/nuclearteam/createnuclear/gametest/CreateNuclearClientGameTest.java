@@ -4,6 +4,8 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.fabricmc.fabric.api.client.gametest.v1.world.TestWorldSave;
+import net.nuclearteam.createnuclear.CNEffects;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -60,7 +62,9 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
 
     @Override
     public void runTest(ClientGameTestContext context) {
-        try (TestSingleplayerContext singleplayer = context.worldBuilder().create()) {
+        // Not try-with-resources: step 6c closes the world and reopens it from its save.
+        TestSingleplayerContext singleplayer = context.worldBuilder().create();
+        try {
             singleplayer.getClientLevel().waitForChunksRender();
             TestServerContext server = singleplayer.getServer();
 
@@ -301,6 +305,51 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
                 throw new AssertionError("No rod consumed after 250 ticks at a 100-tick lifetime: " + outputState);
             }
 
+            // 6c. Save and quit with the reactor running, reopen the save: it must come back assembled,
+            //     with its blueprint and rods, and keep running.
+            String beforeSave = server.computeOnServer(s -> reactorState(s.overworld(), controller, rodInput));
+            TestWorldSave save = singleplayer.getWorldSave();
+            singleplayer.close();
+            singleplayer = null;
+            singleplayer = save.open();
+            server = singleplayer.getServer();
+            singleplayer.getClientLevel().waitForChunksRender();
+            server.runOnServer(s -> CNConfigs.server().rods.uraniumRodLifetime.set(100));
+            context.waitTicks(60);
+            String afterLoad = server.computeOnServer(s -> reactorState(s.overworld(), controller, rodInput));
+            System.out.println("[createnuclear-gametest] reactor before save: " + beforeSave + " | after reload: " + afterLoad);
+            context.takeScreenshot("createnuclear-reactor-reloaded");
+            if (!afterLoad.startsWith("assembled=true active=true blueprint=true") || afterLoad.contains("heat=0 ")
+                || afterLoad.endsWith("rods=0")) {
+                throw new AssertionError("Reactor did not survive a save and reload: " + beforeSave + " -> " + afterLoad);
+            }
+
+            // 6d. Radiation: uranium rods in the inventory give the radiation effect; the full suit
+            //     (IRRADIATED_RESISTANCE 0.25 per piece) must keep it off entirely.
+            server.runCommand("tp @p -6 100 -6");
+            server.runCommand("clear @p");
+            server.runCommand("effect clear @p");
+            server.runCommand("gamemode survival @p");
+            server.runCommand("give @p " + NS + ":uranium_rod 16");
+            context.waitTicks(40);
+            boolean irradiated = server.computeOnServer(s -> s.getPlayerList().getPlayers().getFirst().hasEffect(CNEffects.RADIATION));
+            context.takeScreenshot("createnuclear-radiation");
+            for (String piece : new String[] {"head:helmet", "chest:chestplate", "legs:leggings", "feet:boots"}) {
+                String[] p = piece.split(":");
+                server.runCommand("item replace entity @p armor." + p[0] + " with " + NS + ":default_anti_radiation_" + p[1]);
+            }
+            // Cleared only once the whole suit is on: with part of it the effect is still (re)applied.
+            context.waitTicks(5);
+            server.runCommand("effect clear @p");
+            context.waitTicks(40);
+            boolean irradiatedInSuit = server.computeOnServer(s -> s.getPlayerList().getPlayers().getFirst().hasEffect(CNEffects.RADIATION));
+            System.out.println("[createnuclear-gametest] radiation without suit=" + irradiated + " with full suit=" + irradiatedInSuit);
+            server.runCommand("clear @p");
+            server.runCommand("effect clear @p");
+            if (!irradiated || irradiatedInSuit) {
+                throw new AssertionError("Radiation: without suit=" + irradiated + " (expected true), with suit=" + irradiatedInSuit + " (expected false)");
+            }
+
             // 7. The nuclear explosion (ServerExplosion + onExplosionHit in 26.2) and its mushroom cloud,
             //    away from the reactor. A failure here crashes the integrated server and the test.
             server.runCommand("item replace entity @p armor.head with minecraft:air");
@@ -357,6 +406,23 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
             if (!meltdown.startsWith("true")) {
                 throw new AssertionError("Reactor in danger for 300 ticks did not melt down: " + meltdown);
             }
+        } finally {
+            if (singleplayer != null) singleplayer.close();
         }
+    }
+
+    private static String reactorState(ServerLevel level, BlockPos controller, BlockPos rodInput) {
+        if (!(level.getBlockEntity(controller) instanceof ReactorControllerBlockEntity be)) return "assembled=false (no controller)";
+        long rods = 0;
+        Storage<ItemVariant> rodStorage = ItemStorage.SIDED.find(level, rodInput, null);
+        if (rodStorage != null) {
+            for (StorageView<ItemVariant> view : rodStorage) {
+                if (view.getResource().isOf(CNItems.URANIUM_ROD.get())) rods += view.getAmount();
+            }
+        }
+        return "assembled=" + be.isAssembled()
+            + " active=" + level.getBlockState(controller).getValue(ReactorControllerBlock.ACTIVE)
+            + " blueprint=" + be.getInventoryObject().getItem(0).is(CNItems.REACTOR_BLUEPRINT.get())
+            + " heat=" + be.getConfiguredPatternHeat() + " rods=" + rods;
     }
 }
