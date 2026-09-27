@@ -46,8 +46,13 @@ reaches no client class on that path.
   -Drecipeaudit.out=<dir>"` → PASS over 95 items (models, translations, resource log). It needs
   Fabric Loader >= 0.19.5, hence `loader_version = 0.19.5`.
 
-Not yet exercised in game: the 7x7 and 9x9 reactors running, the JEI categories, the blueprint
-menu by hand, the Flywheel-off path.
+**Confirmed by hand by the user** (2026-09-26, CurseForge instance with JEI, Fabric API 0.161): the
+JEI "Bulk Enriching" category (after the recipe-sync fix), the blueprint menu (keeps its rods, scales
+with the GUI), and a 5x5 built and fuelled by hand running up to danger and melting down (countdown,
+"REACTOR DESTROYED", crater, irradiated biome). Recorded on video.
+
+Not yet exercised in game: the 7x7 and 9x9 reactors running, the snow powder JEI category, the
+Flywheel-off path.
 
 What this session changed, beyond the compile fixes listed below:
 
