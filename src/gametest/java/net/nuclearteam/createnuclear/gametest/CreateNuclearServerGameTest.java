@@ -24,10 +24,15 @@ import net.nuclearteam.createnuclear.content.multiblock.bluePrintItem.ReactorBlu
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlock;
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
 
+import com.zurrtum.create.AllBlocks;
 import com.zurrtum.create.content.kinetics.fan.processing.FanProcessing;
 import com.zurrtum.create.content.kinetics.fan.processing.FanProcessingType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.Vec3;
 import net.nuclearteam.createnuclear.content.kinetics.fan.processing.CNFanProcessingTypes;
 
 import java.util.ArrayList;
@@ -72,6 +77,53 @@ public class CreateNuclearServerGameTest {
             .append(" process=").append(direct).append(" done=").append(done).append(" after ").append(calls)
             .append(" calls -> ").append(result).append("; ");
         entity.discard();
+    }
+
+    /**
+     * The same through the real air current (creative motor -> encased fan -> catalyst), next to Create's own
+     * splashing as a control. Each lane runs along the test's +X on a stone floor, walled on both sides and
+     * closed at x=5 so the pushed items stay inside the stream:
+     * x=0 motor (16 RPM) | x=1 fan facing +X | x=2 catalyst | x=3,4 air, items dropped at x=3.5 | x=5 stone.
+     * Without the stopper a pushed item can come to rest just past the stream's end, where its processing
+     * timer freezes while the particles keep showing.
+     */
+    @GameTest(maxTicks = 400)
+    public void fanInWorldSnowPowderVsSplashing(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        ItemEntity snow = buildFanLane(helper, level, 2, Blocks.POWDER_SNOW.defaultBlockState(), CNItems.NITROGEN_CONCENTRATE.get());
+        ItemEntity water = buildFanLane(helper, level, 5, Blocks.WATER.defaultBlockState(), Items.ICE);
+        helper.runAfterDelay(350, () -> {
+            System.out.println("[createnuclear-gametest] fan in world: powder snow -> " + snow.getItem() + ", water -> " + water.getItem());
+            helper.assertTrue(water.getItem().is(Items.PACKED_ICE), "Control lane (Create's splashing) did not convert: " + water.getItem());
+            helper.assertTrue(snow.getItem().is(CNItems.COOLED_NITROGEN_CONCENTRATE.get()), "Powder snow lane did not convert: " + snow.getItem());
+            helper.succeed();
+        });
+    }
+
+    private static ItemEntity buildFanLane(GameTestHelper helper, ServerLevel level, int z, BlockState catalyst, net.minecraft.world.item.Item input) {
+        Direction east = Direction.getApproximateNearest(Vec3.atLowerCornerOf(
+            helper.absolutePos(new BlockPos(1, 0, 0)).subtract(helper.absolutePos(BlockPos.ZERO))));
+        BlockState stone = Blocks.STONE.defaultBlockState();
+        for (int x = 0; x <= 5; x++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                level.setBlock(helper.absolutePos(new BlockPos(x, 1, z + dz)), stone, 3);
+            }
+        }
+        for (int x = 2; x <= 5; x++) {
+            level.setBlock(helper.absolutePos(new BlockPos(x, 2, z - 1)), stone, 3);
+            level.setBlock(helper.absolutePos(new BlockPos(x, 2, z + 1)), stone, 3);
+        }
+        level.setBlock(helper.absolutePos(new BlockPos(5, 2, z)), stone, 3);
+        level.setBlock(helper.absolutePos(new BlockPos(2, 2, z)), catalyst, 3);
+        level.setBlock(helper.absolutePos(new BlockPos(1, 2, z)), AllBlocks.ENCASED_FAN.defaultBlockState().setValue(BlockStateProperties.FACING, east), 3);
+        level.setBlock(helper.absolutePos(new BlockPos(0, 2, z)), AllBlocks.CREATIVE_MOTOR.defaultBlockState().setValue(BlockStateProperties.FACING, east), 3);
+        Vec3 spawn = helper.absoluteVec(new Vec3(3.5, 2.0, z + .5));
+        ItemEntity item = new ItemEntity(level, spawn.x, spawn.y, spawn.z, new ItemStack(input, 4));
+        item.setDeltaMovement(Vec3.ZERO);
+        item.setNeverPickUp();
+        item.setUnlimitedLifetime();
+        level.addFreshEntity(item);
+        return item;
     }
 
     @GameTest(maxTicks = 200)

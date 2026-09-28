@@ -61,7 +61,11 @@ closed and reopened from its save, and it comes back assembled, `ACTIVE`, with i
 rods, still consuming them (heat 75 -> 68, rods 62 -> 60). Uranium rods in the inventory give the
 radiation effect; with the full suit (0.25 resistance per piece) it stays off.
 
-Not yet exercised in game: the snow powder JEI category, the Flywheel-off path.
+**Fans in the world** (`fanInWorldSnowPowderVsSplashing`): creative motor, encased fan, powder snow,
+items stopped inside the stream; converts on the same tick as Create's own splashing lane next to it.
+The user checked the JEI "Cryogenic fan" category in game.
+
+Not yet exercised in game: the Flywheel-off path.
 
 What this session changed, beyond the compile fixes listed below:
 
@@ -100,6 +104,18 @@ What this session changed, beyond the compile fixes listed below:
 - `controller_panel.png` is missing from NeoForge V2; taken from upstream Forge.
 
 ### Known, left as is
+
+- **Create: Dragons Plus takes the powder snow.** Its `freezing` fan type (catalysts: snow block,
+  powder snow, ice, packed/blue/frosted ice) has priority 600, Nuclear's `snow_powder` 301; Create
+  picks one type per block, the highest, so with Dragons Plus installed a fan through powder snow
+  freezes and Nuclear's recipe never runs (found in game: blaze rod -> breeze rod worked, nitrogen
+  concentrate did nothing). Covered by `data/createnuclear/recipe/compat/create_dragons_plus/freezing/
+  cooled_nitrogen_concentrate.json` (`fabric:load_conditions` on the mod), so both mods' recipes run
+  on powder snow. Checked with the recipe auditor on the user's instance mods: it loads.
+- A fan pushing items along an open floor can leave them resting just past the end of its stream,
+  with the processing timer frozen and the particles still showing (Create's behaviour, not the
+  port's): a block at the end of the stream, a depot or a belt avoids it. Large stacks are the ones
+  that don't make it (150 ticks per started 16).
 
 - `createnuclear:alarm/reactor_alarm` sound has no `.ogg` — missing upstream too.
 - Closing the client game test ends in a "Client shutdown from post-main" watchdog crash report
