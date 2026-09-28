@@ -4,7 +4,7 @@ Working document for the port of **Create Nuclear** from NeoForge 1.21.1 to **Fa
 26.2**, on [Create Fly](https://github.com/ZurrTum/Create-Fly). Written to be picked up cold on
 another machine. Read *State* and *Next steps* first; *Traps* before touching anything unfamiliar.
 
-The method is the one proven on the Connected port (`C:\dev\create connected\PORTING.md`, repo
+The method is the one proven on the Connected port (`E:\DEV\create connected\PORTING.md`, repo
 `GravisLudio/create-connected-fly`). That document is the playbook — most traps below were already
 paid for there. Read its *Traps* and *The launch phase* sections before the first launch.
 
@@ -36,7 +36,7 @@ The 7x7 and 9x9 reactors assemble with their size (step 5b).
 `CreateNuclearServerGameTest`: the fuelled 5x5 reactor turns `ACTIVE` there too, so common code
 reaches no client class on that path.
 
-**recipe-auditor** (`C:\dev\recipe-auditor`, GitHub GravisLudio/recipe-auditor), both passes clean:
+**recipe-auditor** (`E:\DEV\recipe-auditor`, GitHub GravisLudio/recipe-auditor), both passes clean:
 - server: `.\audit-modpack.ps1 -Mods <folder with create-fly, fabric-api, this jar> -Namespaces createnuclear`
   → PASS, 0 errors / 0 warnings; 194 recipes in scope, 77 grid-tested, all 8 mechanical-crafting
   recipes completed on real Create machines. Info only: ores / buckets / eggs have no recipe (by
@@ -156,12 +156,12 @@ widgets; config.
   `N errors` total is exact. `--offline` works once dependencies are cached; adding a
   `fabricApi.module(...)` needs one online run.
 - **Reference sources, outside the repo** (regenerate on the new machine):
-  - Create Fly source: `C:\dev\create assistance\Create-Fly` (clone of ZurrTum/Create-Fly at the
+  - Create Fly source: `E:\DEV\create assistance\Create-Fly` (clone of ZurrTum/Create-Fly at the
     commit matching 6.0.9 / 26.2-rc-2). The single most useful thing — copy its answers.
-  - Upstream clones: `C:\dev\_upstream\CN\{neo-v2, forge-main}` (NeoForge V2 = base, Forge `main`
+  - Upstream clones: `E:\DEV\_upstream\CN\{neo-v2, forge-main}` (NeoForge V2 = base, Forge `main`
     = the 2.0.1 release upstream keeps parity with).
-  - Connected port: `C:\dev\create connected` (clone of GravisLudio/create-connected-fly).
-  - **Decompiled Minecraft 26.2**: `C:\dev\_upstream\mc-26.2-src` (~7,000 classes). On the second
+  - Connected port: `E:\DEV\create connected` (clone of GravisLudio/create-connected-fly).
+  - **Decompiled Minecraft 26.2**: `E:\DEV\_upstream\mc-26.2-src` (~7,000 classes). On the second
     machine `gradlew genSources` worked; unzip the resulting
     `.gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-merged-*/26.2-rc-2/*-sources.jar`
     there. On the first, `libraries.minecraft.net` did not resolve (DNS), so it was made by running
@@ -170,7 +170,7 @@ widgets; config.
     ```bash
     java -Xmx4G -jar vineflower-1.10.1.jar -dgs=1 -rsy=1 -rbr=1 -lit=1 -mpm=60 -log=WARN \
       "<repo>/.gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-merged-*/26.2-rc-2/minecraft-merged-*.jar" \
-      C:\dev\_upstream\mc-26.2-src
+      E:\DEV\_upstream\mc-26.2-src
     ```
 
     On a machine with working DNS, `gradlew genSources` is simpler.
@@ -335,5 +335,5 @@ widgets; config.
 3. Dedicated server: covered by `gradlew runGameTest` for the reactor path; a long play session on
    a real server is still worth doing.
 4. Flywheel-off path (Connected's *Testing*), the recipe auditor
-   (`C:\dev\recipe-auditor\audit-modpack.ps1`).
+   (`E:\DEV\recipe-auditor\audit-modpack.ps1`).
 5. Own spawn egg textures; `reactor_alarm.ogg` (missing upstream).
