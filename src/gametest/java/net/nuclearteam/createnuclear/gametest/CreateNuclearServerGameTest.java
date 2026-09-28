@@ -24,6 +24,12 @@ import net.nuclearteam.createnuclear.content.multiblock.bluePrintItem.ReactorBlu
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlock;
 import net.nuclearteam.createnuclear.content.multiblock.controller.ReactorControllerBlockEntity;
 
+import com.zurrtum.create.content.kinetics.fan.processing.FanProcessing;
+import com.zurrtum.create.content.kinetics.fan.processing.FanProcessingType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.nuclearteam.createnuclear.content.kinetics.fan.processing.CNFanProcessingTypes;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +40,39 @@ import java.util.List;
  * one-rod blueprint, and must turn ACTIVE and produce heat.
  */
 public class CreateNuclearServerGameTest {
+
+    /** Both fan types on a dropped item, through Create's own FanProcessing path (as an air current does). */
+    @GameTest(maxTicks = 40)
+    public void fanTypesProcessItems(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos pos = helper.absolutePos(new BlockPos(1, 2, 1));
+        StringBuilder report = new StringBuilder();
+        fanCase(level, pos, CNFanProcessingTypes.SNOW_POWDER, CNItems.NITROGEN_CONCENTRATE.get(), 4, report);
+        fanCase(level, pos, CNFanProcessingTypes.ENRICHED, CNItems.YELLOWCAKE.get(), 4, report);
+        System.out.println("[createnuclear-gametest] fan processing: " + report);
+        helper.assertTrue(!report.toString().contains("FAIL"), "Fan processing: " + report);
+        helper.succeed();
+    }
+
+    private static void fanCase(ServerLevel level, BlockPos pos, FanProcessingType type, net.minecraft.world.item.Item input, int count, StringBuilder report) {
+        ItemStack stack = new ItemStack(input, count);
+        boolean canProcess = type.canProcess(stack, level);
+        java.util.List<ItemStack> direct = type.process(stack.copy(), level);
+        ItemEntity entity = new ItemEntity(level, pos.getX() + .5, pos.getY(), pos.getZ() + .5, stack);
+        level.addFreshEntity(entity);
+        int calls = 0;
+        boolean done = false;
+        while (calls < 2000 && !done) {
+            calls++;
+            done = FanProcessing.applyProcessing(entity, type);
+        }
+        String result = entity.getItem().getCount() + "x" + BuiltInRegistries.ITEM.getKey(entity.getItem().getItem());
+        boolean ok = canProcess && direct != null && done && !entity.getItem().is(input);
+        report.append(ok ? "ok " : "FAIL ").append(input).append(": canProcess=").append(canProcess)
+            .append(" process=").append(direct).append(" done=").append(done).append(" after ").append(calls)
+            .append(" calls -> ").append(result).append("; ");
+        entity.discard();
+    }
 
     @GameTest(maxTicks = 200)
     public void reactorRunsOnDedicatedServer(GameTestHelper helper) {
