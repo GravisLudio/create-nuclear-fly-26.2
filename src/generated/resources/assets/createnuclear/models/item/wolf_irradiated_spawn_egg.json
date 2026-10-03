@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:item/wolf_spawn_egg"
+    "layer0": "createnuclear:item/wolf_irradiated_spawn_egg"
   }
 }

@@ -1,12 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "createnuclear:item/wolf_irradiated_spawn_egg",
-    "tints": [
-      {
-        "type": "minecraft:constant",
-        "value": -5701748
-      }
-    ]
+    "model": "createnuclear:item/wolf_irradiated_spawn_egg"
   }
 }

@@ -23,7 +23,6 @@ OUT = ROOT / f"src/main/resources/assets/{NS}/items"
 
 DYES = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
         "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
-EGG_TINT = 0xFFA8FF8C - (1 << 32)  # ARGB as a signed int, as the codec reads it
 SUIT = {"default_anti_radiation_" + p: p for p in ("helmet", "chestplate", "leggings", "boots")}
 
 
@@ -49,11 +48,6 @@ def definition(name):
             "entries": [{"threshold": t, "model": plain(f"{NS}:item/{name}/{m}")} for t, m in tiers],
             "fallback": plain(f"{NS}:item/{name}"),
         }}
-    if name.endswith("_irradiated_spawn_egg"):
-        # 26.2 eggs have one texture per entity and no two-colour template. Until the mod has its own
-        # egg textures, the model reuses the vanilla egg of the same animal (models/item/<name>.json)
-        # and this tints it radioactive green; item/generated gives layer0 tint index 0.
-        return {"model": dict(plain(f"{NS}:item/{name}"), tints=[{"type": "minecraft:constant", "value": EGG_TINT}])}
     return {"model": plain(f"{NS}:item/{name}")}
 
 

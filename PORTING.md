@@ -110,8 +110,10 @@ What this session changed, beyond the compile fixes listed below:
   `ItemStorage.SIDED` (`foundation/transfer/CNTransfer`).
 - **JEI**: only the two fan categories (enriched, snow powder). Upstream's plugin was a copy of
   Create's; Create Fly's plugin already registers all of that.
-- **Spawn eggs**: 26.2 has no two-colour egg template. The egg models reuse the vanilla egg of the
-  same animal with a constant green tint — placeholder until the mod has its own egg textures.
+- **Spawn eggs**: 26.2 has no two-colour egg template (one texture per entity). The three eggs have
+  the mod's own 16x16 textures, drawn for this port (`tools/gen-spawn-eggs.py`: a shaded green egg
+  with the animal's face; edit the ASCII grids in `FACES` and re-run with `--write`). Checked in the
+  client game test (`createnuclear-spawn-eggs` screenshot). Upstream has no egg for the irradiated cow.
 - **Mobs**: babies now render at baby size (upstream's `renderToBuffer` overrides skipped the
   `AgeableListModel` scaling); wolf wet darkening works (upstream cast the shade to `int`, 0).
 - `controller_panel.png` is missing from NeoForge V2; taken from upstream Forge.
@@ -202,7 +204,8 @@ widgets; config.
 | `nbt-sweep.py <src> [--write]` | `CompoundTag.getX("k")` → `getXOr("k", default)` etc., only for literal/constant keys in files importing `CompoundTag`. |
 | `imp.py FILE... -d REGEX -a FQCN` | Drop/add imports. |
 | `errs.sh <File.java>` | Errors of one file from `build/compile.txt`. |
-| `gen-item-models.py [--write]` | Writes `assets/createnuclear/items/<id>.json` for every top-level item model, with the suit's `cloth_color` select, the extractor's `biome_restore` range and the spawn egg tint. Re-run after adding an item. |
+| `gen-item-models.py [--write]` | Writes `assets/createnuclear/items/<id>.json` for every top-level item model, with the suit's `cloth_color` select, the extractor's `biome_restore` range. Re-run after adding an item. |
+| `gen-spawn-eggs.py [--write] [--preview out.png]` | Draws the three spawn egg textures (`textures/item/*_irradiated_spawn_egg.png`) from ASCII faces over a generated shaded egg. `--preview` writes a 16x enlarged sheet. |
 | `migrate-recipes-cn.py <dir> [--write]` | Recipe types Connected's `migrate-recipes.js` does not cover: single-input processing (`ingredient`), fluids (`fluid_ingredients` / `fluid_results`, x81), mechanical crafting keys, smelting, smithing. Already applied. |
 | `split-ct.py <sheet> <omni/rectangle/kryppers> [--write]` | Splits a 1.21.1 connected-texture sheet into Create Fly's `<name>_connected/<i>.png` tiles. `--verify` checks a mapping against Create Fly's own split. Already applied to all five sheets. |
 | `jp.sh [-p] [-c] <class>` | `javap` against the **exact** compile classpath (`build/cp.txt`). Regenerate with `gradlew writeClasspath` (task in `build.gradle`) after dependency changes. Always check an API here before writing against it. |
@@ -277,8 +280,8 @@ widgets; config.
   NeoForge V2 had `!advancements.contains(advancement)`, which never awards any registered advancement.
 - Fluid world tint omitted (textures are already coloured; Create Fly resolves world tint via
   Fabric fluid variant rendering). Fluid physics (viscosity, swim, drown) have no vanilla equivalent.
-- Spawn eggs: vanilla egg of the same animal, tinted green in the item definition — **own textures
-  still needed** (26.2 eggs are one texture per entity, no two-colour template).
+- Spawn eggs: own textures (see *State*); 26.2 eggs are one texture per entity, so there is no
+  two-colour egg like on 1.21.1.
 - JEI: only the two fan categories (upstream's plugin duplicated Create's own).
 - Irradiated babies render at baby size, and the wolf darkens when wet (both broken upstream).
 - Suit colour and extractor charge item models work (upstream never registered their properties).
@@ -364,4 +367,5 @@ widgets; config.
    a real server is still worth doing.
 4. Flywheel-off path (Connected's *Testing*), the recipe auditor
    (`E:\DEV\recipe-auditor\audit-modpack.ps1`).
-5. Own spawn egg textures. (`reactor_alarm.ogg` is only the unused one-shot event, see *Known*.)
+5. Nothing known is missing. (`reactor_alarm.ogg` is only the unused one-shot event, see *Known*.)
+   Still worth doing: Ponder checked in game, a long session on a real server.

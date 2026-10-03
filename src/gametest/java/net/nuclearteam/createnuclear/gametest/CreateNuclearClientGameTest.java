@@ -121,6 +121,17 @@ public class CreateNuclearClientGameTest implements FabricClientGameTest {
             context.takeScreenshot("createnuclear-items");
             context.setScreen(() -> null);
 
+            // 4b. The mod's own spawn egg textures (tools/gen-spawn-eggs.py), alone in the inventory.
+            server.runCommand("clear @p");
+            for (String egg : new String[] {"wolf", "cat", "chicken"}) {
+                server.runCommand("give @p " + NS + ":" + egg + "_irradiated_spawn_egg");
+            }
+            context.waitTicks(5);
+            context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
+            context.waitTicks(10);
+            context.takeScreenshot("createnuclear-spawn-eggs");
+            context.setScreen(() -> null);
+
             // 5. The 5x5 reactor: the mod's own pattern, built block by block, then assembled the way
             //    placing the controller by hand does (ReactorControllerBlock.setPlacedBy).
             server.runCommand("clear @p");
