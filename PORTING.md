@@ -73,7 +73,12 @@ present without the suit, absent with the full suit, attachment synced), the dea
 translated, and the `nuclear_explosion` entity reaches the client. The old test then runs on the
 integrated server and passes as before.
 
-Not yet exercised in game: the Flywheel-off path.
+**Flywheel off** (2026-10-02, `CreateNuclearFlywheelOffClientGameTest`): the only renderer that never
+ran with Flywheel on is `ReactorOutputRenderer` (registered with `visual(...)`, so its renderer is
+skipped). The test forces `flywheel:off` through `FabricFlwConfig` (same as `/flywheel backend off`),
+checks that the backend really changed (`flywheel:indirect` -> `flywheel:off`) and photographs a
+running reactor output from two angles: it renders, nothing throws, and the geometry matches the
+Flywheel version (pixel diff only on the rotating shaft's edges and the sky).
 
 What this session changed, beyond the compile fixes listed below:
 
@@ -125,7 +130,11 @@ What this session changed, beyond the compile fixes listed below:
   port's): a block at the end of the stream, a depot or a belt avoids it. Large stacks are the ones
   that don't make it (150 ticks per started 16).
 
-- `createnuclear:alarm/reactor_alarm` sound has no `.ogg` — missing upstream too.
+- The reactor alarm DOES have sound: `ReactorAlarmEntity` plays the loop `createnuclear:alarm/alarm`
+  (`sounds/alarm/alarm.ogg`, 27 s, in the jar, loads without warnings). The event
+  `createnuclear:alarm/reactor_alarm` (`REACTOR_ALARM_ONESHOT`) has no `.ogg` — missing upstream too —
+  but no code plays it; it only costs one harmless "File ... does not exist" line at resource reload.
+  (An earlier version of this file called the alarm silent; that was wrong.)
 - Closing the client game test ends in a "Client shutdown from post-main" watchdog crash report
   (Flywheel worker threads). It happens after the test finished and every screenshot was taken.
 
@@ -355,4 +364,4 @@ widgets; config.
    a real server is still worth doing.
 4. Flywheel-off path (Connected's *Testing*), the recipe auditor
    (`E:\DEV\recipe-auditor\audit-modpack.ps1`).
-5. Own spawn egg textures; `reactor_alarm.ogg` (missing upstream).
+5. Own spawn egg textures. (`reactor_alarm.ogg` is only the unused one-shot event, see *Known*.)
