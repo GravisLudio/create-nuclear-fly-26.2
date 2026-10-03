@@ -161,6 +161,7 @@ java {
 
 jar {
     from('LICENCE') { rename { "${it}_createnuclear" } }
+    from('NOTICE') { rename { "${it}_createnuclear" } }
 }
 
 idea {
