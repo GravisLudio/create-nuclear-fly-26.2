@@ -9,6 +9,7 @@
       "net.nuclearteam.createnuclear.gametest.CreateNuclearServerGameTest"
     ],
     "fabric-client-gametest": [
+      "net.nuclearteam.createnuclear.gametest.CreateNuclearDedicatedClientGameTest",
       "net.nuclearteam.createnuclear.gametest.CreateNuclearClientGameTest"
     ]
   },

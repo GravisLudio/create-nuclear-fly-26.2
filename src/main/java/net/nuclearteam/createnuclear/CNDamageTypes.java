@@ -21,7 +21,7 @@ public class CNDamageTypes {
     }
 
     public static void bootstrap(BootstrapContext<DamageType> ctx) {
-        ctx.register(RADIATION, new DamageType("radiation", 0.1F));
-        ctx.register(FAN_RADIATION, new DamageType("fan_radiation", 0.1F));
+        ctx.register(RADIATION, new DamageType("createnuclear.radiation", 0.1F));
+        ctx.register(FAN_RADIATION, new DamageType("createnuclear.fan_radiation", 0.1F));
     }
 }

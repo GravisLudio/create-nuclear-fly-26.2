@@ -65,6 +65,14 @@ radiation effect; with the full suit (0.25 resistance per piece) it stays off.
 items stopped inside the stream; converts on the same tick as Create's own splashing lane next to it.
 The user checked the JEI "Cryogenic fan" category in game.
 
+**Real client on a dedicated server** (2026-10-02, `CreateNuclearDedicatedClientGameTest`): a client
+joins a dedicated server and every assertion reads the CLIENT's copy. Passing: the four irradiated
+mobs reach the client, a running 5x5 reactor shows `active=true assembled=true size=5`, the rod
+input and blueprint menus open the right screens through the packets, radiation arrives (effect
+present without the suit, absent with the full suit, attachment synced), the death messages are
+translated, and the `nuclear_explosion` entity reaches the client. The old test then runs on the
+integrated server and passes as before.
+
 Not yet exercised in game: the Flywheel-off path.
 
 What this session changed, beyond the compile fixes listed below:
@@ -265,6 +273,9 @@ widgets; config.
 - JEI: only the two fan categories (upstream's plugin duplicated Create's own).
 - Irradiated babies render at baby size, and the wolf darkens when wet (both broken upstream).
 - Suit colour and extractor charge item models work (upstream never registered their properties).
+- Radiation death messages work: the damage types' `message_id` is now `createnuclear.radiation` /
+  `createnuclear.fan_radiation` (upstream used `radiation` / `fan_radiation`, so the death screen
+  showed the raw key `death.attack.radiation`; the lang keys were always `death.attack.createnuclear.*`).
 - Creative tab order: items, buckets, blocks (upstream's 3D-model split read baked models).
 - `withTabsBefore` gone; tab placed with `(null, -1)` like Create Fly.
 
@@ -320,6 +331,14 @@ widgets; config.
   radiation effect not applying without the suit / applying with the full suit. The last screenshot does not frame the controller yet (its
   open side depends on the pattern's orientation). Look at the screenshots: models, textures and
   poses are not asserted. It ends with a harmless shutdown-watchdog crash report (see *Known*).
+- `CreateNuclearDedicatedClientGameTest` (same task, runs first): starts a real dedicated server
+  and connects the client to it. Needs `eula = true` in `configureTests` (set; the owner accepted the
+  Minecraft EULA for these throwaway servers on 2026-10-02, the file only lives in `build/run`).
+  The server uses a free port picked by the OS, because 25565 is often taken by another dev server
+  on the machine ("FAILED TO BIND TO PORT" -> the test times out in `createServer`).
+  Gotchas: do not leave a shell inside `build/run/...` (Gradle cannot delete the run dir), and do
+  not pipe `runClientGameTest` through `Select-Object -First N` (it closes the pipe and kills Gradle
+  while the game keeps running orphaned): redirect to a file and read it afterwards.
 - `gradlew runClient`: the normal dev client (`run/`).
 
 ## Next steps, in order

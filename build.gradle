@@ -81,7 +81,10 @@ fabricApi {
         modId = "createnuclear-gametest"
         enableGameTests = true
         enableClientGameTests = true
-        eula = false
+        // Needed only by CreateNuclearDedicatedClientGameTest, which starts a real dedicated
+        // server for its client. GravisLudio accepted the Minecraft EULA (https://aka.ms/MinecraftEULA)
+        // for these throwaway test servers on 2026-10-02; the file is written into build/run only.
+        eula = true
     }
 }
 
